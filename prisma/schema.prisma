@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Agent {
+  id           Int        @id @default(autoincrement())
+  name         String
+  agency       String
+  phone        String
+  email        String     @unique
+  country      String
+  city         String?
+  license      String?
+  password     String?
+  isAvailable  Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  properties   Property[]
+  representationRequests RepresentationRequest[]
+  agencyRecord Agency?    @relation(fields: [agencyId], references: [id])
+  agencyId     Int?
+}
+
+model Agency {
+  id      Int     @id @default(autoincrement())
+  name    String
+  country String
+  website String?
+  agents  Agent[]
+}
+
+model Solicitor {
+  id         Int        @id @default(autoincrement())
+  name       String
+  firm       String
+  phone      String
+  email      String
+  country    String
+  city       String?
+  license    String?
+  createdAt  DateTime   @default(now())
+}
+
+model Property {
+  id           Int        @id @default(autoincrement())
+  title        String
+  price        Int
+  location     String
+  contactType  String // "direct" or "agent"
+  contactName  String?
+  contactPhone String?
+  contactEmail String?
+  source       String? // "manual", "imported", "agency"
+  image        String?
+  currency     String?
+  propertyType String?
+  bedrooms     Int?
+  bathrooms    Int?
+  builtUp      Int?
+  landSize     Int?
+  tenure       String?
+  images       String?
+  description  String?
+  metadata     String?
+  agent        Agent?   @relation(fields: [agentId], references: [id])
+  agentId      Int?
+  solicitorId  Int?
+  representationRequests RepresentationRequest[]
+  createdAt    DateTime   @default(now())
+}
+
+model RepresentationRequest {
+  id         Int      @id @default(autoincrement())
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId Int
+  agent      Agent    @relation(fields: [agentId], references: [id])
+  agentId    Int
+  createdAt  DateTime @default(now())
+
+  @@unique([propertyId, agentId])
+}
