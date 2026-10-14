@@ -23,8 +23,23 @@ const EXACT: NamedPlace[] = [
 
 const CITIES: NamedPlace[] = [
   { name: "george town, penang", lat: 5.4145, lng: 100.3292 },
-  { name: "kuala lumpur", lat: 3.1579, lng: 101.7116 },
+  { name: "daerah timor laut", lat: 5.4141, lng: 100.3288 },
+  { name: "daerah barat daya", lat: 5.283, lng: 100.275 },
+  { name: "seberang perai utara", lat: 5.399, lng: 100.365 },
+  { name: "seberang perai tengah", lat: 5.363, lng: 100.466 },
+  { name: "seberang perai selatan", lat: 5.17, lng: 100.478 },
+  { name: "batu pahat", lat: 1.8548, lng: 102.9325 },
+  { name: "kota tinggi", lat: 1.7381, lng: 103.8992 },
   { name: "johor bahru", lat: 1.4927, lng: 103.7414 },
+  { name: "kuala lumpur", lat: 3.1579, lng: 101.7116 },
+  { name: "segamat", lat: 2.5148, lng: 102.8158 },
+  { name: "pontian", lat: 1.4866, lng: 103.389 },
+  { name: "mersing", lat: 2.4312, lng: 103.8405 },
+  { name: "tangkak", lat: 2.2674, lng: 102.545 },
+  { name: "kluang", lat: 2.0251, lng: 103.3328 },
+  { name: "kulai", lat: 1.6561, lng: 103.6032 },
+  { name: "muar", lat: 2.0442, lng: 102.5689 },
+  { name: "johor", lat: 1.4927, lng: 103.7414 },
   { name: "tiong bahru", lat: 1.283, lng: 103.832 },
   { name: "bukit timah", lat: 1.3294, lng: 103.8021 },
   { name: "tampines", lat: 1.3496, lng: 103.9568 },
@@ -95,26 +110,47 @@ function fallbackPoint(location: string): MapPoint {
   }
 }
 
-export function pointForListing(location: string, metadata: string | null): MapPoint {
-  if (metadata) {
-    try {
-      const parsed = JSON.parse(metadata) as { lat?: unknown; lng?: unknown }
-      const lat = typeof parsed.lat === "number" ? parsed.lat : Number(parsed.lat)
-      const lng = typeof parsed.lng === "number" ? parsed.lng : Number(parsed.lng)
-      if (
-        Number.isFinite(lat) &&
-        Number.isFinite(lng) &&
-        Math.abs(lat) <= 90 &&
-        Math.abs(lng) <= 180 &&
-        !(lat === 0 && lng === 0)
-      ) {
-        return { lat, lng }
-      }
-    } catch {
-      // The place name still locates the listing.
+function metadataPoint(metadata: string | null): MapPoint | null {
+  if (!metadata) return null
+  try {
+    const parsed = JSON.parse(metadata) as { lat?: unknown; lng?: unknown }
+    const lat = typeof parsed.lat === "number" ? parsed.lat : Number(parsed.lat)
+    const lng = typeof parsed.lng === "number" ? parsed.lng : Number(parsed.lng)
+    if (
+      Number.isFinite(lat) &&
+      Number.isFinite(lng) &&
+      Math.abs(lat) <= 90 &&
+      Math.abs(lng) <= 180 &&
+      !(lat === 0 && lng === 0)
+    ) {
+      return { lat, lng }
     }
+  } catch {
+    // The place name still locates the listing.
   }
-  return placePoint(location)
+  return null
+}
+
+function namedPlace(location: string): MapPoint | null {
+  const key = location.trim().toLocaleLowerCase()
+  const exact = EXACT.find((place) => place.name === key)
+  if (exact) return exact
+  const town = key.split(",")[0]?.trim() ?? ""
+  const townMatch = CITIES.find((place) => place.name === town)
+  if (townMatch) return townMatch
+  return CITIES.find((place) => key.includes(place.name)) ?? null
+}
+
+export function picturePoint(location: string, metadata: string | null): (MapPoint & { precise: boolean }) | null {
+  const placed = metadataPoint(metadata)
+  if (placed) return { ...placed, precise: true }
+  const named = namedPlace(location)
+  if (named) return { ...named, precise: false }
+  return null
+}
+
+export function pointForListing(location: string, metadata: string | null): MapPoint {
+  return picturePoint(location, metadata) ?? placePoint(location)
 }
 
 export function placePoint(location: string): MapPoint {

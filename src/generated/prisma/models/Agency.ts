@@ -1135,6 +1135,7 @@ export type AgencyCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * The data used to create many Agencies.
    */
   data: Prisma.AgencyCreateManyInput | Prisma.AgencyCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1153,6 +1154,7 @@ export type AgencyCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many Agencies.
    */
   data: Prisma.AgencyCreateManyInput | Prisma.AgencyCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**

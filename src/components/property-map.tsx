@@ -20,7 +20,13 @@ export function PropertyMap({
   }
 
   return (
-    <div className={variant === "world" ? "h-96 w-full overflow-hidden border" : "h-full min-h-64 w-full overflow-hidden border"}>
+    <div
+      className={
+        variant === "world"
+          ? "h-72 w-full overflow-hidden border sm:h-96"
+          : "h-64 w-full overflow-hidden border sm:h-full sm:min-h-72"
+      }
+    >
       <Canvas points={points} variant={variant} />
     </div>
   )

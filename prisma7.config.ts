@@ -8,6 +8,8 @@ export default defineConfig({
     seed: "npm run seed",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // CLI tasks (db push, migrations) must use the direct URL;
+    // the app runtime uses pooled DATABASE_URL via the pg adapter.
+    url: process.env["DATABASE_URL_UNPOOLED"] ?? process.env["DATABASE_URL"],
   },
 });

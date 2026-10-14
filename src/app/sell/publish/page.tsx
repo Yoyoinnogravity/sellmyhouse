@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { listAgents } from "@/lib/agent";
-import { listSolicitors } from "@/lib/solicitor";
+import { listAvailableAgentsInRegion, listAgents } from "@/lib/agent";
+import { conveyancerRegisterPath, propertyRegion, realtorRegisterPath } from "@/lib/region";
+import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { requireUser } from "@/lib/session";
 import PublishForm from "./publish-form";
 
@@ -19,7 +20,7 @@ export default function SellPublishPage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Publish your listing</h1>
-      <p className="mt-2">Listing your property for sale is free.</p>
+      <p className="mt-2">Listing your property for sale is free. Add photos, a description, and a realtor or solicitor.</p>
       <Suspense fallback={<p>Loading…</p>}>
         <AuthorizedPublish searchParams={searchParams} />
       </Suspense>
@@ -45,14 +46,27 @@ async function AuthorizedPublish({
   const returnQuery = new URLSearchParams({ title, price, location });
   await requireUser(`/sell/publish?${returnQuery.toString()}`);
 
+  const region = propertyRegion(location);
   const [solicitors, agents] = await Promise.all([
     listSolicitors(location),
-    listAgents(location),
+    region
+      ? listAvailableAgentsInRegion(region.country, region.city)
+      : listAgents().then((listed) =>
+          listed.filter((agent) => {
+            const needle = location.toLocaleLowerCase();
+            return (
+              agent.city?.toLocaleLowerCase() === needle ||
+              agent.country.toLocaleLowerCase() === needle
+            );
+          }),
+        ),
   ]);
 
   return (
     <PublishForm
       draft={{ title, price, location }}
+      agentRegisterHref={realtorRegisterPath(region ?? { city: location, country: "" })}
+      conveyancerRegisterHref={conveyancerRegisterPath(conveyancerPlace(location))}
       solicitors={solicitors.slice(0, 24).map((solicitor) => ({
         id: solicitor.id,
         name: solicitor.name,

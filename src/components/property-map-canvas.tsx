@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { CircleMarker, MapContainer, TileLayer, useMap } from "react-leaflet"
 import L from "leaflet"
-import { MAP_ATTRIBUTION, MAP_TILES } from "@/lib/mapTiles"
+import { MAP_ATTRIBUTION, MAP_LABELS, MAP_TILES } from "@/lib/mapTiles"
 import type { MapProperty } from "@/lib/places"
 import "leaflet/dist/leaflet.css"
 
@@ -85,15 +85,23 @@ export default function PropertyMapCanvas({
     <MapContainer
       center={first ? [first.lat, first.lng] : [20, 0]}
       zoom={variant === "world" ? 2 : 14}
-      scrollWheelZoom={variant === "world"}
+      scrollWheelZoom
+      touchZoom
+      /* Prototype: on touch devices one finger scrolls the page (see the
+         touch-action rule in globals.css) and pinch still zooms. */
+      dragging={!L.Browser.mobile}
+      doubleClickZoom
+      zoomControl
+      attributionControl
       preferCanvas
       className="h-full w-full"
+      /* Prototype: inline so it beats Leaflet's own
+         .leaflet-touch-zoom{touch-action:none} rule. One finger pans the
+         page (browser-owned), two fingers pinch the map (Leaflet-owned). */
+      style={{ touchAction: "pan-x pan-y" }}
     >
-      <TileLayer
-        attribution={MAP_ATTRIBUTION}
-        maxZoom={20}
-        url={MAP_TILES}
-      />
+      <TileLayer attribution={MAP_ATTRIBUTION} maxZoom={19} url={MAP_TILES} />
+      <TileLayer attribution="" maxZoom={19} url={MAP_LABELS} />
       <Frame points={points} variant={variant} />
       {variant === "world" ? (
         <WorldMarkers points={points} />

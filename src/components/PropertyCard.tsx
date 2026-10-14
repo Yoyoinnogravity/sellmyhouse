@@ -6,8 +6,8 @@ import type { ListingPoint } from "@/lib/mappedProperties"
 
 export default function PropertyCard({ property }: { property: ListingPoint }) {
   return (
-    <article className="flex flex-col gap-3 border p-3">
-      <Link href={`/property/${property.id}`} className="grid grid-cols-2 gap-2">
+    <article className="flex min-w-0 flex-col gap-3 border p-3">
+      <Link href={`/property/${property.id}`} className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
         <ListingPhoto
           src={property.image}
           alt={property.title}
@@ -17,13 +17,13 @@ export default function PropertyCard({ property }: { property: ListingPoint }) {
         />
         <MapThumbnail lat={property.lat} lng={property.lng} label={property.location} />
       </Link>
-      <div>
+      <div className="min-w-0">
         <p className="text-sm text-zinc-600">{property.kind === "developer" ? "Developer" : "Private sale"}</p>
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-base font-semibold break-words sm:text-lg">
           <Link href={`/property/${property.id}`}>{property.title}</Link>
         </h2>
-        <p>{property.priceLabel}</p>
-        <p className="text-sm text-zinc-600">{property.location}</p>
+        <p className="break-words">{property.priceLabel}</p>
+        <p className="text-sm break-words text-zinc-600">{property.location}</p>
         {property.phones.length > 0 || property.whatsappNumber || property.website ? (
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
             {property.phones.map((phone) => (

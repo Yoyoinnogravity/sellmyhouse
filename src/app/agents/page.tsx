@@ -7,8 +7,9 @@ export default function AgentsPage() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Agents</h1>
+      <p>Realtors can add their contact details and the region they cover.</p>
       <p className="flex gap-4">
-        <Link href="/agents/register">Register</Link>
+        <Link href="/agents/register">Add your details and region</Link>
         <Link href="/agents/login">Log in</Link>
       </p>
       <Suspense fallback={<p>Loading…</p>}>
@@ -23,7 +24,11 @@ async function AgentDirectory() {
   const agents = await listAgents();
 
   if (agents.length === 0) {
-    return <p>No agents yet.</p>;
+    return (
+      <p>
+        No realtors registered yet. <Link href="/agents/register">Add your details and region</Link>
+      </p>
+    );
   }
 
   return (

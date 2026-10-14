@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
+import { conveyancerRegisterPath } from "@/lib/region";
 import { listSolicitors } from "@/lib/solicitor";
 
 const places = [
@@ -55,7 +56,12 @@ async function SolicitorDirectory({
   const solicitors = await listSolicitors(place);
 
   if (solicitors.length === 0) {
-    return <p>No conveyancers listed for this area yet.</p>;
+    return (
+      <p>
+        No conveyancers registered for this region.{" "}
+        <Link href={conveyancerRegisterPath(place)}>Add your details and region</Link>
+      </p>
+    );
   }
 
   const groups = new Map<string, typeof solicitors>();

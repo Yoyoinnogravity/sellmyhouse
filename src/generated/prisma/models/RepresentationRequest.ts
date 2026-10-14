@@ -458,6 +458,7 @@ export type RepresentationRequestCreateOrConnectWithoutAgentInput = {
 
 export type RepresentationRequestCreateManyAgentInputEnvelope = {
   data: Prisma.RepresentationRequestCreateManyAgentInput | Prisma.RepresentationRequestCreateManyAgentInput[]
+  skipDuplicates?: boolean
 }
 
 export type RepresentationRequestUpsertWithWhereUniqueWithoutAgentInput = {
@@ -504,6 +505,7 @@ export type RepresentationRequestCreateOrConnectWithoutPropertyInput = {
 
 export type RepresentationRequestCreateManyPropertyInputEnvelope = {
   data: Prisma.RepresentationRequestCreateManyPropertyInput | Prisma.RepresentationRequestCreateManyPropertyInput[]
+  skipDuplicates?: boolean
 }
 
 export type RepresentationRequestUpsertWithWhereUniqueWithoutPropertyInput = {
@@ -1292,6 +1294,7 @@ export type RepresentationRequestCreateManyArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many RepresentationRequests.
    */
   data: Prisma.RepresentationRequestCreateManyInput | Prisma.RepresentationRequestCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1310,6 +1313,7 @@ export type RepresentationRequestCreateManyAndReturnArgs<ExtArgs extends runtime
    * The data used to create many RepresentationRequests.
    */
   data: Prisma.RepresentationRequestCreateManyInput | Prisma.RepresentationRequestCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

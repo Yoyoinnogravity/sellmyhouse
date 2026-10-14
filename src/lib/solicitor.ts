@@ -89,7 +89,7 @@ export function validateSolicitorRegistration(
   if (!country || !countryPattern.test(country)) {
     errors.push("Enter the solicitor country.");
   }
-  if (city && !cityPattern.test(city)) errors.push("Enter a city.");
+  if (!city || !cityPattern.test(city)) errors.push("Enter your region.");
   if (license && !licensePattern.test(license)) {
     errors.push("Enter a license number.");
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 
 type SolicitorOption = {
@@ -28,22 +28,28 @@ type ListingDraft = {
   location: string;
 };
 
-type SolicitorChoice = "none" | "later" | "now";
+type SolicitorChoice = "none" | "later" | "now" | "specify";
+type ContactChoice = "direct" | "agent" | "specified";
 
 export default function PublishForm({
   draft,
   solicitors,
   agents,
+  agentRegisterHref,
+  conveyancerRegisterHref,
 }: {
   draft: ListingDraft;
   solicitors: SolicitorOption[];
   agents: AgentOption[];
+  agentRegisterHref: string;
+  conveyancerRegisterHref: string;
 }) {
   const [solicitorChoice, setSolicitorChoice] = useState<SolicitorChoice>("none");
   const [selectedSolicitor, setSelectedSolicitor] =
     useState<SolicitorOption | null>(null);
-  const [contactType, setContactType] = useState<"direct" | "agent">("direct");
+  const [contactType, setContactType] = useState<ContactChoice>("direct");
   const [agentId, setAgentId] = useState(agents[0] ? String(agents[0].id) : "");
+  const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -53,48 +59,43 @@ export default function PublishForm({
     location: draft.location,
   });
 
+  function onPhotos(event: ChangeEvent<HTMLInputElement>) {
+    const files = [...(event.target.files ?? [])];
+    if (files.length > 8) {
+      setError("Add up to 8 pictures.");
+      event.target.value = "";
+      setPreviews([]);
+      return;
+    }
+    setError(null);
+    setPreviews(files.map((file) => URL.createObjectURL(file)));
+  }
+
   async function publish(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
     if (solicitorChoice === "now" && !selectedSolicitor) {
-      setError("Choose a conveyancer.");
+      setError("Choose a solicitor.");
       return;
     }
 
     setPending(true);
     const formData = new FormData(event.currentTarget);
-    let solicitorId: number | null = null;
+    formData.set("title", draft.title);
+    formData.set("price", draft.price);
+    formData.set("location", draft.location);
+    formData.set("contactType", contactType);
+    formData.set("solicitorChoice", solicitorChoice);
     if (solicitorChoice === "now" && selectedSolicitor) {
-      solicitorId = selectedSolicitor.id;
+      formData.set("solicitorId", String(selectedSolicitor.id));
     }
-
-    const body =
-      contactType === "direct"
-        ? {
-            title: draft.title,
-            price: Number(draft.price),
-            location: draft.location,
-            contactType,
-            contactName: String(formData.get("contactName") ?? ""),
-            contactPhone: String(formData.get("contactPhone") ?? ""),
-            contactEmail: String(formData.get("contactEmail") ?? ""),
-            solicitorId,
-          }
-        : {
-            title: draft.title,
-            price: Number(draft.price),
-            location: draft.location,
-            contactType,
-            agentId: Number(agentId),
-            solicitorId,
-          };
+    if (contactType === "agent") formData.set("agentId", agentId);
 
     try {
       const response = await fetch("/api/properties/publish", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: formData,
       });
       const data = (await response.json().catch(() => null)) as {
         id?: number;
@@ -119,8 +120,40 @@ export default function PublishForm({
       <p>
         {draft.title} in {draft.location}
       </p>
+      <label htmlFor="description">
+        Description
+        <textarea
+          id="description"
+          name="description"
+          rows={5}
+          maxLength={2000}
+          className="mt-1 block w-full border px-3 py-2"
+        />
+      </label>
+      <label htmlFor="photos">
+        Pictures
+        <input
+          id="photos"
+          name="photos"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          multiple
+          onChange={onPhotos}
+          className="mt-1 block w-full"
+        />
+      </label>
+      <p>JPG, PNG, or WebP. Up to 8 pictures.</p>
+      {previews.length > 0 ? (
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {previews.map((src) => (
+            <li key={src}>
+              <img src={src} alt="" className="aspect-square w-full object-cover" />
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <fieldset className="flex flex-col gap-2">
-        <legend>How do you want to handle the sale?</legend>
+        <legend>Solicitor</legend>
         <label>
           <input
             type="radio"
@@ -132,7 +165,7 @@ export default function PublishForm({
               setSelectedSolicitor(null);
             }}
           />{" "}
-          List it without a conveyancer
+          No solicitor on this listing
         </label>
         <label>
           <input
@@ -145,7 +178,7 @@ export default function PublishForm({
               setSelectedSolicitor(null);
             }}
           />{" "}
-          Choose a conveyancer later
+          Choose a solicitor later
         </label>
         <label>
           <input
@@ -155,7 +188,20 @@ export default function PublishForm({
             checked={solicitorChoice === "now"}
             onChange={() => setSolicitorChoice("now")}
           />{" "}
-          Choose a conveyancer now
+          Choose a solicitor
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="solicitorChoice"
+            value="specify"
+            checked={solicitorChoice === "specify"}
+            onChange={() => {
+              setSolicitorChoice("specify");
+              setSelectedSolicitor(null);
+            }}
+          />{" "}
+          Specify a solicitor
         </label>
       </fieldset>
 
@@ -163,7 +209,10 @@ export default function PublishForm({
         <section className="flex flex-col gap-4">
           <h2>Local conveyancers</h2>
           {solicitors.length === 0 ? (
-            <p>No local conveyancers listed for this area yet.</p>
+            <p>
+              No conveyancers registered for this region.{" "}
+              <Link href={conveyancerRegisterHref}>Add your details and region</Link>
+            </p>
           ) : (
             <ul className="flex flex-col gap-4">
               {solicitors.map((solicitor) => (
@@ -195,8 +244,29 @@ export default function PublishForm({
         </section>
       ) : null}
 
+      {solicitorChoice === "specify" ? (
+        <>
+          <label htmlFor="solicitorName">
+            Solicitor name
+            <input id="solicitorName" name="solicitorName" required className="mt-1 block w-full border px-3 py-2" />
+          </label>
+          <label htmlFor="solicitorFirm">
+            Firm
+            <input id="solicitorFirm" name="solicitorFirm" className="mt-1 block w-full border px-3 py-2" />
+          </label>
+          <label htmlFor="solicitorPhone">
+            Solicitor phone
+            <input id="solicitorPhone" name="solicitorPhone" type="tel" required className="mt-1 block w-full border px-3 py-2" />
+          </label>
+          <label htmlFor="solicitorEmail">
+            Solicitor email
+            <input id="solicitorEmail" name="solicitorEmail" type="email" required className="mt-1 block w-full border px-3 py-2" />
+          </label>
+        </>
+      ) : null}
+
       <fieldset className="flex flex-col gap-2">
-        <legend>How should buyers reach you?</legend>
+        <legend>Realtor</legend>
         <label>
           <input
             type="radio"
@@ -205,7 +275,7 @@ export default function PublishForm({
             checked={contactType === "direct"}
             onChange={() => setContactType("direct")}
           />{" "}
-          Direct contact
+          Buyers contact me
         </label>
         <label>
           <input
@@ -215,7 +285,17 @@ export default function PublishForm({
             checked={contactType === "agent"}
             onChange={() => setContactType("agent")}
           />{" "}
-          Local estate agent
+          Choose a realtor
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="contactType"
+            value="specified"
+            checked={contactType === "specified"}
+            onChange={() => setContactType("specified")}
+          />{" "}
+          Specify a realtor
         </label>
       </fieldset>
 
@@ -251,9 +331,28 @@ export default function PublishForm({
             />
           </label>
         </>
+      ) : contactType === "specified" ? (
+        <>
+          <label htmlFor="realtorName">
+            Realtor name
+            <input id="realtorName" name="realtorName" required className="mt-1 block w-full border px-3 py-2" />
+          </label>
+          <label htmlFor="realtorAgency">
+            Agency
+            <input id="realtorAgency" name="realtorAgency" className="mt-1 block w-full border px-3 py-2" />
+          </label>
+          <label htmlFor="realtorPhone">
+            Realtor phone
+            <input id="realtorPhone" name="realtorPhone" type="tel" required className="mt-1 block w-full border px-3 py-2" />
+          </label>
+          <label htmlFor="realtorEmail">
+            Realtor email
+            <input id="realtorEmail" name="realtorEmail" type="email" required className="mt-1 block w-full border px-3 py-2" />
+          </label>
+        </>
       ) : (
         <label htmlFor="agentId">
-          Estate agent
+          Realtor
           <select
             id="agentId"
             name="agentId"
@@ -263,7 +362,7 @@ export default function PublishForm({
             className="mt-1 block w-full border px-3 py-2"
           >
             {agents.length === 0 ? (
-              <option value="">No estate agents available</option>
+              <option value="">No realtors registered for this region</option>
             ) : (
               agents.map((agent) => (
                 <option key={agent.id} value={agent.id}>
@@ -276,7 +375,14 @@ export default function PublishForm({
       )}
       {contactType === "agent" ? (
         <p>
-          <Link href="/agents">Browse the agent directory</Link>
+          {agents.length === 0 ? (
+            <>
+              No realtors registered for this region.{" "}
+              <Link href={agentRegisterHref}>Add your details and region</Link>
+            </>
+          ) : (
+            <Link href="/agents">Browse the agent directory</Link>
+          )}
         </p>
       ) : null}
 

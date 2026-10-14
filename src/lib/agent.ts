@@ -107,8 +107,8 @@ export function validateAgentRegistration(
       message: "Password must be at least 8 characters.",
     });
   }
-  if (city && !cityPattern.test(city)) {
-    errors.push({ field: "city", message: "Enter a city." });
+  if (!city || !cityPattern.test(city)) {
+    errors.push({ field: "city", message: "Enter your region." });
   }
   if (license && !licensePattern.test(license)) {
     errors.push({ field: "license", message: "Enter a license number." });

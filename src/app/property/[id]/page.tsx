@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import { ListingPhoto } from "@/components/listing-photo";
 import { PropertyMap } from "@/components/property-map";
 import { listAvailableAgentsInRegion } from "@/lib/agent";
-import { isPlaceholderPhoto, listingImages, placeholderPhoto, priceLabel } from "@/lib/listingImage";
+import { isAerialPhoto, isPlaceholderPhoto, isSellerPhoto, listingGallery, priceLabel } from "@/lib/listingImage";
 import { listingKind } from "@/lib/listingKind";
 import { listingVideos } from "@/lib/listingMedia";
 import { publishedContact, telHref, whatsappHref } from "@/lib/developerContact";
-import { pointForListing } from "@/lib/places";
+import { picturePoint, pointForListing } from "@/lib/places";
 import { prisma } from "@/lib/prisma";
-import { propertyRegion, regionPath } from "@/lib/region";
+import { conveyancerRegisterPath, propertyRegion, realtorRegisterPath, regionPath } from "@/lib/region";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AgentProfileCard } from "./agent-profile-card";
@@ -71,9 +71,13 @@ export default async function PropertyPage({
   const solicitors = await listSolicitors(property.location);
   const conveyancers = solicitors.slice(0, 24);
   const conveyancerArea = conveyancerPlace(property.location);
-  const storedPhotos = listingImages(property.images, property.image);
-  const photos =
-    storedPhotos.length > 0 ? storedPhotos : [placeholderPhoto(property.title)];
+  const photos = listingGallery(
+    property.title,
+    property.images,
+    property.image,
+    picturePoint(property.location, property.metadata),
+    property.id,
+  );
   const point = pointForListing(property.location, property.metadata);
   const mapPoint = {
     id: property.id,
@@ -100,6 +104,7 @@ export default async function PropertyPage({
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
       <p>{kind === "developer" ? "Developer unit" : "Private sale"}</p>
+      <p>Buying? No account needed. Contact the seller, realtor, or a conveyancer below.</p>
       <div className="grid gap-4 md:grid-cols-2">
         <ListingPhoto
           src={photos[0]}
@@ -107,7 +112,7 @@ export default async function PropertyPage({
           width={1200}
           height={800}
           priority
-          className="h-full min-h-64 w-full object-cover"
+          className="h-full min-h-56 w-full object-cover sm:min-h-64"
         />
         <PropertyMap points={[mapPoint]} variant="place" />
       </div>
@@ -127,7 +132,13 @@ export default async function PropertyPage({
         </ul>
       ) : null}
       {isPlaceholderPhoto(photos[0]) ? null : (
-        <p className="text-sm text-zinc-600">Pictures from the developer website.</p>
+        <p className="text-sm text-zinc-600">
+          {isAerialPhoto(photos[0])
+            ? "Aerial view of this listing."
+            : isSellerPhoto(photos[0])
+              ? "Pictures from the seller."
+              : "Pictures from the developer website."}
+        </p>
       )}
       {videos.length > 0 ? (
         <section className="flex flex-col gap-3">
@@ -184,7 +195,7 @@ export default async function PropertyPage({
       {extra ? (
         <ul>
           {Object.entries(extra)
-            .filter(([key]) => !["listingKey", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked"].includes(key))
+            .filter(([key]) => !["listingKey", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked", "contactRole", "realtorAgency", "solicitorName", "solicitorFirm", "solicitorPhone", "solicitorEmail"].includes(key))
             .map(([key, value]) => (
             <li key={key}>
               {metadataLabel(key)}: {String(value)}
@@ -194,14 +205,15 @@ export default async function PropertyPage({
       ) : null}
       {property.contactType === "direct" ? (
         <section>
-          <h2>Contact the seller</h2>
+          <h2>{extra?.contactRole === "realtor" ? "Realtor" : "Contact the seller"}</h2>
           <p>{property.contactName}</p>
+          {typeof extra?.realtorAgency === "string" ? <p>{extra.realtorAgency}</p> : null}
           <p>{property.contactPhone}</p>
           <p>{property.contactEmail}</p>
         </section>
       ) : agentIsAvailable && assignedAgent ? (
         <section>
-          <h2>Estate agent</h2>
+          <h2>Realtor</h2>
           <p>{assignedAgent.name}</p>
           <p>{assignedAgent.agency}</p>
           {assignedAgent.city ? <p>{assignedAgent.city}</p> : null}
@@ -211,7 +223,7 @@ export default async function PropertyPage({
           <p>{assignedAgent.email}</p>
         </section>
       ) : null}
-      {agentIsAvailable ? null : (
+      {agentIsAvailable || extra?.contactRole === "realtor" ? null : (
         <section className="flex flex-col gap-4">
           <p>
             {assignedAgent
@@ -219,8 +231,12 @@ export default async function PropertyPage({
               : "This property does not have an agent yet."}
           </p>
           <h2>Available Agents in This Region</h2>
+          <p>Selling this property? Sign in to choose an agent.</p>
           {regionalAgents.length === 0 ? (
-            <p>No agents in this region.</p>
+            <p>
+              No realtors registered for this region.{" "}
+              <Link href={realtorRegisterPath(region)}>Add your details and region</Link>
+            </p>
           ) : (
             <ul className="flex flex-col gap-6">
               {regionalAgents.map((agent) => (
@@ -233,7 +249,7 @@ export default async function PropertyPage({
                     email={agent.email}
                     photo={agentPhoto(agent.name)}
                     chooseHref={`/property/${property.id}/choose?agentId=${agent.id}`}
-                    profileHref={`/agents/${agent.id}`}
+                    profileHref={agent.city ? regionPath({ country: agent.country, city: agent.city }) : "/agents"}
                   />
                 </li>
               ))}
@@ -244,7 +260,7 @@ export default async function PropertyPage({
               <Link href={regionPath(region)}>View all agents</Link>
             ) : null}
             <Link href={`/property/${property.id}/represent`}>
-              Request representation
+              Request representation (agents)
             </Link>
           </p>
         </section>
@@ -263,6 +279,16 @@ export default async function PropertyPage({
           {solicitor.license ? <p>{solicitor.license}</p> : null}
           <SolicitorContacts phone={solicitor.phone} email={solicitor.email} />
         </section>
+      ) : typeof extra?.solicitorName === "string" ? (
+        <section>
+          <h2>Solicitor</h2>
+          <p>{extra.solicitorName}</p>
+          {typeof extra.solicitorFirm === "string" ? <p>{extra.solicitorFirm}</p> : null}
+          <SolicitorContacts
+            phone={typeof extra.solicitorPhone === "string" ? extra.solicitorPhone : ""}
+            email={typeof extra.solicitorEmail === "string" ? extra.solicitorEmail : ""}
+          />
+        </section>
       ) : null}
       <section className="flex flex-col gap-4">
         <h2>Choose a conveyancer</h2>
@@ -271,7 +297,12 @@ export default async function PropertyPage({
           and email are the firm&apos;s published contact details.
         </p>
         {conveyancers.length === 0 ? (
-          <p>No local conveyancers listed for this area yet.</p>
+          <p>
+            No conveyancers registered for this region.{" "}
+            <Link href={conveyancerRegisterPath(conveyancerArea)}>
+              Add your details and region
+            </Link>
+          </p>
         ) : (
           <ul className="flex flex-col gap-6">
             {conveyancers.map((option) => (

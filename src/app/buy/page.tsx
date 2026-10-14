@@ -46,14 +46,15 @@ export default function BuyPage() {
 
 async function BuyIntro() {
   const site = await currentSite();
-  return <p>Choose how you want to buy {site.withArticle}.</p>;
+  return <p>Choose how you want to buy {site.withArticle}. No account needed.</p>;
 }
 
 async function BuyFooter() {
   const site = await currentSite();
   return (
     <p>
-      Listing your {site.noun} for sale is free. <Link href="/sell">Sell {site.withArticle}</Link>
+      Listing your {site.noun} for sale is free. <Link href="/sell">Sell {site.withArticle}</Link>{" "}
+      <Link href="/privacy">Privacy</Link>
     </p>
   );
 }

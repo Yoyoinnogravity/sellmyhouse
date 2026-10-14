@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { listAvailableAgentsInRegion } from "@/lib/agent";
+import { realtorRegisterPath } from "@/lib/region";
 
 export const instant = false;
 
@@ -26,7 +27,12 @@ export default async function AgentsByRegionPage({
         Agents in {regionCity}, {regionCountry}
       </h1>
       {agents.length === 0 ? (
-        <p>No agents in this region.</p>
+        <p>
+          No realtors registered for this region.{" "}
+          <Link href={realtorRegisterPath({ city: regionCity, country: regionCountry })}>
+            Add your details and region
+          </Link>
+        </p>
       ) : (
         <ul className="flex flex-col gap-6">
           {agents.map((agent) => (

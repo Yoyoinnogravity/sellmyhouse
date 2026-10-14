@@ -1141,6 +1141,7 @@ export type SolicitorCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * The data used to create many Solicitors.
    */
   data: Prisma.SolicitorCreateManyInput | Prisma.SolicitorCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1159,6 +1160,7 @@ export type SolicitorCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exten
    * The data used to create many Solicitors.
    */
   data: Prisma.SolicitorCreateManyInput | Prisma.SolicitorCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**

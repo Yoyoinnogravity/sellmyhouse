@@ -8,32 +8,31 @@ const choices = [
   { href: "/sell", label: "I want to test the market" },
   { href: "/solicitors", label: "I need a conveyancer" },
   { href: "/agents", label: "I want an agent" },
+  { href: "/agents/register", label: "I'm a realtor" },
+  { href: "/advertise", label: "I want to advertise" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const site = await currentSite();
   return (
     <main className="flex flex-1 flex-col">
-      <section className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center gap-10 px-6 py-16 text-center">
-        <Suspense fallback={<h1 className="text-3xl font-semibold tracking-tight">Sell My House</h1>}>
-          <SiteTitle />
-        </Suspense>
-        <div className="flex w-full flex-col gap-4 sm:flex-row">
+      <section className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center gap-8 px-4 py-10 text-center sm:gap-10 sm:px-6 sm:py-16">
+        <h1 className="text-3xl font-semibold tracking-tight">{site.name}</h1>
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:gap-4">
           <Link
             href="/buy"
-            className="flex min-h-28 flex-1 items-center justify-center border text-2xl font-semibold"
+            className="flex min-h-[72px] flex-1 items-center justify-center border px-4 py-4 text-xl font-semibold sm:min-h-28 sm:text-2xl"
           >
             BUY
           </Link>
           <Link
             href="/sell"
-            className="flex min-h-28 flex-1 items-center justify-center border text-2xl font-semibold"
+            className="flex min-h-[72px] flex-1 items-center justify-center border px-4 py-4 text-xl font-semibold sm:min-h-28 sm:text-2xl"
           >
             SELL
           </Link>
         </div>
-        <Suspense fallback={<p>Listing your property for sale is free.</p>}>
-          <FreeListing />
-        </Suspense>
+        <p>Listing your {site.noun} for sale is free.</p>
         <ul className="flex flex-col gap-3">
           {choices.map((choice) => (
             <li key={choice.href + choice.label}>
@@ -42,33 +41,16 @@ export default function HomePage() {
           ))}
         </ul>
       </section>
-      <section className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-6 pb-16">
-        <Suspense fallback={<h2 className="text-2xl font-semibold tracking-tight">Homes on the map</h2>}>
-          <MapHeading />
-        </Suspense>
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pb-10 sm:px-6 sm:pb-16">
+        <h2 className="text-2xl font-semibold tracking-tight">{site.mapHeading}</h2>
         <Suspense fallback={<p>Loading the map…</p>}>
           <WorldMapSection />
         </Suspense>
-        <p className="flex gap-4">
+        <p className="flex flex-wrap gap-x-4 gap-y-2">
           <Link href="/properties">Private sales</Link>
           <Link href="/properties?sale=developer">Developer units</Link>
         </p>
       </section>
     </main>
   );
-}
-
-async function SiteTitle() {
-  const site = await currentSite();
-  return <h1 className="text-3xl font-semibold tracking-tight">{site.name}</h1>;
-}
-
-async function FreeListing() {
-  const site = await currentSite();
-  return <p>Listing your {site.noun} for sale is free.</p>;
-}
-
-async function MapHeading() {
-  const site = await currentSite();
-  return <h2 className="text-2xl font-semibold tracking-tight">{site.mapHeading}</h2>;
 }

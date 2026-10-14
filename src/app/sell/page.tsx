@@ -26,14 +26,19 @@ export default function SellPage({
       >
         <SellHeading />
       </Suspense>
-      <p className="mt-4">Choose how you want to sell.</p>
+      <p className="mt-4">
+        Add photos and a description, then choose or specify a realtor or a solicitor.
+      </p>
       <ul className="mt-3 flex flex-col gap-2">
         <li>List it yourself, on this page.</li>
         <li>
-          <Link href="/solicitors">Choose a conveyancer</Link>
+          <Link href="/solicitors">Choose a solicitor</Link>
         </li>
         <li>
-          <Link href="/agents">Choose an agent</Link>
+          <Link href="/agents">Choose a realtor</Link>
+        </li>
+        <li>
+          <Link href="/agents/register">I'm a realtor. Add your details and region.</Link>
         </li>
       </ul>
       <Suspense fallback={<p>Loading…</p>}>

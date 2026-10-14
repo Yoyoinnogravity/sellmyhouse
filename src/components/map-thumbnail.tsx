@@ -1,4 +1,4 @@
-import { mapTileUrl } from "@/lib/mapTiles"
+import { mapLabelUrl, mapTileUrl } from "@/lib/mapTiles"
 
 function tilePosition(lat: number, lng: number, zoom: number) {
   const scale = 2 ** zoom
@@ -19,11 +19,13 @@ export function MapThumbnail({ lat, lng, label }: { lat: number; lng: number; la
   const zoom = 13
   const { tileX, tileY, left, top } = tilePosition(lat, lng, zoom)
   const src = mapTileUrl(zoom, tileX, tileY)
+  const labels = mapLabelUrl(zoom, tileX, tileY)
 
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-zinc-100">
       {/* Map tiles are served as plain images so the pin can sit on the tile. */}
-      <img src={src} alt="" className="absolute inset-0 h-full w-full" />
+      <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <img src={labels} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <span
         className="absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-orange-50 bg-orange-500"
         style={{ left: `${left}%`, top: `${top}%` }}

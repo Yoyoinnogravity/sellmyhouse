@@ -19,10 +19,71 @@
   }
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 16px form text stops iOS Safari zooming in on focus. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+form button[type="submit"],
+form button:not([type]) {
+  min-height: 44px;
+}
+
+img,
+video {
+  height: auto;
+}
+
+main h1,
+main h2 {
+  overflow-wrap: break-word;
+}
+
+.leaflet-control-zoom a {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  line-height: 44px !important;
+}
+
+.leaflet-control-attribution {
+  font-size: 10px;
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  main {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  main h1 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  .leaflet-popup-content {
+    max-width: 200px;
+    margin: 12px 14px;
+  }
+}
+
+.leaflet-container {
+  background: #d6d3d1;
 }
 
 .leaflet-container img {

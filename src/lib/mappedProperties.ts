@@ -3,8 +3,9 @@ import type { Prisma } from "@/generated/prisma/client"
 import { publishedContact } from "@/lib/developerContact"
 import { listingKind, type SaleKind } from "@/lib/listingKind"
 import { listingPhoto, priceLabel } from "@/lib/listingImage"
-import { pointForListing, type MapProperty } from "@/lib/places"
+import { picturePoint, pointForListing, type MapProperty } from "@/lib/places"
 import { prisma } from "@/lib/prisma"
+import { listingTypeWhere, type ListingSearch } from "@/lib/listingSearch"
 import { currentSite, siteListingWhere } from "@/lib/site"
 
 export type ListingPoint = MapProperty & {
@@ -65,16 +66,65 @@ function saleWhere(sale: SaleKind): Prisma.PropertyWhereInput {
   }
 }
 
-async function listingWhere(sale?: SaleKind) {
+async function listingWhere(sale?: SaleKind, search?: ListingSearch) {
   const site = await currentSite()
-  const typed = siteListingWhere(site)
-  if (!sale) return typed
-  return { AND: [typed, saleWhere(sale)] }
+  const filters: Prisma.PropertyWhereInput[] = []
+  if (search?.type) {
+    filters.push(listingTypeWhere(search.type))
+  } else if (sale !== "developer") {
+    filters.push(siteListingWhere(site))
+  }
+  if (sale) filters.push(saleWhere(sale))
+  if (search?.place) filters.push({ location: { contains: search.place } })
+  if (search && (search.minPrice != null || search.maxPrice != null)) {
+    filters.push({
+      price: {
+        ...(search.minPrice != null ? { gte: search.minPrice } : {}),
+        ...(search.maxPrice != null ? { lte: search.maxPrice } : {}),
+      },
+    })
+  }
+  return filters.length === 1 ? filters[0] : { AND: filters }
 }
 
-export async function listMapPoints(sale?: SaleKind): Promise<MapProperty[]> {
+export async function listPlaceOptions(sale: SaleKind, search: ListingSearch): Promise<string[]> {
   await connection()
-  const where = await listingWhere(sale)
+  const site = await currentSite()
+  const filters: Prisma.PropertyWhereInput[] = []
+  if (search.type) {
+    filters.push(listingTypeWhere(search.type))
+  } else if (sale !== "developer") {
+    filters.push(siteListingWhere(site))
+  }
+  filters.push(saleWhere(sale))
+  const rows = await prisma.property.findMany({
+    where: filters.length === 1 ? filters[0] : { AND: filters },
+    select: { location: true },
+  })
+  return placeSegments(rows.map((row) => row.location))
+}
+
+function placeSegments(locations: string[]) {
+  const counts = new Map<string, { label: string; count: number }>()
+  for (const location of locations) {
+    for (const part of location.split(",")) {
+      const label = part.trim()
+      if (label.length < 2) continue
+      const key = label.toLocaleLowerCase()
+      const seen = counts.get(key)
+      if (seen) seen.count += 1
+      else counts.set(key, { label, count: 1 })
+    }
+  }
+  return [...counts.values()]
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .slice(0, 40)
+    .map((entry) => entry.label)
+}
+
+export async function listMapPoints(sale?: SaleKind, search?: ListingSearch): Promise<MapProperty[]> {
+  await connection()
+  const where = await listingWhere(sale, search)
   const rows = await prisma.property.findMany({
     where,
     orderBy: { id: "asc" },
@@ -100,14 +150,14 @@ export async function listMapPoints(sale?: SaleKind): Promise<MapProperty[]> {
   })
 }
 
-export async function listListingsPage(page: number, sale: SaleKind): Promise<{
+export async function listListingsPage(page: number, sale: SaleKind, search?: ListingSearch): Promise<{
   items: ListingPoint[]
   page: number
   pages: number
   total: number
 }> {
   await connection()
-  const where = await listingWhere(sale)
+  const where = await listingWhere(sale, search)
   const total = await prisma.property.count({ where })
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const current = Math.min(Math.max(1, page), pages)
@@ -136,7 +186,7 @@ export async function listListingsPage(page: number, sale: SaleKind): Promise<{
       const contact = publishedContact(row.metadata)
       return {
         ...toPoint(row),
-        image: listingPhoto(row.title, row.images, row.image),
+        image: listingPhoto(row.title, row.images, row.image, picturePoint(row.location, row.metadata), row.id),
         phones: contact.phones,
         whatsappNumber: contact.whatsappNumber,
         website: contact.website,

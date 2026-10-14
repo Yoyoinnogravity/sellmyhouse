@@ -13,8 +13,22 @@ export function loginPrompt(nextPath: string) {
     };
   }
 
+  if (nextPath.includes("/represent")) {
+    return {
+      title: "Agent sign in",
+      body: "Only registered realtors can request representation. Buying? No account needed.",
+    };
+  }
+
+  if (nextPath.includes("/choose")) {
+    return {
+      title: "Seller sign in",
+      body: "Sign in with your seller account to choose an agent. Buying? No account needed.",
+    };
+  }
+
   return {
     title: "Log in",
-    body: "Sign in with your seller account.",
+    body: "Sign in with your seller account. Buying? No account needed.",
   };
 }

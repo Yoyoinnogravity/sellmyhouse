@@ -15,18 +15,28 @@ export function ListingPhoto({
   height: number
   priority?: boolean
 }) {
-  if (src.startsWith("https://placehold.co/")) {
-    return (
-      <Image
-        src={src}
-        alt={alt}
-        width={width}
-        height={height}
-        priority={priority}
-        className={className}
-      />
-    )
-  }
+  const aerial = src.includes("/World_Imagery/MapServer/tile/")
+  const photo = src.startsWith("https://placehold.co/") ? (
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      priority={priority}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <img src={src} alt={alt} width={width} height={height} className="h-full w-full object-cover" />
+  )
 
-  return <img src={src} alt={alt} width={width} height={height} className={className} />
+  return (
+    <span className={`relative block overflow-hidden ${className ?? ""}`}>
+      {photo}
+      {aerial ? (
+        <span className="absolute bottom-1 left-1 bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white">
+          Aerial
+        </span>
+      ) : null}
+    </span>
+  )
 }

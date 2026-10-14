@@ -23,3 +23,18 @@ export function samePlace(left: string | null | undefined, right: string) {
 export function regionPath(region: PropertyRegion) {
   return `/agents/${encodeURIComponent(region.country)}/${encodeURIComponent(region.city)}`;
 }
+
+export function realtorRegisterPath(region?: PropertyRegion | null) {
+  if (!region?.city) return "/agents/register";
+  const params = new URLSearchParams({
+    city: region.city,
+    country: region.country,
+  });
+  return `/agents/register?${params.toString()}`;
+}
+
+export function conveyancerRegisterPath(region?: string | null) {
+  if (!region) return "/solicitors/register";
+  const params = new URLSearchParams({ city: region, country: "Malaysia" });
+  return `/solicitors/register?${params.toString()}`;
+}

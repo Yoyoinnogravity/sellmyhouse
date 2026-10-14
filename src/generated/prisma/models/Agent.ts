@@ -668,6 +668,7 @@ export type AgentCreateOrConnectWithoutAgencyRecordInput = {
 
 export type AgentCreateManyAgencyRecordInputEnvelope = {
   data: Prisma.AgentCreateManyAgencyRecordInput | Prisma.AgentCreateManyAgencyRecordInput[]
+  skipDuplicates?: boolean
 }
 
 export type AgentUpsertWithWhereUniqueWithoutAgencyRecordInput = {
@@ -1731,6 +1732,7 @@ export type AgentCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * The data used to create many Agents.
    */
   data: Prisma.AgentCreateManyInput | Prisma.AgentCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1749,6 +1751,7 @@ export type AgentCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many Agents.
    */
   data: Prisma.AgentCreateManyInput | Prisma.AgentCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */
