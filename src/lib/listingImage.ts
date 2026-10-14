@@ -47,6 +47,10 @@ function realPhotos(images: string | null, image: string | null) {
   return listingImages(images, image).filter((src) => !isPlaceholderPhoto(src))
 }
 
+export function hasRealPhotos(images: string | null, image: string | null) {
+  return realPhotos(images, image).length > 0
+}
+
 function photoPoint(point: { lat: number; lng: number; precise: boolean } | null, vary: number) {
   if (!point) return null
   if (point.precise) return point

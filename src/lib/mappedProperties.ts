@@ -2,7 +2,7 @@ import { connection } from "next/server"
 import type { Prisma } from "@/generated/prisma/client"
 import { publishedContact } from "@/lib/developerContact"
 import { listingKind, type SaleKind } from "@/lib/listingKind"
-import { listingPhoto, priceLabel } from "@/lib/listingImage"
+import { hasRealPhotos, listingPhoto, priceLabel } from "@/lib/listingImage"
 import { picturePoint, pointForListing, type MapProperty } from "@/lib/places"
 import { prisma } from "@/lib/prisma"
 import { listingTypeWhere, type ListingSearch } from "@/lib/listingSearch"
@@ -10,6 +10,7 @@ import { currentSite, siteListingWhere } from "@/lib/site"
 
 export type ListingPoint = MapProperty & {
   image: string
+  hasPhoto: boolean
   phones: string[]
   whatsappNumber: string | null
   website: string | null
@@ -189,6 +190,7 @@ export async function listListingsPage(page: number, sale: SaleKind, search?: Li
       return {
         ...toPoint(row),
         image: listingPhoto(row.title, row.images, row.image, picturePoint(row.location, row.metadata), row.id),
+        hasPhoto: hasRealPhotos(row.images, row.image),
         phones: contact.phones,
         whatsappNumber: contact.whatsappNumber,
         website: contact.website,

@@ -8,13 +8,28 @@ export default function PropertyCard({ property }: { property: ListingPoint }) {
   return (
     <article className="flex min-w-0 flex-col gap-3 border p-3">
       <Link href={`/property/${property.id}`} className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2">
-        <ListingPhoto
-          src={property.image}
-          alt={property.title}
-          width={800}
-          height={800}
-          className="aspect-square h-full w-full object-cover"
-        />
+        {property.hasPhoto ? (
+          <ListingPhoto
+            src={property.image}
+            alt={property.title}
+            width={800}
+            height={800}
+            className="aspect-square h-full w-full object-cover"
+          />
+        ) : (
+          <span className="relative block overflow-hidden">
+            <ListingPhoto
+              src={property.image}
+              alt={`Aerial view of ${property.location}`}
+              width={800}
+              height={800}
+              className="aspect-square h-full w-full object-cover"
+            />
+            <span className="absolute bottom-1 left-1 bg-black/55 px-1.5 py-0.5 text-[10px] font-medium text-white">
+              Aerial view · photos coming soon
+            </span>
+          </span>
+        )}
         <MapThumbnail lat={property.lat} lng={property.lng} label={property.location} />
       </Link>
       <div className="min-w-0">
