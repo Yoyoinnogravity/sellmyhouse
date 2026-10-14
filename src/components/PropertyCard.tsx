@@ -18,7 +18,7 @@ export default function PropertyCard({ property }: { property: ListingPoint }) {
         <MapThumbnail lat={property.lat} lng={property.lng} label={property.location} />
       </Link>
       <div className="min-w-0">
-        <p className="text-sm text-zinc-600">{property.kind === "developer" ? "Developer" : "Private sale"}</p>
+        <p className="text-sm text-zinc-600">{property.kind === "developer" ? "Developer" : "Private sale"}{property.developerVerified ? " · Verified developer" : ""}</p>
         <h2 className="text-base font-semibold break-words sm:text-lg">
           <Link href={`/property/${property.id}`}>{property.title}</Link>
         </h2>

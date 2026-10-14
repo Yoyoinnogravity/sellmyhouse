@@ -43,6 +43,11 @@ export type Solicitor = Prisma.SolicitorModel
  */
 export type Property = Prisma.PropertyModel
 /**
+ * Model DeveloperClaim
+ * 
+ */
+export type DeveloperClaim = Prisma.DeveloperClaimModel
+/**
  * Model RepresentationRequest
  * 
  */

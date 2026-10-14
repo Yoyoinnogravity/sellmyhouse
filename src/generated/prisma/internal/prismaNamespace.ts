@@ -402,6 +402,7 @@ export const ModelName = {
   Agency: 'Agency',
   Solicitor: 'Solicitor',
   Property: 'Property',
+  DeveloperClaim: 'DeveloperClaim',
   RepresentationRequest: 'RepresentationRequest'
 } as const
 
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "agent" | "agency" | "solicitor" | "property" | "representationRequest"
+    modelProps: "user" | "agent" | "agency" | "solicitor" | "property" | "developerClaim" | "representationRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -792,6 +793,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DeveloperClaim: {
+      payload: Prisma.$DeveloperClaimPayload<ExtArgs>
+      fields: Prisma.DeveloperClaimFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DeveloperClaimFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DeveloperClaimFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>
+        }
+        findFirst: {
+          args: Prisma.DeveloperClaimFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DeveloperClaimFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>
+        }
+        findMany: {
+          args: Prisma.DeveloperClaimFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>[]
+        }
+        create: {
+          args: Prisma.DeveloperClaimCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>
+        }
+        createMany: {
+          args: Prisma.DeveloperClaimCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DeveloperClaimCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>[]
+        }
+        delete: {
+          args: Prisma.DeveloperClaimDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>
+        }
+        update: {
+          args: Prisma.DeveloperClaimUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>
+        }
+        deleteMany: {
+          args: Prisma.DeveloperClaimDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DeveloperClaimUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DeveloperClaimUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>[]
+        }
+        upsert: {
+          args: Prisma.DeveloperClaimUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DeveloperClaimPayload>
+        }
+        aggregate: {
+          args: Prisma.DeveloperClaimAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDeveloperClaim>
+        }
+        groupBy: {
+          args: Prisma.DeveloperClaimGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeveloperClaimGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DeveloperClaimCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DeveloperClaimCountAggregateOutputType> | number
+        }
+      }
+    }
     RepresentationRequest: {
       payload: Prisma.$RepresentationRequestPayload<ExtArgs>
       fields: Prisma.RepresentationRequestFieldRefs
@@ -981,10 +1056,28 @@ export const PropertyScalarFieldEnum = {
   metadata: 'metadata',
   agentId: 'agentId',
   solicitorId: 'solicitorId',
+  claimedById: 'claimedById',
+  claimedAt: 'claimedAt',
+  developerVerified: 'developerVerified',
   createdAt: 'createdAt'
 } as const
 
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
+
+
+export const DeveloperClaimScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  company: 'company',
+  contactEmail: 'contactEmail',
+  contactPhone: 'contactPhone',
+  listingIds: 'listingIds',
+  status: 'status',
+  createdAt: 'createdAt',
+  decidedAt: 'decidedAt'
+} as const
+
+export type DeveloperClaimScalarFieldEnum = (typeof DeveloperClaimScalarFieldEnum)[keyof typeof DeveloperClaimScalarFieldEnum]
 
 
 export const RepresentationRequestScalarFieldEnum = {
@@ -1245,6 +1338,7 @@ export type GlobalOmitConfig = {
   agency?: Prisma.AgencyOmit
   solicitor?: Prisma.SolicitorOmit
   property?: Prisma.PropertyOmit
+  developerClaim?: Prisma.DeveloperClaimOmit
   representationRequest?: Prisma.RepresentationRequestOmit
 }
 

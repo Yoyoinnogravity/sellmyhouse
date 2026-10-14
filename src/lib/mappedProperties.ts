@@ -14,6 +14,7 @@ export type ListingPoint = MapProperty & {
   whatsappNumber: string | null
   website: string | null
   kind: SaleKind
+  developerVerified: boolean
 }
 
 const PAGE_SIZE = 12
@@ -175,6 +176,7 @@ export async function listListingsPage(page: number, sale: SaleKind, search?: Li
       image: true,
       images: true,
       metadata: true,
+      developerVerified: true,
     },
   })
 
@@ -191,6 +193,7 @@ export async function listListingsPage(page: number, sale: SaleKind, search?: Li
         whatsappNumber: contact.whatsappNumber,
         website: contact.website,
         kind: listingKind(row.metadata),
+        developerVerified: row.developerVerified,
       }
     }),
   }

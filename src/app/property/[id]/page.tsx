@@ -103,7 +103,7 @@ export default async function PropertyPage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
-      <p>{kind === "developer" ? "Developer unit" : "Private sale"}</p>
+      <p>{kind === "developer" ? "Developer unit" : "Private sale"}{property.developerVerified ? " · Verified developer" : ""}</p>
       <p>Buying? No account needed. Contact the seller, realtor, or a conveyancer below.</p>
       <div className="grid gap-4 md:grid-cols-2">
         <ListingPhoto

@@ -12,6 +12,8 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+  claimedProperties Property[] @relation("ClaimedProperties")
+  developerClaims   DeveloperClaim[]
 }
 
 model Agent {
@@ -77,7 +79,24 @@ model Property {
   agentId      Int?
   solicitorId  Int?
   representationRequests RepresentationRequest[]
+  claimedBy    User?    @relation("ClaimedProperties", fields: [claimedById], references: [id])
+  claimedById  Int?
+  claimedAt    DateTime?
+  developerVerified Boolean @default(false)
   createdAt    DateTime   @default(now())
+}
+
+model DeveloperClaim {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  company      String
+  contactEmail String?
+  contactPhone String?
+  listingIds   String // JSON array of Property ids
+  status       String   @default("pending") // "pending" | "approved" | "rejected"
+  createdAt    DateTime @default(now())
+  decidedAt    DateTime?
 }
 
 model RepresentationRequest {

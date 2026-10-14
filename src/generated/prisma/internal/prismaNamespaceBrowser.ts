@@ -56,6 +56,7 @@ export const ModelName = {
   Agency: 'Agency',
   Solicitor: 'Solicitor',
   Property: 'Property',
+  DeveloperClaim: 'DeveloperClaim',
   RepresentationRequest: 'RepresentationRequest'
 } as const
 
@@ -151,10 +152,28 @@ export const PropertyScalarFieldEnum = {
   metadata: 'metadata',
   agentId: 'agentId',
   solicitorId: 'solicitorId',
+  claimedById: 'claimedById',
+  claimedAt: 'claimedAt',
+  developerVerified: 'developerVerified',
   createdAt: 'createdAt'
 } as const
 
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
+
+
+export const DeveloperClaimScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  company: 'company',
+  contactEmail: 'contactEmail',
+  contactPhone: 'contactPhone',
+  listingIds: 'listingIds',
+  status: 'status',
+  createdAt: 'createdAt',
+  decidedAt: 'decidedAt'
+} as const
+
+export type DeveloperClaimScalarFieldEnum = (typeof DeveloperClaimScalarFieldEnum)[keyof typeof DeveloperClaimScalarFieldEnum]
 
 
 export const RepresentationRequestScalarFieldEnum = {

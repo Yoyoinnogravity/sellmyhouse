@@ -10,6 +10,7 @@ const links = [
   { href: "/solicitors", label: "Conveyancers" },
   { href: "/agents/upload", label: "Upload" },
   { href: "/advertise", label: "Advertise" },
+  { href: "/developers", label: "Developers" },
   { href: "/dashboard", label: "Dashboard" },
 ]
 
