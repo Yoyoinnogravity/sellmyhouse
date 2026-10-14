@@ -1,0 +1,112 @@
+"use client"
+
+import { useEffect } from "react"
+import { CircleMarker, MapContainer, TileLayer, useMap } from "react-leaflet"
+import L from "leaflet"
+import { MAP_ATTRIBUTION, MAP_TILES } from "@/lib/mapTiles"
+import type { MapProperty } from "@/lib/places"
+import "leaflet/dist/leaflet.css"
+
+function Frame({ points, variant }: { points: MapProperty[]; variant: "world" | "place" }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (points.length === 0) return
+    if (variant === "place" || points.length === 1) {
+      map.setView([points[0].lat, points[0].lng], 14)
+      return
+    }
+    map.fitBounds(
+      points.map((point) => [point.lat, point.lng]),
+      { padding: [28, 28], maxZoom: 5 },
+    )
+  }, [map, points, variant])
+
+  return null
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => {
+    if (char === "&") return "&amp;"
+    if (char === "<") return "&lt;"
+    if (char === ">") return "&gt;"
+    if (char === '"') return "&quot;"
+    return "&#39;"
+  })
+}
+
+function pinLabel(point: MapProperty) {
+  return (point.offerCount ?? 1) > 1 ? `From ${point.priceLabel}` : point.priceLabel
+}
+
+function WorldMarkers({ points }: { points: MapProperty[] }) {
+  const map = useMap()
+
+  useEffect(() => {
+    const layer = L.layerGroup()
+    for (const point of points) {
+      const label = pinLabel(point)
+      const marker = L.marker([point.lat, point.lng], {
+        icon: L.divIcon({
+          className: "price-pin",
+          html: `<span style="position:absolute;left:0;top:0;transform:translate(-50%,-130%);background:#f97316;color:#fff7ed;border:2px solid #fff7ed;border-radius:999px;padding:2px 8px;font:600 12px/1.3 Arial,Helvetica,sans-serif;white-space:nowrap;box-shadow:0 1px 2px rgb(0 0 0 / 35%)">${escapeHtml(label)}</span>`,
+          iconSize: [0, 0],
+          iconAnchor: [0, 0],
+        }),
+        keyboard: true,
+        title: label,
+      })
+      const offers = point.offerCount ?? 1
+      const count = offers > 1 ? `<br>Lowest of ${offers} unit types` : ""
+      marker.bindPopup(
+        `<a href="/property/${point.id}">${escapeHtml(point.title)}</a><br>${escapeHtml(label)}${count}<br>${escapeHtml(point.location)}`,
+      )
+      marker.addTo(layer)
+    }
+    layer.addTo(map)
+    return () => {
+      map.removeLayer(layer)
+    }
+  }, [map, points])
+
+  return null
+}
+
+export default function PropertyMapCanvas({
+  points,
+  variant,
+}: {
+  points: MapProperty[]
+  variant: "world" | "place"
+}) {
+  const first = points[0]
+
+  return (
+    <MapContainer
+      center={first ? [first.lat, first.lng] : [20, 0]}
+      zoom={variant === "world" ? 2 : 14}
+      scrollWheelZoom={variant === "world"}
+      preferCanvas
+      className="h-full w-full"
+    >
+      <TileLayer
+        attribution={MAP_ATTRIBUTION}
+        maxZoom={20}
+        url={MAP_TILES}
+      />
+      <Frame points={points} variant={variant} />
+      {variant === "world" ? (
+        <WorldMarkers points={points} />
+      ) : (
+        points.map((point) => (
+          <CircleMarker
+            key={point.id}
+            center={[point.lat, point.lng]}
+            radius={10}
+            pathOptions={{ color: "#fff7ed", fillColor: "#f97316", fillOpacity: 0.95, weight: 2 }}
+          />
+        ))
+      )}
+    </MapContainer>
+  )
+}

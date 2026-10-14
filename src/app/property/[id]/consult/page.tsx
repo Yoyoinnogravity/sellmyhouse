@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { prisma } from "@/lib/prisma";
 
 export const instant = false;
@@ -57,9 +58,8 @@ export default async function RequestConsultationPage({
       <p>
         Consultation requested with {solicitor.name} about {property.title}.
       </p>
-      <p>{solicitor.firm}</p>
-      <p>{solicitor.phone}</p>
-      <p>{solicitor.email}</p>
+      {solicitor.firm !== solicitor.name ? <p>{solicitor.firm}</p> : null}
+      <SolicitorContacts phone={solicitor.phone} email={solicitor.email} />
       <p>
         <a href={`mailto:${solicitor.email}?subject=${subject}&body=${body}`}>
           Send consultation request

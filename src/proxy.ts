@@ -22,7 +22,12 @@ export function proxy(request: NextRequest) {
   if (isAgentDashboard(request.nextUrl.pathname)) {
     const token = request.cookies.get(AGENT_COOKIE)?.value;
     if (!token || !verifyAgentToken(token)) {
-      return NextResponse.redirect(new URL("/agents/login", request.url));
+      const login = new URL("/agents/login", request.url);
+      login.searchParams.set(
+        "next",
+        `${request.nextUrl.pathname}${request.nextUrl.search}`,
+      );
+      return NextResponse.redirect(login);
     }
     return NextResponse.next();
   }
@@ -33,7 +38,12 @@ export function proxy(request: NextRequest) {
 
   const token = request.cookies.get(AUTH_COOKIE)?.value;
   if (!token || !verifyToken(token)) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const login = new URL("/login", request.url);
+    login.searchParams.set(
+      "next",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    );
+    return NextResponse.redirect(login);
   }
 
   return NextResponse.next();

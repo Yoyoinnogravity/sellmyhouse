@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { prisma } from "@/lib/prisma";
 
 export const instant = false;
@@ -50,11 +51,10 @@ export default async function HireSolicitorPage({
       <p>
         You are hiring {solicitor.name} for {property.title}.
       </p>
-      <p>{solicitor.firm}</p>
+      {solicitor.firm !== solicitor.name ? <p>{solicitor.firm}</p> : null}
       {solicitor.city ? <p>{solicitor.city}</p> : null}
       <p>{solicitor.country}</p>
-      <p>{solicitor.phone}</p>
-      <p>{solicitor.email}</p>
+      <SolicitorContacts phone={solicitor.phone} email={solicitor.email} />
       <p>
         <Link href={`/solicitors/${solicitor.id}`}>View profile</Link>
       </p>

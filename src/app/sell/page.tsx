@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { Suspense } from "react";
-import { requireUser } from "@/lib/session";
+import { currentSite } from "@/lib/site";
 import SellForm from "./sell-form";
 
 type SellSearchParams = {
@@ -15,7 +16,26 @@ export default function SellPage({
 }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-6 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Sell your house</h1>
+      <Suspense
+        fallback={
+          <>
+            <h1 className="text-3xl font-semibold tracking-tight">Sell your house</h1>
+            <p className="mt-2">Listing your property for sale is free.</p>
+          </>
+        }
+      >
+        <SellHeading />
+      </Suspense>
+      <p className="mt-4">Choose how you want to sell.</p>
+      <ul className="mt-3 flex flex-col gap-2">
+        <li>List it yourself, on this page.</li>
+        <li>
+          <Link href="/solicitors">Choose a conveyancer</Link>
+        </li>
+        <li>
+          <Link href="/agents">Choose an agent</Link>
+        </li>
+      </ul>
       <Suspense fallback={<p>Loading…</p>}>
         <AuthorizedSellForm searchParams={searchParams} />
       </Suspense>
@@ -28,7 +48,6 @@ async function AuthorizedSellForm({
 }: {
   searchParams: Promise<SellSearchParams>;
 }) {
-  await requireUser();
   const params = await searchParams;
 
   return (
@@ -39,6 +58,16 @@ async function AuthorizedSellForm({
         location: firstValue(params.location),
       }}
     />
+  );
+}
+
+async function SellHeading() {
+  const site = await currentSite();
+  return (
+    <>
+      <h1 className="text-3xl font-semibold tracking-tight">Sell your {site.noun}</h1>
+      <p className="mt-2">Listing your {site.noun} for sale is free.</p>
+    </>
   );
 }
 

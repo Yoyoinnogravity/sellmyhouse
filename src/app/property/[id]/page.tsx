@@ -1,11 +1,18 @@
-import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { ListingPhoto } from "@/components/listing-photo";
+import { PropertyMap } from "@/components/property-map";
 import { listAvailableAgentsInRegion } from "@/lib/agent";
+import { isPlaceholderPhoto, listingImages, placeholderPhoto, priceLabel } from "@/lib/listingImage";
+import { listingKind } from "@/lib/listingKind";
+import { listingVideos } from "@/lib/listingMedia";
+import { publishedContact, telHref, whatsappHref } from "@/lib/developerContact";
+import { pointForListing } from "@/lib/places";
 import { prisma } from "@/lib/prisma";
 import { propertyRegion, regionPath } from "@/lib/region";
-import { listSolicitors } from "@/lib/solicitor";
+import { SolicitorContacts } from "@/components/solicitor-contacts";
+import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AgentProfileCard } from "./agent-profile-card";
 
 export const instant = false;
@@ -62,9 +69,25 @@ export default async function PropertyPage({
       });
 
   const solicitors = await listSolicitors(property.location);
-  const photos = listingImages(property.images, property.image);
+  const conveyancers = solicitors.slice(0, 24);
+  const conveyancerArea = conveyancerPlace(property.location);
+  const storedPhotos = listingImages(property.images, property.image);
+  const photos =
+    storedPhotos.length > 0 ? storedPhotos : [placeholderPhoto(property.title)];
+  const point = pointForListing(property.location, property.metadata);
+  const mapPoint = {
+    id: property.id,
+    title: property.title,
+    location: property.location,
+    priceLabel: priceLabel(property.currency, property.price),
+    lat: point.lat,
+    lng: point.lng,
+  };
   const details = listingDetails(property);
   const extra = readMetadata(property.metadata);
+  const kind = listingKind(property.metadata);
+  const contact = publishedContact(property.metadata);
+  const videos = listingVideos(property.metadata);
   const region = propertyRegion(property.location);
   const assignedAgent = property.agent;
   const agentIsAvailable = assignedAgent?.isAvailable === true;
@@ -76,22 +99,80 @@ export default async function PropertyPage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
-      {photos.map((src, index) => (
-        <Image
-          key={src}
-          src={src}
-          alt=""
+      <p>{kind === "developer" ? "Developer unit" : "Private sale"}</p>
+      <div className="grid gap-4 md:grid-cols-2">
+        <ListingPhoto
+          src={photos[0]}
+          alt={property.title}
           width={1200}
           height={800}
-          loading={index === 0 ? "eager" : "lazy"}
-          className="h-auto w-full"
+          priority
+          className="h-full min-h-64 w-full object-cover"
         />
-      ))}
+        <PropertyMap points={[mapPoint]} variant="place" />
+      </div>
+      {photos.length > 1 ? (
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {photos.slice(1).map((src) => (
+            <li key={src}>
+              <ListingPhoto
+                src={src}
+                alt=""
+                width={800}
+                height={800}
+                className="aspect-square h-auto w-full object-cover"
+              />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {isPlaceholderPhoto(photos[0]) ? null : (
+        <p className="text-sm text-zinc-600">Pictures from the developer website.</p>
+      )}
+      {videos.length > 0 ? (
+        <section className="flex flex-col gap-3">
+          <h2>Video</h2>
+          {videos.map((video) =>
+            video.kind === "file" ? (
+              <video key={video.src} src={video.src} controls className="aspect-video w-full bg-black" />
+            ) : (
+              <iframe
+                key={video.src}
+                src={video.src}
+                title={`${property.title} video`}
+                className="aspect-video w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ),
+          )}
+        </section>
+      ) : null}
       <p>{property.location}</p>
-      <p>
-        {property.currency ? `${property.currency} ` : "$"}
-        {property.price.toLocaleString()}
-      </p>
+      <p>{mapPoint.priceLabel}</p>
+      {contact.developer || contact.phones.length > 0 || contact.website ? (
+        <section className="flex flex-col gap-1">
+          <h2>Developer</h2>
+          {contact.developer ? <p>{contact.developer}</p> : null}
+          {contact.phones.map((phone) => (
+            <p key={phone}>
+              <a href={telHref(phone)}>{phone}</a>
+            </p>
+          ))}
+          {contact.whatsappNumber ? (
+            <p>
+              <a href={whatsappHref(contact.whatsappNumber)}>WhatsApp</a>
+            </p>
+          ) : null}
+          {contact.website ? (
+            <p>
+              <a href={contact.website} target="_blank" rel="noreferrer">
+                {contact.website.replace(/^https?:\/\//, "")}
+              </a>
+            </p>
+          ) : null}
+        </section>
+      ) : null}
       {property.description ? <p>{property.description}</p> : null}
       {details.length > 0 ? (
         <ul>
@@ -102,14 +183,15 @@ export default async function PropertyPage({
       ) : null}
       {extra ? (
         <ul>
-          {Object.entries(extra).map(([key, value]) => (
+          {Object.entries(extra)
+            .filter(([key]) => !["listingKey", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked"].includes(key))
+            .map(([key, value]) => (
             <li key={key}>
-              {key}: {String(value)}
+              {metadataLabel(key)}: {String(value)}
             </li>
           ))}
         </ul>
       ) : null}
-      {property.source ? <p>Source: {property.source}</p> : null}
       {property.contactType === "direct" ? (
         <section>
           <h2>Contact the seller</h2>
@@ -179,28 +261,28 @@ export default async function PropertyPage({
           {solicitor.city ? <p>{solicitor.city}</p> : null}
           <p>{solicitor.country}</p>
           {solicitor.license ? <p>{solicitor.license}</p> : null}
-          <p>{solicitor.phone}</p>
-          <p>{solicitor.email}</p>
-          <p>
-            <a href={`mailto:${solicitor.email}`}>Contact</a>
-          </p>
+          <SolicitorContacts phone={solicitor.phone} email={solicitor.email} />
         </section>
       ) : null}
       <section className="flex flex-col gap-4">
-        <h2>Need legal assistance?</h2>
-        {solicitors.length === 0 ? (
-          <p>No solicitors available.</p>
+        <h2>Choose a conveyancer</h2>
+        <p>
+          Use a local conveyancing solicitor for this purchase or sale. Phone
+          and email are the firm&apos;s published contact details.
+        </p>
+        {conveyancers.length === 0 ? (
+          <p>No local conveyancers listed for this area yet.</p>
         ) : (
           <ul className="flex flex-col gap-6">
-            {solicitors.map((option) => (
+            {conveyancers.map((option) => (
               <li key={option.id}>
                 <p>
                   <Link href={`/solicitors/${option.id}`}>{option.name}</Link>
                 </p>
-                <p>{option.firm}</p>
+                {option.firm !== option.name ? <p>{option.firm}</p> : null}
                 <p>{[option.city, option.country].filter(Boolean).join(", ")}</p>
-                <p>{option.phone}</p>
-                <p>{option.email}</p>
+                {option.license ? <p>{option.license}</p> : null}
+                <SolicitorContacts phone={option.phone} email={option.email} />
                 <p className="flex gap-4">
                   <Link
                     href={`/property/${property.id}/hire?solicitorId=${option.id}`}
@@ -217,30 +299,38 @@ export default async function PropertyPage({
             ))}
           </ul>
         )}
+        <p>
+          <Link
+            href={
+              conveyancerArea
+                ? `/solicitors?place=${encodeURIComponent(conveyancerArea)}`
+                : "/solicitors"
+            }
+          >
+            View all conveyancers
+            {conveyancerArea ? ` in ${conveyancerArea}` : ""}
+          </Link>
+        </p>
       </section>
     </main>
   );
 }
 
-function agentPhoto(name: string) {
-  return `https://placehold.co/320x320/0f172a/f8fafc/png?text=${encodeURIComponent(name)}`;
+function metadataLabel(key: string) {
+  const labels: Record<string, string> = {
+    projectCode: "Project code",
+    developer: "Developer",
+    status: "Project status",
+    unitType: "Unit type",
+    units: "Units of this type",
+    areaUnit: "Area unit",
+    yearBuilt: "Year built",
+  }
+  return labels[key] ?? key
 }
 
-function listingImages(images: string | null, image: string | null) {
-  if (images) {
-    try {
-      const parsed = JSON.parse(images) as unknown;
-      if (
-        Array.isArray(parsed) &&
-        parsed.every((item) => typeof item === "string" && item.length > 0)
-      ) {
-        return parsed;
-      }
-    } catch {
-      return image ? [image] : [];
-    }
-  }
-  return image ? [image] : [];
+function agentPhoto(name: string) {
+  return `https://placehold.co/320x320/0f172a/f8fafc/png?text=${encodeURIComponent(name)}`;
 }
 
 function listingDetails(property: {

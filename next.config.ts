@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   serverExternalPackages: ["better-sqlite3"],
+  outputFileTracingIncludes: {
+    "/*": ["./prisma/dev.db"],
+    "/**/*": ["./prisma/dev.db"],
+  },
   images: {
     remotePatterns: [
       {

@@ -321,9 +321,11 @@ export async function getAgentFromCookie() {
   return verifyAgentToken(token);
 }
 
-export async function requireAgent() {
+export async function requireAgent(returnPath = "/agents/dashboard") {
   const agent = await getAgentFromCookie();
-  if (!agent) redirect("/agents/login");
+  if (!agent) {
+    redirect(`/agents/login?next=${encodeURIComponent(returnPath)}`);
+  }
   return agent;
 }
 

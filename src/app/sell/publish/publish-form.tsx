@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
+import { SolicitorContacts } from "@/components/solicitor-contacts";
 
 type SolicitorOption = {
   id: number;
@@ -57,7 +58,7 @@ export default function PublishForm({
     setError(null);
 
     if (solicitorChoice === "now" && !selectedSolicitor) {
-      setError("Choose a solicitor.");
+      setError("Choose a conveyancer.");
       return;
     }
 
@@ -119,7 +120,7 @@ export default function PublishForm({
         {draft.title} in {draft.location}
       </p>
       <fieldset className="flex flex-col gap-2">
-        <legend>Do you want legal support?</legend>
+        <legend>How do you want to handle the sale?</legend>
         <label>
           <input
             type="radio"
@@ -131,7 +132,7 @@ export default function PublishForm({
               setSelectedSolicitor(null);
             }}
           />{" "}
-          No solicitor yet
+          List it without a conveyancer
         </label>
         <label>
           <input
@@ -144,7 +145,7 @@ export default function PublishForm({
               setSelectedSolicitor(null);
             }}
           />{" "}
-          Choose solicitor later
+          Choose a conveyancer later
         </label>
         <label>
           <input
@@ -154,15 +155,15 @@ export default function PublishForm({
             checked={solicitorChoice === "now"}
             onChange={() => setSolicitorChoice("now")}
           />{" "}
-          Assign solicitor now
+          Choose a conveyancer now
         </label>
       </fieldset>
 
       {solicitorChoice === "now" ? (
         <section className="flex flex-col gap-4">
-          <h2>Solicitor directory</h2>
+          <h2>Local conveyancers</h2>
           {solicitors.length === 0 ? (
-            <p>No solicitors available.</p>
+            <p>No local conveyancers listed for this area yet.</p>
           ) : (
             <ul className="flex flex-col gap-4">
               {solicitors.map((solicitor) => (
@@ -179,18 +180,17 @@ export default function PublishForm({
                       {solicitor.name}
                     </Link>
                   </label>
-                  <p>{solicitor.firm}</p>
+                  {solicitor.firm !== solicitor.name ? <p>{solicitor.firm}</p> : null}
                   <p>
                     {[solicitor.city, solicitor.country].filter(Boolean).join(", ")}
                   </p>
-                  <p>{solicitor.phone}</p>
-                  <p>{solicitor.email}</p>
+                  <SolicitorContacts phone={solicitor.phone} email={solicitor.email} />
                 </li>
               ))}
             </ul>
           )}
           <p>
-            <Link href="/solicitors">Browse the solicitor directory</Link>
+            <Link href="/solicitors">Browse all conveyancers</Link>
           </p>
         </section>
       ) : null}

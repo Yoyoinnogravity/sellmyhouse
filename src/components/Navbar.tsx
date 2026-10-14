@@ -1,12 +1,20 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { currentSite } from "@/lib/site";
 
 export default function Navbar() {
   return (
     <header className="border-b border-black/10 dark:border-white/15">
       <nav className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-4 text-sm">
-        <Link href="/" className="shrink-0 font-semibold tracking-tight whitespace-nowrap">
-          Sell My House
-        </Link>
+        <Suspense
+          fallback={
+            <Link href="/" className="shrink-0 font-semibold tracking-tight whitespace-nowrap">
+              Sell My House
+            </Link>
+          }
+        >
+          <SiteBrand />
+        </Suspense>
         <Link href="/properties" className="whitespace-nowrap">
           Properties
         </Link>
@@ -17,7 +25,7 @@ export default function Navbar() {
           Agents
         </Link>
         <Link href="/solicitors" className="whitespace-nowrap">
-          Solicitors
+          Conveyancers
         </Link>
         <Link href="/agents/upload" className="whitespace-nowrap">
           Upload
@@ -35,5 +43,14 @@ export default function Navbar() {
         </div>
       </nav>
     </header>
+  );
+}
+
+async function SiteBrand() {
+  const site = await currentSite();
+  return (
+    <Link href="/" className="shrink-0 font-semibold tracking-tight whitespace-nowrap">
+      {site.name}
+    </Link>
   );
 }

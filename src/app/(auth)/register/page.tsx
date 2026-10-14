@@ -1,10 +1,24 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
+import { safeNext } from "@/lib/safeNext";
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={<p>Loading…</p>}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
+  const nextPath = safeNext(useSearchParams().get("next"), "/dashboard");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const loginHref = `/login?next=${encodeURIComponent(nextPath)}`;
+  const listing = nextPath.startsWith("/sell");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,7 +45,7 @@ export default function RegisterPage() {
         return;
       }
 
-      window.location.assign("/dashboard");
+      window.location.assign(nextPath);
     } catch {
       setError("Could not create an account.");
     } finally {
@@ -41,7 +55,14 @@ export default function RegisterPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-6 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Register</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">
+        {listing ? "Create an account to publish" : "Create an account"}
+      </h1>
+      <p className="mt-3">
+        {listing
+          ? "After this, you’ll go back to your listing."
+          : "Use this seller account to list a house."}
+      </p>
       <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-4">
         <label htmlFor="email">
           Email
@@ -50,6 +71,7 @@ export default function RegisterPage() {
             name="email"
             type="email"
             autoComplete="email"
+            autoFocus
             required
             className="mt-1 block w-full border px-3 py-2"
           />
@@ -65,12 +87,20 @@ export default function RegisterPage() {
             required
             className="mt-1 block w-full border px-3 py-2"
           />
+          <span className="mt-1 block text-sm">At least 8 characters.</span>
         </label>
         {error ? <p role="alert">{error}</p> : null}
-        <button type="submit" disabled={pending}>
+        <button
+          type="submit"
+          disabled={pending}
+          className="border px-3 py-3 font-semibold disabled:opacity-60"
+        >
           {pending ? "Creating account…" : "Create account"}
         </button>
       </form>
+      <p className="mt-6">
+        Already have an account? <Link href={loginHref}>Sign in</Link>
+      </p>
     </main>
   );
 }

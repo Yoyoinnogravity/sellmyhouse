@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
+import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { getSolicitorById } from "@/lib/solicitor";
 
 export const instant = false;
@@ -25,15 +26,14 @@ export default async function SolicitorProfilePage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">{solicitor.name}</h1>
-      <p>{solicitor.firm}</p>
+      {solicitor.firm !== solicitor.name ? <p>{solicitor.firm}</p> : null}
+      {solicitor.license === "Conveyancing" ? <p>Conveyancing solicitor</p> : null}
       {solicitor.city ? <p>{solicitor.city}</p> : null}
       <p>{solicitor.country}</p>
-      <p>{solicitor.phone}</p>
-      <p>{solicitor.email}</p>
-      {solicitor.license ? <p>{solicitor.license}</p> : null}
-      <p>
-        <a href={`mailto:${solicitor.email}`}>Contact</a>
-      </p>
+      {solicitor.license && solicitor.license !== "Conveyancing" ? (
+        <p>{solicitor.license}</p>
+      ) : null}
+      <SolicitorContacts phone={solicitor.phone} email={solicitor.email} />
       <section className="flex flex-col gap-4">
         <h2>Listings</h2>
         {solicitor.properties.length === 0 ? (

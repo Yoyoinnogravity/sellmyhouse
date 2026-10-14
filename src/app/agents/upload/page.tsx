@@ -19,7 +19,7 @@ async function AuthorizedUpload() {
   const user = await getUserFromCookie();
   const agent = await getAgentFromCookie();
   if (!user && !agent) {
-    redirect("/login");
+    redirect("/login?next=/agents/upload");
   }
   return <UploadForm />;
 }

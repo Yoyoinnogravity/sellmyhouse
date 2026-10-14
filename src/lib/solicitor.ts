@@ -101,16 +101,59 @@ export function validateSolicitorRegistration(
   };
 }
 
+const placeReplacements: [string, string][] = [
+  ["wilayah persekutuan kuala lumpur", "kuala lumpur"],
+  ["wilayah persekutuan putrajaya", "putrajaya"],
+  ["wp kuala lumpur", "kuala lumpur"],
+  ["wp putrajaya", "putrajaya"],
+  ["pulau pinang", "penang"],
+  ["seberang perai", "seberang prai"],
+  ["johore", "johor"],
+  ["georgetown", "george town"],
+  ["malacca", "melaka"],
+];
+
+const stateLabels: Record<string, string> = {
+  "kuala lumpur": "Kuala Lumpur",
+  "negeri sembilan": "Negeri Sembilan",
+  penang: "Penang",
+  johor: "Johor",
+  selangor: "Selangor",
+  perak: "Perak",
+  melaka: "Melaka",
+  kedah: "Kedah",
+  kelantan: "Kelantan",
+  pahang: "Pahang",
+  perlis: "Perlis",
+  terengganu: "Terengganu",
+  putrajaya: "Putrajaya",
+};
+
+const states = Object.keys(stateLabels);
+
+export function conveyancerPlace(location: string) {
+  const place = normalizePlace(location);
+  const state = states.find((name) => place.includes(name));
+  return state ? stateLabels[state] : "";
+}
+
 export async function listSolicitors(location = ""): Promise<PublicSolicitor[]> {
   const solicitors = await prisma.solicitor.findMany({
-    orderBy: { name: "asc" },
+    orderBy: [{ country: "asc" }, { city: "asc" }, { name: "asc" }],
     select: publicSolicitorSelect,
   });
-  const needle = location.trim().toLowerCase();
-  const localSolicitors = needle
-    ? solicitors.filter((solicitor) => matchesLocation(solicitor, needle))
-    : solicitors;
-  return localSolicitors.length > 0 ? localSolicitors : solicitors;
+  const needle = location.trim();
+  if (!needle) return solicitors;
+
+  const ranked = solicitors
+    .map((solicitor) => ({ solicitor, score: localityScore(solicitor, needle) }))
+    .filter((entry) => entry.score > 0);
+  if (ranked.length === 0) return [];
+
+  const best = Math.max(...ranked.map((entry) => entry.score));
+  return ranked
+    .filter((entry) => entry.score === best)
+    .map((entry) => entry.solicitor);
 }
 
 export async function getSolicitorById(
@@ -188,17 +231,43 @@ function lookupSolicitorByEmail(email: string) {
   });
 }
 
-function matchesLocation(
+function localityScore(
   solicitor: { country: string; city: string | null },
-  needle: string,
+  location: string,
 ) {
-  const country = solicitor.country.toLowerCase();
-  const city = solicitor.city?.toLowerCase() ?? "";
-  return (
-    country.includes(needle) ||
-    needle.includes(country) ||
-    (city !== "" && (city.includes(needle) || needle.includes(city)))
+  const place = normalizePlace(location);
+  const city = normalizePlace(solicitor.city ?? "");
+  const country = normalizePlace(solicitor.country);
+  const town = city.split(",")[0]?.trim() ?? "";
+  if (matchesTown(place, town)) return 3;
+
+  const stateMatch = states.some(
+    (state) => place.includes(state) && (city.includes(state) || country === state),
   );
+  if (stateMatch) return 2;
+
+  if (country.length > 2 && (place.includes(country) || country.includes(place))) {
+    return 1;
+  }
+  return 0;
+}
+
+function matchesTown(place: string, town: string) {
+  if (town.length < 4 || states.includes(town)) return false;
+  const segments = place.split(",").map((segment) => segment.trim());
+  if (segments.some((segment) => segment === town || segment.startsWith(`${town} `))) {
+    return true;
+  }
+  const words = town.split(" ").filter(Boolean);
+  return words.length >= 2 && segments.some((segment) => segment.includes(town));
+}
+
+function normalizePlace(value: string) {
+  let place = value.toLowerCase();
+  for (const [from, to] of placeReplacements) {
+    place = place.replaceAll(from, to);
+  }
+  return place.replace(/[^a-z\s,]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function readString(value: unknown) {

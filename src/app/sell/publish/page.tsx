@@ -19,6 +19,7 @@ export default function SellPublishPage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Publish your listing</h1>
+      <p className="mt-2">Listing your property for sale is free.</p>
       <Suspense fallback={<p>Loading…</p>}>
         <AuthorizedPublish searchParams={searchParams} />
       </Suspense>
@@ -31,7 +32,6 @@ async function AuthorizedPublish({
 }: {
   searchParams: Promise<PublishSearchParams>;
 }) {
-  await requireUser();
   const params = await searchParams;
   const title = firstValue(params.title).trim();
   const price = firstValue(params.price).trim();
@@ -42,6 +42,9 @@ async function AuthorizedPublish({
     redirect("/sell");
   }
 
+  const returnQuery = new URLSearchParams({ title, price, location });
+  await requireUser(`/sell/publish?${returnQuery.toString()}`);
+
   const [solicitors, agents] = await Promise.all([
     listSolicitors(location),
     listAgents(location),
@@ -50,7 +53,7 @@ async function AuthorizedPublish({
   return (
     <PublishForm
       draft={{ title, price, location }}
-      solicitors={solicitors.map((solicitor) => ({
+      solicitors={solicitors.slice(0, 24).map((solicitor) => ({
         id: solicitor.id,
         name: solicitor.name,
         firm: solicitor.firm,
