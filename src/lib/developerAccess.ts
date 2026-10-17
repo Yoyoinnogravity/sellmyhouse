@@ -1,7 +1,8 @@
+import { REQUEST_INBOX_FALLBACK } from "@/lib/notify";
 import { prisma } from "@/lib/prisma";
 
 export function adminEmail(): string {
-  return (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase();
+  return (process.env.ADMIN_EMAIL ?? "").trim().toLowerCase() || REQUEST_INBOX_FALLBACK;
 }
 
 export function isAdminEmail(email: string | null | undefined): boolean {

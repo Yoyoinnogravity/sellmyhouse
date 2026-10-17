@@ -14,6 +14,9 @@ export type ListingSearch = {
   minPrice: number | null
   maxPrice: number | null
   type: ListingTypeId | null
+  // "all": search every brand's stock (houses, condos, land, bungalows) from
+  // whichever domain the visitor is on. "site": only this brand's type.
+  scope: "site" | "all"
 }
 
 const PRICE_MAX = 2_000_000_000
@@ -109,8 +112,8 @@ export function listingTypeWhere(id: ListingTypeId): Prisma.PropertyWhereInput {
   return listingTypeChoice(id)?.where ?? {}
 }
 
-export function emptyListingSearch(): ListingSearch {
-  return { place: "", minPrice: null, maxPrice: null, type: null }
+export function emptyListingSearch(scope: ListingSearch["scope"] = "site"): ListingSearch {
+  return { place: "", minPrice: null, maxPrice: null, type: null, scope }
 }
 
 export function parseListingSearch(params: {
@@ -118,7 +121,9 @@ export function parseListingSearch(params: {
   min?: string | string[]
   max?: string | string[]
   type?: string | string[]
+  all?: string | string[]
 }): ListingSearch {
+  const scope = firstValue(params.all) === "1" ? "all" : "site"
   const place = firstValue(params.place).trim().slice(0, 80)
   let minPrice = priceValue(params.min)
   let maxPrice = priceValue(params.max)
@@ -129,11 +134,18 @@ export function parseListingSearch(params: {
   }
   const typeValue = firstValue(params.type)
   const type = listingTypes.some((type) => type.id === typeValue) ? (typeValue as ListingTypeId) : null
-  return { place, minPrice, maxPrice, type }
+  return { place, minPrice, maxPrice, type, scope }
 }
 
 export function searchIsActive(search: ListingSearch) {
   return search.place !== "" || search.minPrice != null || search.maxPrice != null || search.type != null
+}
+
+// Which stock a search covers: a chosen type wins, then "all sites", then this brand.
+export function searchStockWhere(search: ListingSearch | undefined, siteWhere: Prisma.PropertyWhereInput): Prisma.PropertyWhereInput | null {
+  if (search?.type) return listingTypeWhere(search.type)
+  if (search?.scope === "all") return null
+  return siteWhere
 }
 
 function firstValue(value: string | string[] | undefined) {

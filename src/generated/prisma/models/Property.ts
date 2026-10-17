@@ -419,6 +419,7 @@ export type PropertyWhereInput = {
   agent?: Prisma.XOR<Prisma.AgentNullableScalarRelationFilter, Prisma.AgentWhereInput> | null
   representationRequests?: Prisma.RepresentationRequestListRelationFilter
   claimedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  lead?: Prisma.XOR<Prisma.LeadNullableScalarRelationFilter, Prisma.LeadWhereInput> | null
 }
 
 export type PropertyOrderByWithRelationInput = {
@@ -451,6 +452,7 @@ export type PropertyOrderByWithRelationInput = {
   agent?: Prisma.AgentOrderByWithRelationInput
   representationRequests?: Prisma.RepresentationRequestOrderByRelationAggregateInput
   claimedBy?: Prisma.UserOrderByWithRelationInput
+  lead?: Prisma.LeadOrderByWithRelationInput
 }
 
 export type PropertyWhereUniqueInput = Prisma.AtLeast<{
@@ -486,6 +488,7 @@ export type PropertyWhereUniqueInput = Prisma.AtLeast<{
   agent?: Prisma.XOR<Prisma.AgentNullableScalarRelationFilter, Prisma.AgentWhereInput> | null
   representationRequests?: Prisma.RepresentationRequestListRelationFilter
   claimedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  lead?: Prisma.XOR<Prisma.LeadNullableScalarRelationFilter, Prisma.LeadWhereInput> | null
 }, "id">
 
 export type PropertyOrderByWithAggregationInput = {
@@ -581,6 +584,7 @@ export type PropertyCreateInput = {
   agent?: Prisma.AgentCreateNestedOneWithoutPropertiesInput
   representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutPropertyInput
   claimedBy?: Prisma.UserCreateNestedOneWithoutClaimedPropertiesInput
+  lead?: Prisma.LeadCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateInput = {
@@ -611,6 +615,7 @@ export type PropertyUncheckedCreateInput = {
   developerVerified?: boolean
   createdAt?: Date | string
   representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutPropertyInput
+  lead?: Prisma.LeadUncheckedCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyUpdateInput = {
@@ -640,6 +645,7 @@ export type PropertyUpdateInput = {
   agent?: Prisma.AgentUpdateOneWithoutPropertiesNestedInput
   representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutPropertyNestedInput
   claimedBy?: Prisma.UserUpdateOneWithoutClaimedPropertiesNestedInput
+  lead?: Prisma.LeadUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateInput = {
@@ -670,6 +676,7 @@ export type PropertyUncheckedUpdateInput = {
   developerVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutPropertyNestedInput
+  lead?: Prisma.LeadUncheckedUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyInput = {
@@ -970,6 +977,20 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
+export type PropertyCreateNestedOneWithoutLeadInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutLeadInput, Prisma.PropertyUncheckedCreateWithoutLeadInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutLeadInput
+  connect?: Prisma.PropertyWhereUniqueInput
+}
+
+export type PropertyUpdateOneRequiredWithoutLeadNestedInput = {
+  create?: Prisma.XOR<Prisma.PropertyCreateWithoutLeadInput, Prisma.PropertyUncheckedCreateWithoutLeadInput>
+  connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutLeadInput
+  upsert?: Prisma.PropertyUpsertWithoutLeadInput
+  connect?: Prisma.PropertyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PropertyUpdateToOneWithWhereWithoutLeadInput, Prisma.PropertyUpdateWithoutLeadInput>, Prisma.PropertyUncheckedUpdateWithoutLeadInput>
+}
+
 export type PropertyCreateNestedOneWithoutRepresentationRequestsInput = {
   create?: Prisma.XOR<Prisma.PropertyCreateWithoutRepresentationRequestsInput, Prisma.PropertyUncheckedCreateWithoutRepresentationRequestsInput>
   connectOrCreate?: Prisma.PropertyCreateOrConnectWithoutRepresentationRequestsInput
@@ -1010,6 +1031,7 @@ export type PropertyCreateWithoutClaimedByInput = {
   createdAt?: Date | string
   agent?: Prisma.AgentCreateNestedOneWithoutPropertiesInput
   representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutPropertyInput
+  lead?: Prisma.LeadCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutClaimedByInput = {
@@ -1039,6 +1061,7 @@ export type PropertyUncheckedCreateWithoutClaimedByInput = {
   developerVerified?: boolean
   createdAt?: Date | string
   representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutPropertyInput
+  lead?: Prisma.LeadUncheckedCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutClaimedByInput = {
@@ -1125,6 +1148,7 @@ export type PropertyCreateWithoutAgentInput = {
   createdAt?: Date | string
   representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutPropertyInput
   claimedBy?: Prisma.UserCreateNestedOneWithoutClaimedPropertiesInput
+  lead?: Prisma.LeadCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutAgentInput = {
@@ -1154,6 +1178,7 @@ export type PropertyUncheckedCreateWithoutAgentInput = {
   developerVerified?: boolean
   createdAt?: Date | string
   representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutPropertyInput
+  lead?: Prisma.LeadUncheckedCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutAgentInput = {
@@ -1182,6 +1207,140 @@ export type PropertyUpdateManyWithWhereWithoutAgentInput = {
   data: Prisma.XOR<Prisma.PropertyUpdateManyMutationInput, Prisma.PropertyUncheckedUpdateManyWithoutAgentInput>
 }
 
+export type PropertyCreateWithoutLeadInput = {
+  title: string
+  price: number
+  location: string
+  contactType: string
+  contactName?: string | null
+  contactPhone?: string | null
+  contactEmail?: string | null
+  source?: string | null
+  image?: string | null
+  currency?: string | null
+  propertyType?: string | null
+  bedrooms?: number | null
+  bathrooms?: number | null
+  builtUp?: number | null
+  landSize?: number | null
+  tenure?: string | null
+  images?: string | null
+  description?: string | null
+  metadata?: string | null
+  solicitorId?: number | null
+  claimedAt?: Date | string | null
+  developerVerified?: boolean
+  createdAt?: Date | string
+  agent?: Prisma.AgentCreateNestedOneWithoutPropertiesInput
+  representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutPropertyInput
+  claimedBy?: Prisma.UserCreateNestedOneWithoutClaimedPropertiesInput
+}
+
+export type PropertyUncheckedCreateWithoutLeadInput = {
+  id?: number
+  title: string
+  price: number
+  location: string
+  contactType: string
+  contactName?: string | null
+  contactPhone?: string | null
+  contactEmail?: string | null
+  source?: string | null
+  image?: string | null
+  currency?: string | null
+  propertyType?: string | null
+  bedrooms?: number | null
+  bathrooms?: number | null
+  builtUp?: number | null
+  landSize?: number | null
+  tenure?: string | null
+  images?: string | null
+  description?: string | null
+  metadata?: string | null
+  agentId?: number | null
+  solicitorId?: number | null
+  claimedById?: number | null
+  claimedAt?: Date | string | null
+  developerVerified?: boolean
+  createdAt?: Date | string
+  representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutPropertyInput
+}
+
+export type PropertyCreateOrConnectWithoutLeadInput = {
+  where: Prisma.PropertyWhereUniqueInput
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutLeadInput, Prisma.PropertyUncheckedCreateWithoutLeadInput>
+}
+
+export type PropertyUpsertWithoutLeadInput = {
+  update: Prisma.XOR<Prisma.PropertyUpdateWithoutLeadInput, Prisma.PropertyUncheckedUpdateWithoutLeadInput>
+  create: Prisma.XOR<Prisma.PropertyCreateWithoutLeadInput, Prisma.PropertyUncheckedCreateWithoutLeadInput>
+  where?: Prisma.PropertyWhereInput
+}
+
+export type PropertyUpdateToOneWithWhereWithoutLeadInput = {
+  where?: Prisma.PropertyWhereInput
+  data: Prisma.XOR<Prisma.PropertyUpdateWithoutLeadInput, Prisma.PropertyUncheckedUpdateWithoutLeadInput>
+}
+
+export type PropertyUpdateWithoutLeadInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.IntFieldUpdateOperationsInput | number
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  contactType?: Prisma.StringFieldUpdateOperationsInput | string
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bedrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  builtUp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  landSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tenure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  images?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  solicitorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  developerVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  agent?: Prisma.AgentUpdateOneWithoutPropertiesNestedInput
+  representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutPropertyNestedInput
+  claimedBy?: Prisma.UserUpdateOneWithoutClaimedPropertiesNestedInput
+}
+
+export type PropertyUncheckedUpdateWithoutLeadInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.IntFieldUpdateOperationsInput | number
+  location?: Prisma.StringFieldUpdateOperationsInput | string
+  contactType?: Prisma.StringFieldUpdateOperationsInput | string
+  contactName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  propertyType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bedrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bathrooms?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  builtUp?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  landSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tenure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  images?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  agentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  solicitorId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  claimedById?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  developerVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutPropertyNestedInput
+}
+
 export type PropertyCreateWithoutRepresentationRequestsInput = {
   title: string
   price: number
@@ -1208,6 +1367,7 @@ export type PropertyCreateWithoutRepresentationRequestsInput = {
   createdAt?: Date | string
   agent?: Prisma.AgentCreateNestedOneWithoutPropertiesInput
   claimedBy?: Prisma.UserCreateNestedOneWithoutClaimedPropertiesInput
+  lead?: Prisma.LeadCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyUncheckedCreateWithoutRepresentationRequestsInput = {
@@ -1237,6 +1397,7 @@ export type PropertyUncheckedCreateWithoutRepresentationRequestsInput = {
   claimedAt?: Date | string | null
   developerVerified?: boolean
   createdAt?: Date | string
+  lead?: Prisma.LeadUncheckedCreateNestedOneWithoutPropertyInput
 }
 
 export type PropertyCreateOrConnectWithoutRepresentationRequestsInput = {
@@ -1281,6 +1442,7 @@ export type PropertyUpdateWithoutRepresentationRequestsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   agent?: Prisma.AgentUpdateOneWithoutPropertiesNestedInput
   claimedBy?: Prisma.UserUpdateOneWithoutClaimedPropertiesNestedInput
+  lead?: Prisma.LeadUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutRepresentationRequestsInput = {
@@ -1310,6 +1472,7 @@ export type PropertyUncheckedUpdateWithoutRepresentationRequestsInput = {
   claimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   developerVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lead?: Prisma.LeadUncheckedUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyCreateManyClaimedByInput = {
@@ -1366,6 +1529,7 @@ export type PropertyUpdateWithoutClaimedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   agent?: Prisma.AgentUpdateOneWithoutPropertiesNestedInput
   representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutPropertyNestedInput
+  lead?: Prisma.LeadUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutClaimedByInput = {
@@ -1395,6 +1559,7 @@ export type PropertyUncheckedUpdateWithoutClaimedByInput = {
   developerVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutPropertyNestedInput
+  lead?: Prisma.LeadUncheckedUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateManyWithoutClaimedByInput = {
@@ -1479,6 +1644,7 @@ export type PropertyUpdateWithoutAgentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutPropertyNestedInput
   claimedBy?: Prisma.UserUpdateOneWithoutClaimedPropertiesNestedInput
+  lead?: Prisma.LeadUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateWithoutAgentInput = {
@@ -1508,6 +1674,7 @@ export type PropertyUncheckedUpdateWithoutAgentInput = {
   developerVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutPropertyNestedInput
+  lead?: Prisma.LeadUncheckedUpdateOneWithoutPropertyNestedInput
 }
 
 export type PropertyUncheckedUpdateManyWithoutAgentInput = {
@@ -1599,6 +1766,7 @@ export type PropertySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   agent?: boolean | Prisma.Property$agentArgs<ExtArgs>
   representationRequests?: boolean | Prisma.Property$representationRequestsArgs<ExtArgs>
   claimedBy?: boolean | Prisma.Property$claimedByArgs<ExtArgs>
+  lead?: boolean | Prisma.Property$leadArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["property"]>
 
@@ -1698,6 +1866,7 @@ export type PropertyInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   agent?: boolean | Prisma.Property$agentArgs<ExtArgs>
   representationRequests?: boolean | Prisma.Property$representationRequestsArgs<ExtArgs>
   claimedBy?: boolean | Prisma.Property$claimedByArgs<ExtArgs>
+  lead?: boolean | Prisma.Property$leadArgs<ExtArgs>
   _count?: boolean | Prisma.PropertyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PropertyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1715,6 +1884,7 @@ export type $PropertyPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     agent: Prisma.$AgentPayload<ExtArgs> | null
     representationRequests: Prisma.$RepresentationRequestPayload<ExtArgs>[]
     claimedBy: Prisma.$UserPayload<ExtArgs> | null
+    lead: Prisma.$LeadPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -2140,6 +2310,7 @@ export interface Prisma__PropertyClient<T, Null = never, ExtArgs extends runtime
   agent<T extends Prisma.Property$agentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$agentArgs<ExtArgs>>): Prisma.Prisma__AgentClient<runtime.Types.Result.GetResult<Prisma.$AgentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   representationRequests<T extends Prisma.Property$representationRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$representationRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RepresentationRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   claimedBy<T extends Prisma.Property$claimedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$claimedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  lead<T extends Prisma.Property$leadArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Property$leadArgs<ExtArgs>>): Prisma.Prisma__LeadClient<runtime.Types.Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2655,6 +2826,25 @@ export type Property$claimedByArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * Property.lead
+ */
+export type Property$leadArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Lead
+   */
+  select?: Prisma.LeadSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Lead
+   */
+  omit?: Prisma.LeadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadInclude<ExtArgs> | null
+  where?: Prisma.LeadWhereInput
 }
 
 /**

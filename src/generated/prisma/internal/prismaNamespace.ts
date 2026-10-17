@@ -402,6 +402,8 @@ export const ModelName = {
   Agency: 'Agency',
   Solicitor: 'Solicitor',
   Property: 'Property',
+  Lead: 'Lead',
+  LeadUnlock: 'LeadUnlock',
   DeveloperClaim: 'DeveloperClaim',
   RepresentationRequest: 'RepresentationRequest'
 } as const
@@ -419,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "agent" | "agency" | "solicitor" | "property" | "developerClaim" | "representationRequest"
+    modelProps: "user" | "agent" | "agency" | "solicitor" | "property" | "lead" | "leadUnlock" | "developerClaim" | "representationRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -793,6 +795,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Lead: {
+      payload: Prisma.$LeadPayload<ExtArgs>
+      fields: Prisma.LeadFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LeadFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LeadFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>
+        }
+        findFirst: {
+          args: Prisma.LeadFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LeadFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>
+        }
+        findMany: {
+          args: Prisma.LeadFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>[]
+        }
+        create: {
+          args: Prisma.LeadCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>
+        }
+        createMany: {
+          args: Prisma.LeadCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LeadCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>[]
+        }
+        delete: {
+          args: Prisma.LeadDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>
+        }
+        update: {
+          args: Prisma.LeadUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>
+        }
+        deleteMany: {
+          args: Prisma.LeadDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LeadUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LeadUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>[]
+        }
+        upsert: {
+          args: Prisma.LeadUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadPayload>
+        }
+        aggregate: {
+          args: Prisma.LeadAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLead>
+        }
+        groupBy: {
+          args: Prisma.LeadGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LeadGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LeadCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LeadCountAggregateOutputType> | number
+        }
+      }
+    }
+    LeadUnlock: {
+      payload: Prisma.$LeadUnlockPayload<ExtArgs>
+      fields: Prisma.LeadUnlockFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LeadUnlockFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LeadUnlockFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>
+        }
+        findFirst: {
+          args: Prisma.LeadUnlockFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LeadUnlockFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>
+        }
+        findMany: {
+          args: Prisma.LeadUnlockFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>[]
+        }
+        create: {
+          args: Prisma.LeadUnlockCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>
+        }
+        createMany: {
+          args: Prisma.LeadUnlockCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LeadUnlockCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>[]
+        }
+        delete: {
+          args: Prisma.LeadUnlockDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>
+        }
+        update: {
+          args: Prisma.LeadUnlockUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>
+        }
+        deleteMany: {
+          args: Prisma.LeadUnlockDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LeadUnlockUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LeadUnlockUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>[]
+        }
+        upsert: {
+          args: Prisma.LeadUnlockUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LeadUnlockPayload>
+        }
+        aggregate: {
+          args: Prisma.LeadUnlockAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLeadUnlock>
+        }
+        groupBy: {
+          args: Prisma.LeadUnlockGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LeadUnlockGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LeadUnlockCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LeadUnlockCountAggregateOutputType> | number
+        }
+      }
+    }
     DeveloperClaim: {
       payload: Prisma.$DeveloperClaimPayload<ExtArgs>
       fields: Prisma.DeveloperClaimFieldRefs
@@ -1063,6 +1213,35 @@ export const PropertyScalarFieldEnum = {
 } as const
 
 export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
+
+
+export const LeadScalarFieldEnum = {
+  id: 'id',
+  propertyId: 'propertyId',
+  sellerName: 'sellerName',
+  sellerPhone: 'sellerPhone',
+  sellerEmail: 'sellerEmail',
+  city: 'city',
+  country: 'country',
+  site: 'site',
+  status: 'status',
+  createdAt: 'createdAt'
+} as const
+
+export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
+export const LeadUnlockScalarFieldEnum = {
+  id: 'id',
+  leadId: 'leadId',
+  agentId: 'agentId',
+  priceMyr: 'priceMyr',
+  status: 'status',
+  createdAt: 'createdAt',
+  paidAt: 'paidAt'
+} as const
+
+export type LeadUnlockScalarFieldEnum = (typeof LeadUnlockScalarFieldEnum)[keyof typeof LeadUnlockScalarFieldEnum]
 
 
 export const DeveloperClaimScalarFieldEnum = {
@@ -1338,6 +1517,8 @@ export type GlobalOmitConfig = {
   agency?: Prisma.AgencyOmit
   solicitor?: Prisma.SolicitorOmit
   property?: Prisma.PropertyOmit
+  lead?: Prisma.LeadOmit
+  leadUnlock?: Prisma.LeadUnlockOmit
   developerClaim?: Prisma.DeveloperClaimOmit
   representationRequest?: Prisma.RepresentationRequestOmit
 }

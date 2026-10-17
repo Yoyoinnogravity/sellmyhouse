@@ -5,7 +5,7 @@ import { listingKind, type SaleKind } from "@/lib/listingKind"
 import { hasRealPhotos, listingPhoto, priceLabel } from "@/lib/listingImage"
 import { picturePoint, pointForListing, type MapProperty } from "@/lib/places"
 import { prisma } from "@/lib/prisma"
-import { listingTypeWhere, type ListingSearch } from "@/lib/listingSearch"
+import { searchStockWhere, type ListingSearch } from "@/lib/listingSearch"
 import { currentSite, siteListingWhere } from "@/lib/site"
 
 export type ListingPoint = MapProperty & {
@@ -71,13 +71,10 @@ function saleWhere(sale: SaleKind): Prisma.PropertyWhereInput {
 async function listingWhere(sale?: SaleKind, search?: ListingSearch) {
   const site = await currentSite()
   const filters: Prisma.PropertyWhereInput[] = []
-  if (search?.type) {
-    filters.push(listingTypeWhere(search.type))
-  } else if (sale !== "developer") {
-    filters.push(siteListingWhere(site))
-  }
+  const stock = searchStockWhere(search, siteListingWhere(site))
+  if (stock && (search?.type || sale !== "developer")) filters.push(stock)
   if (sale) filters.push(saleWhere(sale))
-  if (search?.place) filters.push({ location: { contains: search.place } })
+  if (search?.place) filters.push({ location: { contains: search.place, mode: "insensitive" } })
   if (search && (search.minPrice != null || search.maxPrice != null)) {
     filters.push({
       price: {
@@ -93,17 +90,40 @@ export async function listPlaceOptions(sale: SaleKind, search: ListingSearch): P
   await connection()
   const site = await currentSite()
   const filters: Prisma.PropertyWhereInput[] = []
-  if (search.type) {
-    filters.push(listingTypeWhere(search.type))
-  } else if (sale !== "developer") {
-    filters.push(siteListingWhere(site))
-  }
+  const stock = searchStockWhere(search, siteListingWhere(site))
+  if (stock && (search.type || sale !== "developer")) filters.push(stock)
   filters.push(saleWhere(sale))
   const rows = await prisma.property.findMany({
     where: filters.length === 1 ? filters[0] : { AND: filters },
     select: { location: true },
   })
   return placeSegments(rows.map((row) => row.location))
+}
+
+// Countries with stock, biggest first. The country is the last part of
+// "Town, Region, Country"; listings with a single-part location are skipped.
+export async function listCountryCounts(sale: SaleKind, search: ListingSearch): Promise<{ label: string; count: number }[]> {
+  await connection()
+  const site = await currentSite()
+  const filters: Prisma.PropertyWhereInput[] = []
+  const stock = searchStockWhere(search, siteListingWhere(site))
+  if (stock && (search.type || sale !== "developer")) filters.push(stock)
+  filters.push(saleWhere(sale))
+  const rows = await prisma.property.findMany({
+    where: filters.length === 1 ? filters[0] : { AND: filters },
+    select: { location: true },
+  })
+  const counts = new Map<string, { label: string; count: number }>()
+  for (const row of rows) {
+    const parts = row.location.split(",").map((part) => part.trim()).filter(Boolean)
+    if (parts.length < 2) continue
+    const label = parts[parts.length - 1]
+    const key = label.toLocaleLowerCase()
+    const seen = counts.get(key)
+    if (seen) seen.count += 1
+    else counts.set(key, { label, count: 1 })
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
 }
 
 function placeSegments(locations: string[]) {
@@ -120,7 +140,7 @@ function placeSegments(locations: string[]) {
   }
   return [...counts.values()]
     .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
-    .slice(0, 40)
+    .slice(0, 200)
     .map((entry) => entry.label)
 }
 

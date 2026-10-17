@@ -1,56 +1,156 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { WorldMapSection } from "@/components/world-map-section";
+import { emptyListingSearch, listingTypeOptions, PRICE_BANDS, priceBandLabel } from "@/lib/listingSearch";
+import { listCountryCounts, listPlaceOptions } from "@/lib/mappedProperties";
 import { currentSite } from "@/lib/site";
 
-const choices = [
-  { href: "/buy", label: "I'm just browsing" },
-  { href: "/sell", label: "I want to test the market" },
-  { href: "/solicitors", label: "I need a conveyancer" },
-  { href: "/agents", label: "I want an agent" },
+// The site is a place to look for property anywhere in the world first.
+// Everything else — selling, agents, conveyancers, advertising — sits
+// underneath the search. The search covers all four brands' stock, so a
+// listing can be found and sold from any of the domains; the brand only
+// sets the headline wording.
+
+const moreChoices = [
+  { href: "/properties?all=1", label: "Private sales" },
+  { href: "/properties?sale=developer&all=1", label: "Developer units" },
+  { href: "/agents", label: "Find an agent" },
+  { href: "/solicitors", label: "Find a conveyancer" },
   { href: "/agents/register", label: "I'm a realtor" },
-  { href: "/advertise", label: "I want to advertise" },
+  { href: "/advertise", label: "Advertise" },
 ];
 
 export default async function HomePage() {
   const site = await currentSite();
   return (
     <main className="flex flex-1 flex-col">
-      <section className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center gap-8 px-4 py-10 text-center sm:gap-10 sm:px-6 sm:py-16">
-        <h1 className="text-3xl font-semibold tracking-tight">{site.name}</h1>
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:gap-4">
-          <Link
-            href="/buy"
-            className="flex min-h-[72px] flex-1 items-center justify-center border px-4 py-4 text-xl font-semibold sm:min-h-28 sm:text-2xl"
-          >
-            BUY
-          </Link>
-          <Link
-            href="/sell"
-            className="flex min-h-[72px] flex-1 items-center justify-center border px-4 py-4 text-xl font-semibold sm:min-h-28 sm:text-2xl"
-          >
-            SELL
-          </Link>
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pt-10 sm:px-6 sm:pt-16">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            Find {site.withArticle}, anywhere in the world
+          </h1>
+          <p className="text-zinc-600">
+            Houses, condos, land, bungalows and new developments from every Sell My site, on one
+            map. Type a town or a country. No account needed.
+          </p>
         </div>
-        <p>Listing your {site.noun} for sale is free.</p>
-        <ul className="flex flex-col gap-3">
-          {choices.map((choice) => (
-            <li key={choice.href + choice.label}>
+        <Suspense fallback={<SearchForm places={[]} />}>
+          <SearchWithPlaces />
+        </Suspense>
+        <Suspense fallback={null}>
+          <CountryChips />
+        </Suspense>
+      </section>
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-8 sm:px-6 sm:py-10">
+        <h2 className="text-2xl font-semibold tracking-tight">Property around the world</h2>
+        <Suspense fallback={<p>Loading the map…</p>}>
+          <WorldMapSection search={emptyListingSearch("all")} />
+        </Suspense>
+      </section>
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-4 border-t px-4 py-8 sm:px-6 sm:py-10">
+        <p className="text-lg">
+          Selling? Listing your {site.noun} is free.{" "}
+          <Link href="/sell" className="font-semibold underline">
+            Sell {site.withArticle}
+          </Link>
+        </p>
+        <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          {moreChoices.map((choice) => (
+            <li key={choice.href}>
               <Link href={choice.href}>{choice.label}</Link>
             </li>
           ))}
         </ul>
       </section>
-      <section className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 pb-10 sm:px-6 sm:pb-16">
-        <h2 className="text-2xl font-semibold tracking-tight">{site.mapHeading}</h2>
-        <Suspense fallback={<p>Loading the map…</p>}>
-          <WorldMapSection />
-        </Suspense>
-        <p className="flex flex-wrap gap-x-4 gap-y-2">
-          <Link href="/properties">Private sales</Link>
-          <Link href="/properties?sale=developer">Developer units</Link>
-        </p>
-      </section>
     </main>
+  );
+}
+
+async function SearchWithPlaces() {
+  const places = await listPlaceOptions("private", emptyListingSearch("all"));
+  return <SearchForm places={places} />;
+}
+
+async function CountryChips() {
+  const countries = await listCountryCounts("private", emptyListingSearch("all"));
+  if (countries.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm text-zinc-600">Where the stock is</p>
+      <ul className="flex flex-wrap gap-2">
+        {countries.slice(0, 16).map((country) => (
+          <li key={country.label}>
+            <Link
+              href={`/properties?all=1&place=${encodeURIComponent(country.label)}`}
+              className="inline-flex min-h-[36px] items-center gap-2 border px-3 py-1 text-sm"
+            >
+              {country.label}
+              <span className="text-zinc-500">{country.count}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SearchForm({ places }: { places: string[] }) {
+  return (
+    <form action="/properties" className="grid items-end gap-3 border p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-6">
+      <input type="hidden" name="all" value="1" />
+      <label className="sm:col-span-2">
+        Town or country
+        <input
+          type="search"
+          name="place"
+          list="home-places"
+          placeholder="Johor Bahru, Tokyo, Australia…"
+          autoComplete="off"
+          maxLength={80}
+          className="mt-1 block w-full border px-3 py-2"
+        />
+        <datalist id="home-places">
+          {places.map((place) => (
+            <option key={place} value={place} />
+          ))}
+        </datalist>
+      </label>
+      <label>
+        Minimum price
+        <select name="min" defaultValue="" className="mt-1 block w-full border px-3 py-2">
+          <option value="">No minimum</option>
+          {PRICE_BANDS.map((price) => (
+            <option key={price} value={price}>
+              {priceBandLabel(price)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Maximum price
+        <select name="max" defaultValue="" className="mt-1 block w-full border px-3 py-2">
+          <option value="">No maximum</option>
+          {PRICE_BANDS.map((price) => (
+            <option key={price} value={price}>
+              {priceBandLabel(price)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Type
+        <select name="type" defaultValue="" className="mt-1 block w-full border px-3 py-2">
+          <option value="">Any type</option>
+          {listingTypeOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button type="submit" className="min-h-[44px] w-full border px-4 py-2 text-lg font-semibold">
+        Search
+      </button>
+    </form>
   );
 }

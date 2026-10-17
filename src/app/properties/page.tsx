@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { InternetResults } from "@/components/internet-results";
 import PropertyCard from "@/components/PropertyCard";
 import { WorldMapSection } from "@/components/world-map-section";
 import { saleKind, type SaleKind } from "@/lib/listingKind";
@@ -23,6 +24,7 @@ type PropertySearchParams = {
   min?: string | string[];
   max?: string | string[];
   type?: string | string[];
+  all?: string | string[];
 };
 
 export default function PropertiesPage({
@@ -54,7 +56,8 @@ async function SaleBrowse({
     listPlaceOptions(sale, search),
   ]);
   const typeChoice = search.type ? listingTypeChoice(search.type) : null;
-  const plural = typeChoice?.plural ?? site.plural;
+  const allSites = search.scope === "all" && !typeChoice;
+  const plural = typeChoice?.plural ?? (allSites ? "properties" : site.plural);
   const searching = searchIsActive(search);
   const developerHeading =
     sale === "developer" && !typeChoice
@@ -72,7 +75,15 @@ async function SaleBrowse({
             ? typeChoice
               ? `${capitalize(plural)} from licensed developments. Each price is the lowest published for that unit type.`
               : "Units, condos, bungalows, and land from licensed developments. Each price is the lowest published for that unit type."
-            : `${capitalize(plural)} offered by individual owners. Listing your ${site.noun} for sale is free.`}
+            : `${capitalize(plural)} offered by individual owners${allSites ? " across sellmyhouse, sellmycondo, sellmyland and sellmybungalow" : ""}. Listing your ${site.noun} for sale is free.`}
+        </p>
+        <p className="flex gap-4 text-sm">
+          <Link href={browseHref(sale, 1, { ...search, scope: "site" })} aria-current={search.scope === "site" ? "page" : undefined} className={search.scope === "site" ? "font-semibold" : undefined}>
+            {site.name} only
+          </Link>
+          <Link href={browseHref(sale, 1, { ...search, scope: "all" })} aria-current={search.scope === "all" ? "page" : undefined} className={search.scope === "all" ? "font-semibold" : undefined}>
+            All four sites
+          </Link>
         </p>
         <p className="flex gap-4 text-sm">
           <Link href={browseHref("private", 1, search)} aria-current={sale === "private" ? "page" : undefined} className={sale === "private" ? "font-semibold" : undefined}>
@@ -89,7 +100,9 @@ async function SaleBrowse({
       {result.total === 0 ? (
         <p>
           {searching
-            ? "No listings match this search."
+            ? search.place
+              ? `Nothing in our own stock for “${search.place}” yet. Results from across the internet are below.`
+              : "No listings match this search."
             : sale === "developer" && !typeChoice
               ? "No developer listings in this group yet."
               : `No ${plural} in this group yet.`}
@@ -115,6 +128,9 @@ async function SaleBrowse({
           </p>
         </div>
       )}
+      <Suspense fallback={search.place ? <p className="text-sm text-zinc-600">Searching the internet…</p> : null}>
+        <InternetResults search={search} />
+      </Suspense>
     </>
   );
 }
@@ -132,16 +148,24 @@ function ListingSearchForm({
   return (
     <form action="/properties" className="grid items-end gap-3 border p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-6">
       {sale === "developer" ? <input type="hidden" name="sale" value="developer" /> : null}
+      {search.scope === "all" ? <input type="hidden" name="all" value="1" /> : null}
       <label className="sm:col-span-2">
-        Place
-        <select name="place" defaultValue={search.place} className="mt-1 block w-full border px-3 py-2">
-          <option value="">Anywhere</option>
+        Town or country
+        <input
+          type="search"
+          name="place"
+          list="browse-places"
+          defaultValue={search.place}
+          placeholder="Anywhere"
+          autoComplete="off"
+          maxLength={80}
+          className="mt-1 block w-full border px-3 py-2"
+        />
+        <datalist id="browse-places">
           {placeOptions.map((place) => (
-            <option key={place} value={place}>
-              {place}
-            </option>
+            <option key={place} value={place} />
           ))}
-        </select>
+        </datalist>
       </label>
       <label>
         Minimum price
@@ -181,7 +205,7 @@ function ListingSearchForm({
           Search
         </button>
         {searchIsActive(search) ? (
-          <Link href={browseHref(sale)} className="self-center text-sm">
+          <Link href={browseHref(sale, 1, emptyListingSearch(search.scope))} className="self-center text-sm">
             Clear
           </Link>
         ) : null}
@@ -193,6 +217,7 @@ function ListingSearchForm({
 function browseHref(sale: SaleKind, page = 1, search: ListingSearch = emptyListingSearch()) {
   const params = new URLSearchParams();
   if (sale === "developer") params.set("sale", "developer");
+  if (search.scope === "all") params.set("all", "1");
   if (search.place) params.set("place", search.place);
   if (search.minPrice != null) params.set("min", String(search.minPrice));
   if (search.maxPrice != null) params.set("max", String(search.maxPrice));

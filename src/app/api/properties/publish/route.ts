@@ -4,9 +4,11 @@ import {
   removeListingPhotos,
   saveListingPhotos,
 } from "@/lib/listingPhotos";
+import { createLeadForProperty } from "@/lib/leads";
 import { prisma } from "@/lib/prisma";
 import { formatFieldError, validateProperty } from "@/lib/propertyStandard";
 import { getUserFromCookie } from "@/lib/session";
+import { currentSite, defaultPropertyType } from "@/lib/site";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[0-9+().\-\s]+$/;
@@ -15,6 +17,7 @@ const namePattern = /^[\p{L}\p{M}][\p{L}\p{M}\s.'-]{0,79}$/u;
 type SpecifiedContacts = {
   realtor: boolean;
   solicitor: boolean;
+  agentLeads: boolean;
   realtorAgency: string;
   solicitorName: string;
   solicitorFirm: string;
@@ -33,6 +36,7 @@ export async function POST(request: Request) {
   let specified: SpecifiedContacts = {
     realtor: false,
     solicitor: false,
+    agentLeads: false,
     realtorAgency: "",
     solicitorName: "",
     solicitorFirm: "",
@@ -61,6 +65,8 @@ export async function POST(request: Request) {
   }
 
   const listing = validated.value;
+  // The brand the seller is on (sellmyhouse, sellmycondo, sellmyland, sellmybungalow).
+  const site = await currentSite();
   const solicitor = await resolveSolicitorId(body, specified.solicitor);
   if (!solicitor.ok) {
     return NextResponse.json({ error: solicitor.error }, { status: 400 });
@@ -86,6 +92,7 @@ export async function POST(request: Request) {
         price: listing.price,
         location: listing.location,
         description: listing.description,
+        propertyType: listing.propertyType ?? defaultPropertyType(site),
         image: images[0] ?? null,
         images: images.length > 0 ? JSON.stringify(images) : null,
         metadata: named.metadata,
@@ -99,6 +106,19 @@ export async function POST(request: Request) {
       },
       select: { id: true },
     });
+
+    // The seller asked for local realtors. Their number is held back from
+    // the public page and offered to agents in the same town.
+    if (specified.agentLeads && listing.contactType === "direct" && !specified.realtor) {
+      await createLeadForProperty({
+        propertyId: property.id,
+        location: listing.location,
+        site: site.id,
+        contactName: listing.contactName,
+        contactPhone: listing.contactPhone,
+        contactEmail: listing.contactEmail,
+      });
+    }
 
     return NextResponse.json({ id: property.id }, { status: 201 });
   } catch {
@@ -143,6 +163,7 @@ async function readPublishRequest(request: Request) {
     specified: {
       realtor: specifiedRealtor,
       solicitor: solicitorChoice === "specify",
+      agentLeads: contactChoice === "direct" && form.get("agentLeads") === "1",
       realtorAgency: text(form.get("realtorAgency")),
       solicitorName: text(form.get("solicitorName")),
       solicitorFirm: text(form.get("solicitorFirm")),
@@ -156,6 +177,7 @@ function emptySpecified(): SpecifiedContacts {
   return {
     realtor: false,
     solicitor: false,
+    agentLeads: false,
     realtorAgency: "",
     solicitorName: "",
     solicitorFirm: "",

@@ -1,6 +1,7 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { notifyRequest } from "@/lib/notify";
 
 const SITE_OPTIONS = [
   "sellmyhouse.asia",
@@ -85,6 +86,19 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Could not record this commitment." }, { status: 500 });
   }
+
+  await notifyRequest({
+    kind: "advertise",
+    subject: `${company} wants to advertise · ${placement} · ${duration} (${reference})`,
+    lines: [
+      `Contact: ${name} · ${email} · ${phone}`,
+      `Sites: ${sites.join(", ")}`,
+      `Placement: ${placement} for ${duration}`,
+      budget && `Budget: ${budget}`,
+      message && `Message: ${message}`,
+      `Agreed to advertising terms.`,
+    ],
+  });
 
   return NextResponse.json({ reference }, { status: 201 });
 }

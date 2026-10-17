@@ -110,6 +110,19 @@ export async function currentSite() {
   return siteFromHost(headerStore.get("host"));
 }
 
+export function siteById(id: string | null | undefined): Site {
+  return id && id in sites ? sites[id as SiteId] : sites.house;
+}
+
+// A seller listing on sellmycondo.asia is listing a condo. Giving the listing
+// that type is what keeps it on the condo site instead of drifting to houses.
+export function defaultPropertyType(site: Site): string {
+  if (site.id === "condo") return "Condominium";
+  if (site.id === "land") return "Land";
+  if (site.id === "bungalow") return "Bungalow";
+  return "House";
+}
+
 export function siteListingWhere(site: Site): Prisma.PropertyWhereInput {
   if (site.id === "land") {
     return {

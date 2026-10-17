@@ -278,6 +278,7 @@ export type AgentWhereInput = {
   agencyId?: Prisma.IntNullableFilter<"Agent"> | number | null
   properties?: Prisma.PropertyListRelationFilter
   representationRequests?: Prisma.RepresentationRequestListRelationFilter
+  leadUnlocks?: Prisma.LeadUnlockListRelationFilter
   agencyRecord?: Prisma.XOR<Prisma.AgencyNullableScalarRelationFilter, Prisma.AgencyWhereInput> | null
 }
 
@@ -296,6 +297,7 @@ export type AgentOrderByWithRelationInput = {
   agencyId?: Prisma.SortOrderInput | Prisma.SortOrder
   properties?: Prisma.PropertyOrderByRelationAggregateInput
   representationRequests?: Prisma.RepresentationRequestOrderByRelationAggregateInput
+  leadUnlocks?: Prisma.LeadUnlockOrderByRelationAggregateInput
   agencyRecord?: Prisma.AgencyOrderByWithRelationInput
 }
 
@@ -317,6 +319,7 @@ export type AgentWhereUniqueInput = Prisma.AtLeast<{
   agencyId?: Prisma.IntNullableFilter<"Agent"> | number | null
   properties?: Prisma.PropertyListRelationFilter
   representationRequests?: Prisma.RepresentationRequestListRelationFilter
+  leadUnlocks?: Prisma.LeadUnlockListRelationFilter
   agencyRecord?: Prisma.XOR<Prisma.AgencyNullableScalarRelationFilter, Prisma.AgencyWhereInput> | null
 }, "id" | "email">
 
@@ -371,6 +374,7 @@ export type AgentCreateInput = {
   createdAt?: Date | string
   properties?: Prisma.PropertyCreateNestedManyWithoutAgentInput
   representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockCreateNestedManyWithoutAgentInput
   agencyRecord?: Prisma.AgencyCreateNestedOneWithoutAgentsInput
 }
 
@@ -389,6 +393,7 @@ export type AgentUncheckedCreateInput = {
   agencyId?: number | null
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutAgentInput
   representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type AgentUpdateInput = {
@@ -404,6 +409,7 @@ export type AgentUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   properties?: Prisma.PropertyUpdateManyWithoutAgentNestedInput
   representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUpdateManyWithoutAgentNestedInput
   agencyRecord?: Prisma.AgencyUpdateOneWithoutAgentsNestedInput
 }
 
@@ -422,6 +428,7 @@ export type AgentUncheckedUpdateInput = {
   agencyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutAgentNestedInput
   representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type AgentCreateManyInput = {
@@ -616,6 +623,20 @@ export type AgentUpdateOneWithoutPropertiesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AgentUpdateToOneWithWhereWithoutPropertiesInput, Prisma.AgentUpdateWithoutPropertiesInput>, Prisma.AgentUncheckedUpdateWithoutPropertiesInput>
 }
 
+export type AgentCreateNestedOneWithoutLeadUnlocksInput = {
+  create?: Prisma.XOR<Prisma.AgentCreateWithoutLeadUnlocksInput, Prisma.AgentUncheckedCreateWithoutLeadUnlocksInput>
+  connectOrCreate?: Prisma.AgentCreateOrConnectWithoutLeadUnlocksInput
+  connect?: Prisma.AgentWhereUniqueInput
+}
+
+export type AgentUpdateOneRequiredWithoutLeadUnlocksNestedInput = {
+  create?: Prisma.XOR<Prisma.AgentCreateWithoutLeadUnlocksInput, Prisma.AgentUncheckedCreateWithoutLeadUnlocksInput>
+  connectOrCreate?: Prisma.AgentCreateOrConnectWithoutLeadUnlocksInput
+  upsert?: Prisma.AgentUpsertWithoutLeadUnlocksInput
+  connect?: Prisma.AgentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AgentUpdateToOneWithWhereWithoutLeadUnlocksInput, Prisma.AgentUpdateWithoutLeadUnlocksInput>, Prisma.AgentUncheckedUpdateWithoutLeadUnlocksInput>
+}
+
 export type AgentCreateNestedOneWithoutRepresentationRequestsInput = {
   create?: Prisma.XOR<Prisma.AgentCreateWithoutRepresentationRequestsInput, Prisma.AgentUncheckedCreateWithoutRepresentationRequestsInput>
   connectOrCreate?: Prisma.AgentCreateOrConnectWithoutRepresentationRequestsInput
@@ -643,6 +664,7 @@ export type AgentCreateWithoutAgencyRecordInput = {
   createdAt?: Date | string
   properties?: Prisma.PropertyCreateNestedManyWithoutAgentInput
   representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockCreateNestedManyWithoutAgentInput
 }
 
 export type AgentUncheckedCreateWithoutAgencyRecordInput = {
@@ -659,6 +681,7 @@ export type AgentUncheckedCreateWithoutAgencyRecordInput = {
   createdAt?: Date | string
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutAgentInput
   representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type AgentCreateOrConnectWithoutAgencyRecordInput = {
@@ -717,6 +740,7 @@ export type AgentCreateWithoutPropertiesInput = {
   isAvailable?: boolean
   createdAt?: Date | string
   representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockCreateNestedManyWithoutAgentInput
   agencyRecord?: Prisma.AgencyCreateNestedOneWithoutAgentsInput
 }
 
@@ -734,6 +758,7 @@ export type AgentUncheckedCreateWithoutPropertiesInput = {
   createdAt?: Date | string
   agencyId?: number | null
   representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type AgentCreateOrConnectWithoutPropertiesInput = {
@@ -764,6 +789,7 @@ export type AgentUpdateWithoutPropertiesInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUpdateManyWithoutAgentNestedInput
   agencyRecord?: Prisma.AgencyUpdateOneWithoutAgentsNestedInput
 }
 
@@ -781,6 +807,89 @@ export type AgentUncheckedUpdateWithoutPropertiesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   agencyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type AgentCreateWithoutLeadUnlocksInput = {
+  name: string
+  agency: string
+  phone: string
+  email: string
+  country: string
+  city?: string | null
+  license?: string | null
+  password?: string | null
+  isAvailable?: boolean
+  createdAt?: Date | string
+  properties?: Prisma.PropertyCreateNestedManyWithoutAgentInput
+  representationRequests?: Prisma.RepresentationRequestCreateNestedManyWithoutAgentInput
+  agencyRecord?: Prisma.AgencyCreateNestedOneWithoutAgentsInput
+}
+
+export type AgentUncheckedCreateWithoutLeadUnlocksInput = {
+  id?: number
+  name: string
+  agency: string
+  phone: string
+  email: string
+  country: string
+  city?: string | null
+  license?: string | null
+  password?: string | null
+  isAvailable?: boolean
+  createdAt?: Date | string
+  agencyId?: number | null
+  properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutAgentInput
+  representationRequests?: Prisma.RepresentationRequestUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type AgentCreateOrConnectWithoutLeadUnlocksInput = {
+  where: Prisma.AgentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AgentCreateWithoutLeadUnlocksInput, Prisma.AgentUncheckedCreateWithoutLeadUnlocksInput>
+}
+
+export type AgentUpsertWithoutLeadUnlocksInput = {
+  update: Prisma.XOR<Prisma.AgentUpdateWithoutLeadUnlocksInput, Prisma.AgentUncheckedUpdateWithoutLeadUnlocksInput>
+  create: Prisma.XOR<Prisma.AgentCreateWithoutLeadUnlocksInput, Prisma.AgentUncheckedCreateWithoutLeadUnlocksInput>
+  where?: Prisma.AgentWhereInput
+}
+
+export type AgentUpdateToOneWithWhereWithoutLeadUnlocksInput = {
+  where?: Prisma.AgentWhereInput
+  data: Prisma.XOR<Prisma.AgentUpdateWithoutLeadUnlocksInput, Prisma.AgentUncheckedUpdateWithoutLeadUnlocksInput>
+}
+
+export type AgentUpdateWithoutLeadUnlocksInput = {
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  agency?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  license?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  properties?: Prisma.PropertyUpdateManyWithoutAgentNestedInput
+  representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutAgentNestedInput
+  agencyRecord?: Prisma.AgencyUpdateOneWithoutAgentsNestedInput
+}
+
+export type AgentUncheckedUpdateWithoutLeadUnlocksInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  agency?: Prisma.StringFieldUpdateOperationsInput | string
+  phone?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  country?: Prisma.StringFieldUpdateOperationsInput | string
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  license?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  agencyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  properties?: Prisma.PropertyUncheckedUpdateManyWithoutAgentNestedInput
+  representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type AgentCreateWithoutRepresentationRequestsInput = {
@@ -795,6 +904,7 @@ export type AgentCreateWithoutRepresentationRequestsInput = {
   isAvailable?: boolean
   createdAt?: Date | string
   properties?: Prisma.PropertyCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockCreateNestedManyWithoutAgentInput
   agencyRecord?: Prisma.AgencyCreateNestedOneWithoutAgentsInput
 }
 
@@ -812,6 +922,7 @@ export type AgentUncheckedCreateWithoutRepresentationRequestsInput = {
   createdAt?: Date | string
   agencyId?: number | null
   properties?: Prisma.PropertyUncheckedCreateNestedManyWithoutAgentInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type AgentCreateOrConnectWithoutRepresentationRequestsInput = {
@@ -842,6 +953,7 @@ export type AgentUpdateWithoutRepresentationRequestsInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   properties?: Prisma.PropertyUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUpdateManyWithoutAgentNestedInput
   agencyRecord?: Prisma.AgencyUpdateOneWithoutAgentsNestedInput
 }
 
@@ -859,6 +971,7 @@ export type AgentUncheckedUpdateWithoutRepresentationRequestsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   agencyId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type AgentCreateManyAgencyRecordInput = {
@@ -888,6 +1001,7 @@ export type AgentUpdateWithoutAgencyRecordInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   properties?: Prisma.PropertyUpdateManyWithoutAgentNestedInput
   representationRequests?: Prisma.RepresentationRequestUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUpdateManyWithoutAgentNestedInput
 }
 
 export type AgentUncheckedUpdateWithoutAgencyRecordInput = {
@@ -904,6 +1018,7 @@ export type AgentUncheckedUpdateWithoutAgencyRecordInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   properties?: Prisma.PropertyUncheckedUpdateManyWithoutAgentNestedInput
   representationRequests?: Prisma.RepresentationRequestUncheckedUpdateManyWithoutAgentNestedInput
+  leadUnlocks?: Prisma.LeadUnlockUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type AgentUncheckedUpdateManyWithoutAgencyRecordInput = {
@@ -928,11 +1043,13 @@ export type AgentUncheckedUpdateManyWithoutAgencyRecordInput = {
 export type AgentCountOutputType = {
   properties: number
   representationRequests: number
+  leadUnlocks: number
 }
 
 export type AgentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   properties?: boolean | AgentCountOutputTypeCountPropertiesArgs
   representationRequests?: boolean | AgentCountOutputTypeCountRepresentationRequestsArgs
+  leadUnlocks?: boolean | AgentCountOutputTypeCountLeadUnlocksArgs
 }
 
 /**
@@ -959,6 +1076,13 @@ export type AgentCountOutputTypeCountRepresentationRequestsArgs<ExtArgs extends 
   where?: Prisma.RepresentationRequestWhereInput
 }
 
+/**
+ * AgentCountOutputType without action
+ */
+export type AgentCountOutputTypeCountLeadUnlocksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeadUnlockWhereInput
+}
+
 
 export type AgentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -975,6 +1099,7 @@ export type AgentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   agencyId?: boolean
   properties?: boolean | Prisma.Agent$propertiesArgs<ExtArgs>
   representationRequests?: boolean | Prisma.Agent$representationRequestsArgs<ExtArgs>
+  leadUnlocks?: boolean | Prisma.Agent$leadUnlocksArgs<ExtArgs>
   agencyRecord?: boolean | Prisma.Agent$agencyRecordArgs<ExtArgs>
   _count?: boolean | Prisma.AgentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["agent"]>
@@ -1030,6 +1155,7 @@ export type AgentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
 export type AgentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   properties?: boolean | Prisma.Agent$propertiesArgs<ExtArgs>
   representationRequests?: boolean | Prisma.Agent$representationRequestsArgs<ExtArgs>
+  leadUnlocks?: boolean | Prisma.Agent$leadUnlocksArgs<ExtArgs>
   agencyRecord?: boolean | Prisma.Agent$agencyRecordArgs<ExtArgs>
   _count?: boolean | Prisma.AgentCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1045,6 +1171,7 @@ export type $AgentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     properties: Prisma.$PropertyPayload<ExtArgs>[]
     representationRequests: Prisma.$RepresentationRequestPayload<ExtArgs>[]
+    leadUnlocks: Prisma.$LeadUnlockPayload<ExtArgs>[]
     agencyRecord: Prisma.$AgencyPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1456,6 +1583,7 @@ export interface Prisma__AgentClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   properties<T extends Prisma.Agent$propertiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Agent$propertiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PropertyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   representationRequests<T extends Prisma.Agent$representationRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Agent$representationRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RepresentationRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  leadUnlocks<T extends Prisma.Agent$leadUnlocksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Agent$leadUnlocksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeadUnlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   agencyRecord<T extends Prisma.Agent$agencyRecordArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Agent$agencyRecordArgs<ExtArgs>>): Prisma.Prisma__AgencyClient<runtime.Types.Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1944,6 +2072,30 @@ export type Agent$representationRequestsArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.RepresentationRequestScalarFieldEnum | Prisma.RepresentationRequestScalarFieldEnum[]
+}
+
+/**
+ * Agent.leadUnlocks
+ */
+export type Agent$leadUnlocksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeadUnlock
+   */
+  select?: Prisma.LeadUnlockSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LeadUnlock
+   */
+  omit?: Prisma.LeadUnlockOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeadUnlockInclude<ExtArgs> | null
+  where?: Prisma.LeadUnlockWhereInput
+  orderBy?: Prisma.LeadUnlockOrderByWithRelationInput | Prisma.LeadUnlockOrderByWithRelationInput[]
+  cursor?: Prisma.LeadUnlockWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeadUnlockScalarFieldEnum | Prisma.LeadUnlockScalarFieldEnum[]
 }
 
 /**

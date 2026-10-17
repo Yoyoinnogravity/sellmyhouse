@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminEmail, parseListingIds } from "@/lib/developerAccess";
+import { notifyRequest } from "@/lib/notify";
 import { prisma } from "@/lib/prisma";
 import { getUserFromCookie } from "@/lib/session";
 
@@ -62,6 +63,19 @@ export async function POST(request: Request) {
       status: "pending",
     },
     select: { id: true },
+  });
+
+  await notifyRequest({
+    kind: "developer-claim",
+    subject: `${company} asks to edit ${existing.length} listing(s) (claim ${claim.id})`,
+    lines: [
+      `Company: ${company}`,
+      `Account: ${user.email}`,
+      contactEmail && `Contact email: ${contactEmail}`,
+      contactPhone && `Contact phone: ${contactPhone}`,
+      `Listings: ${existing.map((row) => row.id).join(", ")}`,
+      `Approve or reject at /developers/claims`,
+    ],
   });
 
   return NextResponse.json({ id: claim.id }, { status: 201 });

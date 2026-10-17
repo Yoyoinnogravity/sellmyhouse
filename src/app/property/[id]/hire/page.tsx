@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
+import { mailtoWithCopy } from "@/lib/notify";
 import { prisma } from "@/lib/prisma";
 
 export const instant = false;
@@ -60,9 +61,9 @@ export default async function HireSolicitorPage({
       </p>
       <p>
         <a
-          href={`mailto:${solicitor.email}?subject=${encodeURIComponent(
-            `Hire request for ${property.title}`,
-          )}`}
+          href={mailtoWithCopy(solicitor.email, {
+            subject: `Hire request for ${property.title}`,
+          })}
         >
           Contact {solicitor.name}
         </a>

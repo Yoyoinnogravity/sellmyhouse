@@ -43,6 +43,16 @@ export type Solicitor = Prisma.SolicitorModel
  */
 export type Property = Prisma.PropertyModel
 /**
+ * Model Lead
+ * 
+ */
+export type Lead = Prisma.LeadModel
+/**
+ * Model LeadUnlock
+ * 
+ */
+export type LeadUnlock = Prisma.LeadUnlockModel
+/**
  * Model DeveloperClaim
  * 
  */

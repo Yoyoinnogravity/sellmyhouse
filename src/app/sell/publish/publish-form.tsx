@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useState } from "react";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
+import { propertyRegion } from "@/lib/region";
 
 type SolicitorOption = {
   id: number;
@@ -50,8 +51,10 @@ export default function PublishForm({
   const [contactType, setContactType] = useState<ContactChoice>("direct");
   const [agentId, setAgentId] = useState(agents[0] ? String(agents[0].id) : "");
   const [previews, setPreviews] = useState<string[]>([]);
+  const [agentLeads, setAgentLeads] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const leadTown = propertyRegion(draft.location)?.city ?? draft.location;
 
   const details = new URLSearchParams({
     title: draft.title,
@@ -91,6 +94,7 @@ export default function PublishForm({
       formData.set("solicitorId", String(selectedSolicitor.id));
     }
     if (contactType === "agent") formData.set("agentId", agentId);
+    if (contactType !== "direct") formData.delete("agentLeads");
 
     try {
       const response = await fetch("/api/properties/publish", {
@@ -329,6 +333,23 @@ export default function PublishForm({
               required
               className="mt-1 block w-full border px-3 py-2"
             />
+          </label>
+          <label className="flex items-start gap-2 border p-3">
+            <input
+              type="checkbox"
+              name="agentLeads"
+              value="1"
+              checked={agentLeads}
+              onChange={(event) => setAgentLeads(event.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              Let realtors in {leadTown} contact me about selling.
+              <span className="block text-sm text-zinc-600">
+                Free for you. Your number is not shown publicly; up to three local realtors can
+                ask us for it.
+              </span>
+            </span>
           </label>
         </>
       ) : contactType === "specified" ? (

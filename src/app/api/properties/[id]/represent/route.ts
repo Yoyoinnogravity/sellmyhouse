@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { getAgentFromCookie } from "@/lib/agent";
+import { notifyRequest } from "@/lib/notify";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(
@@ -20,7 +21,7 @@ export async function POST(
 
   const agent = await prisma.agent.findUnique({
     where: { id: session.id },
-    select: { id: true, isAvailable: true },
+    select: { id: true, isAvailable: true, name: true, agency: true, phone: true, email: true },
   });
   if (!agent) {
     return NextResponse.json({ error: "You need to log in." }, { status: 401 });
@@ -36,6 +37,8 @@ export async function POST(
     where: { id: propertyId },
     select: {
       id: true,
+      title: true,
+      location: true,
       agent: { select: { isAvailable: true } },
     },
   });
@@ -69,6 +72,15 @@ export async function POST(
       { status: 500 },
     );
   }
+
+  await notifyRequest({
+    kind: "represent",
+    subject: `${agent.name} asks to represent "${property.title}"`,
+    lines: [
+      `Agent: ${agent.name}, ${agent.agency} · ${agent.phone} · ${agent.email}`,
+      `Listing: /property/${property.id} · ${property.location}`,
+    ],
+  });
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

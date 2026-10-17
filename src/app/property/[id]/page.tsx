@@ -44,6 +44,7 @@ export default async function PropertyPage({
           isAvailable: true,
         },
       },
+      lead: { select: { id: true, city: true, status: true } },
     },
   });
 
@@ -203,7 +204,22 @@ export default async function PropertyPage({
           ))}
         </ul>
       ) : null}
-      {property.contactType === "direct" ? (
+      {property.contactType === "direct" && property.lead ? (
+        <section>
+          <h2>Seller</h2>
+          <p>{property.contactName}</p>
+          <p>
+            This seller is being matched with a realtor in {property.lead.city}. Buyers: check
+            back soon for the realtor&apos;s contact, or{" "}
+            <Link href="/agents">find a local agent</Link>{" "}
+            now.
+          </p>
+          <p className="text-sm text-zinc-600">
+            Realtor in {property.lead.city}?{" "}
+            <Link href="/agents/dashboard">Get this seller&apos;s number</Link>
+          </p>
+        </section>
+      ) : property.contactType === "direct" ? (
         <section>
           <h2>{extra?.contactRole === "realtor" ? "Realtor" : "Contact the seller"}</h2>
           <p>{property.contactName}</p>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
+import { mailtoWithCopy } from "@/lib/notify";
 import { prisma } from "@/lib/prisma";
 
 export const instant = false;
@@ -43,12 +44,10 @@ export default async function RequestConsultationPage({
     notFound();
   }
 
-  const subject = encodeURIComponent(
-    `Consultation request for ${property.title}`,
-  );
-  const body = encodeURIComponent(
-    `I would like a consultation about ${property.title} in ${property.location} (${property.id}).`,
-  );
+  const mailHref = mailtoWithCopy(solicitor.email, {
+    subject: `Consultation request for ${property.title}`,
+    body: `I would like a consultation about ${property.title} in ${property.location} (${property.id}).`,
+  });
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
@@ -61,7 +60,7 @@ export default async function RequestConsultationPage({
       {solicitor.firm !== solicitor.name ? <p>{solicitor.firm}</p> : null}
       <SolicitorContacts phone={solicitor.phone} email={solicitor.email} />
       <p>
-        <a href={`mailto:${solicitor.email}?subject=${subject}&body=${body}`}>
+        <a href={mailHref}>
           Send consultation request
         </a>
       </p>

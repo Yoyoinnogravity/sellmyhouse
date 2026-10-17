@@ -30,6 +30,7 @@ model Agent {
   createdAt    DateTime   @default(now())
   properties   Property[]
   representationRequests RepresentationRequest[]
+  leadUnlocks  LeadUnlock[]
   agencyRecord Agency?    @relation(fields: [agencyId], references: [id])
   agencyId     Int?
 }
@@ -83,7 +84,41 @@ model Property {
   claimedById  Int?
   claimedAt    DateTime?
   developerVerified Boolean @default(false)
+  lead         Lead?
   createdAt    DateTime   @default(now())
+}
+
+// A seller who ticked "let realtors contact me". The seller's number is
+// not shown publicly; agents in the same town pay a flat fee to receive it.
+model Lead {
+  id          Int      @id @default(autoincrement())
+  property    Property @relation(fields: [propertyId], references: [id])
+  propertyId  Int      @unique
+  sellerName  String
+  sellerPhone String
+  sellerEmail String?
+  city        String
+  country     String
+  site        String   @default("house") // which brand the seller listed on
+  status      String   @default("open") // "open" | "closed"
+  createdAt   DateTime @default(now())
+  unlocks     LeadUnlock[]
+}
+
+// One agent asking for one seller's number. Paid by bank transfer for now;
+// the admin marks it paid and the number is released.
+model LeadUnlock {
+  id        Int       @id @default(autoincrement())
+  lead      Lead      @relation(fields: [leadId], references: [id])
+  leadId    Int
+  agent     Agent     @relation(fields: [agentId], references: [id])
+  agentId   Int
+  priceMyr  Int
+  status    String    @default("requested") // "requested" | "paid" | "refused"
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
+
+  @@unique([leadId, agentId])
 }
 
 model DeveloperClaim {

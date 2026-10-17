@@ -3,8 +3,8 @@
 import Link from "next/link"
 import { useState } from "react"
 
-const links = [
-  { href: "/properties", label: "Properties" },
+const publicLinks = [
+  { href: "/properties?all=1", label: "Find" },
   { href: "/sell", label: "Sell" },
   { href: "/agents", label: "Agents" },
   { href: "/solicitors", label: "Conveyancers" },
@@ -14,8 +14,11 @@ const links = [
   { href: "/dashboard", label: "Dashboard" },
 ]
 
-export function NavbarMenu({ siteName }: { siteName: string }) {
+const adminLinks = [{ href: "/leads", label: "Leads" }]
+
+export function NavbarMenu({ siteName, admin = false }: { siteName: string; admin?: boolean }) {
   const [open, setOpen] = useState(false)
+  const links = admin ? [...publicLinks, ...adminLinks] : publicLinks
 
   return (
     <>

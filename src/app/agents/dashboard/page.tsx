@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getAgentById, requireAgent } from "@/lib/agent";
+import { bankDetails, leadsForAgent } from "@/lib/leads";
+import LeadList from "./lead-list";
 
 export default function AgentDashboardPage() {
   return (
@@ -21,6 +23,9 @@ async function AgentHome() {
     redirect("/agents/login");
   }
 
+  const leads = await leadsForAgent(agent);
+  const town = agent.city ?? agent.country;
+
   return (
     <>
       <p>Signed in as {agent.name}</p>
@@ -30,6 +35,15 @@ async function AgentHome() {
         <Link href={`/agents/${agent.id}`}>View profile</Link>
         <Link href="/agents/upload">Upload listings</Link>
       </p>
+      <section className="flex flex-col gap-4">
+        <h2>Sellers in {town} asking for a realtor</h2>
+        <p className="max-w-xl text-sm text-zinc-600">
+          These owners listed for free on Sell My House, Sell My Condo, Sell My Land, or Sell My
+          Bungalow and ticked the box to hear from local realtors. The number goes to the first
+          three who pay. No commission is taken.
+        </p>
+        <LeadList initial={leads} town={town} bank={bankDetails()} />
+      </section>
       <section className="flex flex-col gap-4">
         <h2>Your listings</h2>
         {agent.properties.length === 0 ? (

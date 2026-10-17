@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { notifyRequest } from "@/lib/notify";
 import { prisma } from "@/lib/prisma";
 import { propertyRegion, samePlace } from "@/lib/region";
 import { getUserFromCookie } from "@/lib/session";
@@ -40,6 +41,7 @@ export async function POST(
     where: { id: propertyId },
     select: {
       id: true,
+      title: true,
       location: true,
       agent: { select: { isAvailable: true } },
     },
@@ -60,6 +62,10 @@ export async function POST(
     select: {
       id: true,
       isAvailable: true,
+      name: true,
+      agency: true,
+      phone: true,
+      email: true,
       country: true,
       city: true,
     },
@@ -82,6 +88,16 @@ export async function POST(
       agentId: agent.id,
       contactType: "agent",
     },
+  });
+
+  await notifyRequest({
+    kind: "choose-agent",
+    subject: `Seller chose ${agent.name} for "${property.title}"`,
+    lines: [
+      `Seller account: ${user.email}`,
+      `Agent: ${agent.name}, ${agent.agency} · ${agent.phone} · ${agent.email}`,
+      `Listing: /property/${property.id} · ${property.location}`,
+    ],
   });
 
   return NextResponse.json({ ok: true });

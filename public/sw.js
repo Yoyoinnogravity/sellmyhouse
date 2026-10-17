@@ -2,7 +2,7 @@
    Navigations are network-first with a cached fallback so the shell still
    opens on flaky data. Static assets are cached; map tiles and listing
    photos are cached as seen. Version the cache name to ship updates. */
-const VERSION = "smh-v1";
+const VERSION = "smh-v2";
 const CORE_CACHE = `core-${VERSION}`;
 const PAGES_CACHE = `pages-${VERSION}`;
 const MEDIA_CACHE = `media-${VERSION}`;
