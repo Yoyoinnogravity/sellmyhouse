@@ -3,18 +3,18 @@
 import Link from "next/link"
 import { useState } from "react"
 
-const publicLinks = [
+const publicLinks: { href: string; label: string; highlight?: boolean }[] = [
   { href: "/properties?all=1&deal=sale", label: "Buy" },
   { href: "/properties?all=1&deal=rent", label: "Rent" },
   { href: "/sell", label: "Sell" },
-  { href: "/listing-format", label: "Database format" },
+  { href: "/listing-format", label: "For realtors", highlight: true },
   { href: "/agents", label: "Agents" },
   { href: "/solicitors", label: "Conveyancers" },
   { href: "/advertise", label: "Advertise" },
   { href: "/developers", label: "Developers" },
 ]
 
-const adminLinks = [{ href: "/leads", label: "Leads" }]
+const adminLinks: { href: string; label: string; highlight?: boolean }[] = [{ href: "/leads", label: "Leads" }]
 
 export function NavbarMenu({ siteName, admin = false }: { siteName: string; admin?: boolean }) {
   const [open, setOpen] = useState(false)
@@ -41,7 +41,11 @@ export function NavbarMenu({ siteName, admin = false }: { siteName: string; admi
       </div>
       <div className="hidden items-center gap-x-6 sm:flex sm:flex-1">
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="whitespace-nowrap">
+          <Link
+            key={link.href}
+            href={link.href}
+            className={link.highlight ? "whitespace-nowrap font-semibold text-orange-700" : "whitespace-nowrap"}
+          >
             {link.label}
           </Link>
         ))}
@@ -65,7 +69,7 @@ export function NavbarMenu({ siteName, admin = false }: { siteName: string; admi
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="flex min-h-[44px] items-center py-2 text-base"
+              className={`flex min-h-[44px] items-center py-2 text-base ${link.highlight ? "font-semibold text-orange-700" : ""}`}
             >
               {link.label}
             </Link>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
 import { FormatDownloads } from "@/components/format-downloads";
+import { RealtorStrip } from "@/components/realtor-strip";
 import { WorldMapSection } from "@/components/world-map-section";
 import { emptyListingSearch, listingTypeOptions } from "@/lib/listingSearch";
 import { listCountryCounts, listPlaceOptions } from "@/lib/mappedProperties";
@@ -51,6 +52,7 @@ export default async function HomePage() {
         <Suspense fallback={<SearchForm places={[]} />}>
           <SearchWithPlaces />
         </Suspense>
+        <RealtorStrip />
         <Suspense fallback={null}>
           <CountryChips />
         </Suspense>
