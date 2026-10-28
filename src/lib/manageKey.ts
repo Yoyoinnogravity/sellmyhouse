@@ -10,7 +10,9 @@ function hashKey(key: string) {
 }
 
 export function newManageKey() {
-  const key = randomBytes(24).toString("base64url")
+  // 12 characters (72 random bits): short enough to read out or type,
+  // far too many combinations to guess.
+  const key = randomBytes(9).toString("base64url")
   return { key, hash: hashKey(key) }
 }
 
@@ -28,7 +30,7 @@ function storedHash(metadata: string | null): string | null {
 
 export function manageKeyMatches(metadata: string | null, key: unknown): boolean {
   const stored = storedHash(metadata)
-  if (!stored || typeof key !== "string" || key.length < 16 || key.length > 100) return false
+  if (!stored || typeof key !== "string" || key.length < 10 || key.length > 100) return false
   const a = Buffer.from(stored, "hex")
   const b = Buffer.from(hashKey(key), "hex")
   return a.length === b.length && timingSafeEqual(a, b)

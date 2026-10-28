@@ -52,8 +52,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
+  // The brand the seller is on (sellmyhouse, sellmycondo, sellmyland, sellmybungalow).
+  const site = await currentSite();
   // A pin alone is enough: describe the place by its coordinates.
   const fields = body as Record<string, unknown>;
+  if (fields && typeof fields === "object" && !fields.propertyType) {
+    fields.propertyType = defaultPropertyType(site);
+  }
   if (pin && fields && typeof fields === "object" && !String(fields.location ?? "").trim()) {
     fields.location = `Near ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}`;
   }
@@ -70,8 +75,6 @@ export async function POST(request: Request) {
   }
 
   const listing = validated.value;
-  // The brand the seller is on (sellmyhouse, sellmycondo, sellmyland, sellmybungalow).
-  const site = await currentSite();
   const solicitor = await resolveSolicitorId(body, specified.solicitor);
   if (!solicitor.ok) {
     return NextResponse.json({ error: solicitor.error }, { status: 400 });

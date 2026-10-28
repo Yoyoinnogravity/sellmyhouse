@@ -16,6 +16,7 @@ import {
 } from "@/lib/listingSearch";
 import { listListingsPage, listPlaceOptions } from "@/lib/mappedProperties";
 import { currentSite } from "@/lib/site";
+import { AdPlace } from "@/components/ad-place";
 
 type PropertySearchParams = {
   page?: string | string[];
@@ -95,6 +96,7 @@ async function SaleBrowse({
         </div>
         <ListingSearchForm sale={sale} search={search} places={places} />
       </div>
+      <AdPlace place={search.place} />
       <WorldMapSection sale={sale} search={search} />
       {result.total === 0 ? (
         <p>

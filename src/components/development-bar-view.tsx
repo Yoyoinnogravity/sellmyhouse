@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { shortPlace, useAdPlace } from "@/lib/adPlace";
 
 const HIDE_KEY = "development-bar-hidden";
 
@@ -9,6 +10,7 @@ const HIDE_KEY = "development-bar-hidden";
 // developers launching a new project. A paid advert can replace the text.
 export function DevelopmentBar() {
   const [hidden, setHidden] = useState(true);
+  const place = shortPlace(useAdPlace());
 
   useEffect(() => {
     let wasHidden = false;
@@ -44,7 +46,7 @@ export function DevelopmentBar() {
             Advertise
           </span>
           <Link href="/advertise" className="min-w-0 flex-1 text-[15px] leading-tight font-semibold sm:text-lg">
-            Your ad for the next development here
+            Your ad for the next development{place ? ` in ${place}` : ""} here
           </Link>
           <Link
             href="/advertise"

@@ -82,10 +82,8 @@ export function ListingLive({ title }: { title: string }) {
     clean.hash = ""
     setUrl(clean.toString())
     if (key) {
-      const manage = new URL(clean.toString())
-      manage.pathname = `${manage.pathname.replace(/\/$/, "")}/manage`
-      manage.hash = `key=${key}`
-      setManageUrl(manage.toString())
+      const id = /\/property\/(\d+)/.exec(clean.pathname)?.[1]
+      setManageUrl(id ? `${clean.origin}/edit/${id}/${key}` : `${clean.origin}${clean.pathname}/manage#key=${key}`)
       // Take the secret out of the address bar so it isn't shared by mistake.
       window.history.replaceState(null, "", clean.pathname)
     }
@@ -138,18 +136,26 @@ export function ListingLive({ title }: { title: string }) {
       </div>
       {manageUrl ? (
         <div className="mt-2 flex flex-col gap-2 border-t border-green-700/30 pt-3">
-          <p className="font-semibold text-green-900">Your private link, for you only</p>
+          <p className="text-lg font-semibold text-green-900">Your link to check or edit your listing</p>
+          <p className="break-all border-2 border-green-700 bg-white p-3 font-mono text-base">{manageUrl.replace(/^https?:\/\//, "")}</p>
           <p className="text-sm text-green-900">
-            Use it to change the price or remove your listing when it sells. Keep it safe and don&apos;t share it:
-            anyone with this link can edit your listing. Email it to yourself now so you don&apos;t lose it.
+            Open it any time to see your listing, change the price or details, or remove it when it sells. Save it
+            now: this is the only copy. Keep it to yourself, because anyone with it can edit your listing.
           </p>
-          <p className="break-all border bg-white p-2 font-mono text-sm">{manageUrl}</p>
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={copyManage} className={button}>
-              {manageCopied ? "Private link copied" : "Copy private link"}
+              {manageCopied ? "Copied" : "Copy my link"}
             </button>
             <a
-              href={`mailto:?subject=${encodeURIComponent(`Private link to manage: ${title}`)}&body=${encodeURIComponent(`Keep this link private. Use it to edit or remove your listing:\n${manageUrl}`)}`}
+              href={`https://wa.me/?text=${encodeURIComponent(`My private link to check or edit my listing "${title}": ${manageUrl}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={button}
+            >
+              Save to my WhatsApp
+            </a>
+            <a
+              href={`mailto:?subject=${encodeURIComponent(`My listing link: ${title}`)}&body=${encodeURIComponent(`Keep this link private. Open it to check, edit or remove your listing:\n${manageUrl}`)}`}
               className={button}
             >
               Email it to myself

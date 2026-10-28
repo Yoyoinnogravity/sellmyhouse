@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ConveyancerRail } from "@/components/conveyancer-rail";
 import { DevelopmentBar } from "@/components/development-bar-view";
 import Navbar from "@/components/Navbar";
 import ServiceWorkerRegister from "@/components/sw-register";
@@ -65,6 +66,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-dvh flex-col overflow-x-hidden bg-white text-zinc-900 antialiased">
         <Navbar />
         {children}
+        <ConveyancerRail />
         <DevelopmentBar />
         <ServiceWorkerRegister />
       </body>

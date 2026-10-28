@@ -17,6 +17,7 @@ import { SellerContact } from "@/components/seller-contact";
 import { ListingLive, ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
+import { AdPlace } from "@/components/ad-place";
 import { AgentProfileCard } from "./agent-profile-card";
 
 export const instant = false;
@@ -148,6 +149,7 @@ export default async function PropertyPage({
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-10 sm:py-16">
+      <AdPlace place={property.location} />
       {(await searchParams).published ? <ListingLive title={property.title} /> : null}
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>

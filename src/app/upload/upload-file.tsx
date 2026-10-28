@@ -58,13 +58,13 @@ export default function UploadFile() {
     const origin = window.location.origin;
     const quote = (value: string) => `"${value.replace(/"/g, '""')}"`;
     const lines = [
-      "id,title,public_link,private_edit_link",
+      "id,title,public_link,private_check_or_edit_link",
       ...result.listings.map((listing) =>
         [
           listing.id,
           quote(listing.title),
           `${origin}/property/${listing.id}`,
-          `${origin}/property/${listing.id}/manage#key=${listing.manageKey}`,
+          `${origin}/edit/${listing.id}/${listing.manageKey}`,
         ].join(","),
       ),
     ];
@@ -100,7 +100,7 @@ export default function UploadFile() {
               <a href={`/property/${listing.id}`} className="font-semibold underline">
                 {listing.title}
               </a>
-              <a href={`/property/${listing.id}/manage#key=${listing.manageKey}`} className="text-sm underline">
+              <a href={`/edit/${listing.id}/${listing.manageKey}`} className="text-sm underline">
                 Edit (private)
               </a>
             </li>
