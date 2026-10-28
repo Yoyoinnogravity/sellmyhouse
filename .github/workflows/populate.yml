@@ -1,0 +1,22 @@
+name: Populate developments
+
+# Every 15 minutes, ask the live site to import a few more real
+# developments from Malaysia's public housing register.
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  populate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Import a batch
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          AUTH=()
+          if [ -n "$CRON_SECRET" ]; then AUTH=(-H "Authorization: Bearer $CRON_SECRET"); fi
+          curl -sS --max-time 90 "${AUTH[@]}" https://sellmyhouse.asia/api/cron/developments | head -c 4000
+          echo
