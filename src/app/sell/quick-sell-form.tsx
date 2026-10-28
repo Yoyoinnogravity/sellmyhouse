@@ -48,12 +48,13 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
     setPending(true);
     try {
       const response = await fetch("/api/properties/publish", { method: "POST", body: formData });
-      const data = (await response.json().catch(() => null)) as { id?: number; error?: string } | null;
+      const data = (await response.json().catch(() => null)) as { id?: number; manageKey?: string; error?: string } | null;
       if (!response.ok || !data?.id) {
         setError(data?.error ?? "Your listing couldn't be published just now. Please try again in a minute.");
         return;
       }
-      window.location.assign(`/property/${data.id}?published=1`);
+      // The manage key goes in the #fragment, which browsers never send to a server.
+      window.location.assign(`/property/${data.id}?published=1${data.manageKey ? `#key=${data.manageKey}` : ""}`);
     } catch {
       setError("Your listing couldn't be published just now. Please try again in a minute.");
     } finally {

@@ -5,6 +5,7 @@ import {
   saveListingPhotos,
 } from "@/lib/listingPhotos";
 import { createLeadForProperty } from "@/lib/leads";
+import { newManageKey, withManageHash } from "@/lib/manageKey";
 import { prisma } from "@/lib/prisma";
 import { formatFieldError, validateProperty } from "@/lib/propertyStandard";
 import { currentSite, defaultPropertyType } from "@/lib/site";
@@ -74,7 +75,8 @@ export async function POST(request: Request) {
   if (!named.ok) {
     return NextResponse.json({ error: named.error }, { status: 400 });
   }
-  const metadata = withPin(named.metadata, pin);
+  const manage = newManageKey();
+  const metadata = withManageHash(withPin(named.metadata, pin), manage.hash);
 
   let images: string[] = [];
   try {
@@ -119,7 +121,7 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({ id: property.id }, { status: 201 });
+    return NextResponse.json({ id: property.id, manageKey: manage.key }, { status: 201 });
   } catch {
     await removeListingPhotos(images);
     return NextResponse.json({ error: "Could not publish this listing." }, { status: 500 });

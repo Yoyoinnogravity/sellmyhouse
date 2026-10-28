@@ -71,13 +71,35 @@ export function ShareListing({ title, location }: { title: string; location: str
 // find the listing again.
 export function ListingLive({ title }: { title: string }) {
   const [url, setUrl] = useState("")
+  const [manageUrl, setManageUrl] = useState("")
   const [copied, setCopied] = useState(false)
+  const [manageCopied, setManageCopied] = useState(false)
 
   useEffect(() => {
     const clean = new URL(window.location.href)
+    const key = /(?:^|[#&])key=([A-Za-z0-9_-]+)/.exec(clean.hash)?.[1] ?? ""
     clean.searchParams.delete("published")
+    clean.hash = ""
     setUrl(clean.toString())
+    if (key) {
+      const manage = new URL(clean.toString())
+      manage.pathname = `${manage.pathname.replace(/\/$/, "")}/manage`
+      manage.hash = `key=${key}`
+      setManageUrl(manage.toString())
+      // Take the secret out of the address bar so it isn't shared by mistake.
+      window.history.replaceState(null, "", clean.pathname)
+    }
   }, [])
+
+  async function copyManage() {
+    try {
+      await navigator.clipboard.writeText(manageUrl)
+      setManageCopied(true)
+      setTimeout(() => setManageCopied(false), 2000)
+    } catch {
+      window.prompt("Copy your private link:", manageUrl)
+    }
+  }
 
   async function copy() {
     try {
@@ -95,8 +117,7 @@ export function ListingLive({ title }: { title: string }) {
     <div className="flex flex-col gap-3 border-2 border-green-700 bg-green-50 p-4" role="status">
       <p className="text-lg font-semibold text-green-900">Your listing is live.</p>
       <p className="text-green-900">
-        Send this link to your lawyer, family or anyone who might want to buy. Save it too: it&apos;s how you
-        find your listing again.
+        Send this link to your lawyer, family or anyone who might want to buy.
       </p>
       <p className="break-all border bg-white p-2 font-mono text-sm">{url}</p>
       <div className="flex flex-wrap gap-2">
@@ -115,6 +136,27 @@ export function ListingLive({ title }: { title: string }) {
           Send by email
         </a>
       </div>
+      {manageUrl ? (
+        <div className="mt-2 flex flex-col gap-2 border-t border-green-700/30 pt-3">
+          <p className="font-semibold text-green-900">Your private link, for you only</p>
+          <p className="text-sm text-green-900">
+            Use it to change the price or remove your listing when it sells. Keep it safe and don&apos;t share it:
+            anyone with this link can edit your listing. Email it to yourself now so you don&apos;t lose it.
+          </p>
+          <p className="break-all border bg-white p-2 font-mono text-sm">{manageUrl}</p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={copyManage} className={button}>
+              {manageCopied ? "Private link copied" : "Copy private link"}
+            </button>
+            <a
+              href={`mailto:?subject=${encodeURIComponent(`Private link to manage: ${title}`)}&body=${encodeURIComponent(`Keep this link private. Use it to edit or remove your listing:\n${manageUrl}`)}`}
+              className={button}
+            >
+              Email it to myself
+            </a>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
