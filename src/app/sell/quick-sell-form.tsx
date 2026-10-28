@@ -18,12 +18,15 @@ export default function QuickSellForm({
   defaults,
   noun,
   asRealtor = false,
+  forRent = false,
 }: {
   defaults: Defaults;
   noun: string;
   asRealtor?: boolean;
+  forRent?: boolean;
 }) {
   const [realtor, setRealtor] = useState(asRealtor);
+  const [rent, setRent] = useState(forRent);
   const [previews, setPreviews] = useState<string[]>([]);
   const [location, setLocation] = useState(defaults.location);
   const [error, setError] = useState<string | null>(null);
@@ -51,10 +54,12 @@ export default function QuickSellForm({
     }
     const price = Number(String(formData.get("price") ?? "").replace(/[^0-9]/g, ""));
     if (!Number.isInteger(price) || price <= 0) {
-      setError("Please enter the asking price as a number, for example 450000.");
+      setError(rent ? "Please enter the monthly rent as a number, for example 2500." : "Please enter the asking price as a number, for example 450000.");
       return;
     }
     formData.set("price", String(price));
+    formData.set("saleType", rent ? "rent" : "sale");
+    if (rent) formData.delete("agentLeads");
     if (realtor) {
       // A realtor listing for a client: buyers contact the realtor.
       formData.set("contactType", "specified");
@@ -99,10 +104,33 @@ export default function QuickSellForm({
       />
 
       <fieldset className="flex flex-col gap-2">
+        <legend className="mb-2 text-lg font-semibold">Selling or renting out?</legend>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { value: false, label: "Sell", hint: "Find a buyer" },
+            { value: true, label: "Rent out", hint: "Long-term, 6 months+" },
+          ].map((option) => (
+            <button
+              key={option.label}
+              type="button"
+              aria-pressed={rent === option.value}
+              onClick={() => setRent(option.value)}
+              className={`flex min-h-[64px] flex-col items-start justify-center border-2 px-3 py-2 text-left ${
+                rent === option.value ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white"
+              }`}
+            >
+              <span className="font-semibold">{option.label}</span>
+              <span className={`text-sm ${rent === option.value ? "text-zinc-200" : "text-zinc-600"}`}>{option.hint}</span>
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-lg font-semibold">Who&apos;s listing?</legend>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { value: false, label: "I'm the owner", hint: "Selling my own property" },
+            { value: false, label: "I'm the owner", hint: rent ? "My own property" : "Selling my own property" },
             { value: true, label: "I'm a realtor", hint: "Listing for a client" },
           ].map((option) => (
             <button
@@ -157,10 +185,10 @@ export default function QuickSellForm({
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">2. Tell buyers about it</h2>
+        <h2 className="text-lg font-semibold">2. Tell {rent ? "tenants" : "buyers"} about it</h2>
         <p className="text-sm text-zinc-600">Only the price and where it is are needed. Everything else is up to you.</p>
         <label htmlFor="title">
-          What are you selling? <span className="text-zinc-500">(optional)</span>
+          {rent ? "What are you renting out?" : "What are you selling?"} <span className="text-zinc-500">(optional)</span>
           <input
             id="title"
             name="title"
@@ -171,14 +199,14 @@ export default function QuickSellForm({
           />
         </label>
         <label htmlFor="price">
-          Asking price
+          {rent ? "Monthly rent" : "Asking price"}
           <input
             id="price"
             name="price"
             inputMode="numeric"
             required
             defaultValue={defaults.price}
-            placeholder="450000"
+            placeholder={rent ? "2500" : "450000"}
             className={input}
           />
         </label>
@@ -202,6 +230,36 @@ export default function QuickSellForm({
             onPlace={(place) => setLocation((current) => (current.trim() ? current : place))}
           />
         </div>
+        {rent ? (
+          <p className="border-l-4 border-zinc-900 bg-zinc-50 p-3 text-sm">
+            Long-term rentals only: a lease of 6 months or more. No holiday lets, homestays or short stays.
+          </p>
+        ) : null}
+        {rent ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label htmlFor="deposit">
+              Deposit <span className="text-zinc-500">(optional)</span>
+              <input id="deposit" name="deposit" inputMode="numeric" placeholder="5000" className={input} />
+            </label>
+            <label htmlFor="furnished">
+              Furnished? <span className="text-zinc-500">(optional)</span>
+              <select id="furnished" name="furnished" defaultValue="" className={input}>
+                <option value="">Not saying</option>
+                <option>Furnished</option>
+                <option>Partly furnished</option>
+                <option>Unfurnished</option>
+              </select>
+            </label>
+            <label htmlFor="availableFrom">
+              Available from <span className="text-zinc-500">(optional)</span>
+              <input id="availableFrom" name="availableFrom" type="date" className={input} />
+            </label>
+            <label htmlFor="minLease">
+              Minimum lease in months <span className="text-zinc-500">(6 or more)</span>
+              <input id="minLease" name="minLease" type="number" min={6} max={120} placeholder="12" className={input} />
+            </label>
+          </div>
+        ) : null}
         <label htmlFor="description">
           A few words about it <span className="text-zinc-500">(optional)</span>
           <textarea
@@ -215,7 +273,7 @@ export default function QuickSellForm({
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">3. How can buyers reach you?</h2>
+        <h2 className="text-lg font-semibold">3. How can {rent ? "tenants" : "buyers"} reach you?</h2>
         <p className="text-sm text-zinc-600">Your name is needed. Add a phone number or email so buyers can reach you.</p>
         <label htmlFor="contactName">
           {realtor ? "Your name (realtor)" : "Your name"}
@@ -235,8 +293,8 @@ export default function QuickSellForm({
             <input id="realtorAgency" name="realtorAgency" maxLength={120} autoComplete="organization" className={input} />
           </label>
         ) : null}
-        <label className={`flex items-start gap-3 border p-3 ${realtor ? "hidden" : ""}`}>
-          <input type="checkbox" name="agentLeads" value="1" className="mt-1 h-5 w-5" disabled={realtor} />
+        <label className={`flex items-start gap-3 border p-3 ${realtor || rent ? "hidden" : ""}`}>
+          <input type="checkbox" name="agentLeads" value="1" className="mt-1 h-5 w-5" disabled={realtor || rent} />
           <span>
             Also let realtors in {town} offer to help me sell.
             <span className="block text-sm text-zinc-600">
@@ -257,7 +315,7 @@ export default function QuickSellForm({
         disabled={pending}
         className="min-h-[52px] bg-zinc-900 px-6 text-lg font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
       >
-        {pending ? "Publishing…" : "Publish my listing free"}
+        {pending ? "Publishing…" : rent ? "Publish my rental free" : "Publish my listing free"}
       </button>
       <p className="text-sm text-zinc-600">
         No account and no fees. Your listing goes on the world map within a few minutes.

@@ -59,7 +59,8 @@ export default function ListingFormatPage() {
             listing appears on the exact spot on the world map, with its price as the label.
           </li>
           <li>Photos are added as links to images already online (https://…). To upload photos from your phone, use the <Link href="/sell" className="underline">one-page form</Link> instead.</li>
-          <li>Listing is free for sellers and realtors, and buyers contact you directly.</li>
+          <li>Rentals: put <span className="font-mono">rent</span> in the sale-or-rent column and the monthly rent as the price. We list long-term rentals only (6 months or more), not holiday lets or short stays.</li>
+          <li>Listing is free for sellers, landlords and realtors, and buyers and tenants contact you directly.</li>
         </ul>
       </section>
 

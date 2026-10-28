@@ -18,6 +18,7 @@ export function SellerContact({
   title,
   location,
   heading = "Contact the seller",
+  rental = false,
 }: {
   name: string | null
   phone: string | null
@@ -25,9 +26,12 @@ export function SellerContact({
   title: string
   location: string
   heading?: string
+  rental?: boolean
 }) {
   const digits = phone ? internationalDigits(phone, location) : ""
-  const message = `Hello, I saw your listing "${title}" and I'm interested.`
+  const message = rental
+    ? `Hello, I saw your rental "${title}". Is it still available? I'd like to arrange a viewing.`
+    : `Hello, I saw your listing "${title}" and I'm interested.`
   const button = "inline-flex min-h-[48px] flex-1 items-center justify-center px-4 font-semibold sm:flex-none"
 
   return (
@@ -63,7 +67,7 @@ export function SellerContact({
       </div>
       <p className="text-sm text-zinc-600">
         {phone || email
-          ? `${[phone, email].filter(Boolean).join(" · ")}. No account needed, and no fees for buyers.`
+          ? `${[phone, email].filter(Boolean).join(" · ")}. No account needed, and no fees for ${rental ? "tenants" : "buyers"}.`
           : "The seller hasn't added a phone number or email yet. Check back soon."}
       </p>
     </section>

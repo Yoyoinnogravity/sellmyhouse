@@ -68,7 +68,7 @@ export function ComparePrices({ id }: { id: number }) {
           </section>
         ))}
         {blocks && blocks.length > 0 ? (
-          <p className="text-xs text-zinc-500">For guidance only. Asking prices are not sale prices, and every property differs.</p>
+          <p className="text-xs text-zinc-500">For guidance only. Asking prices and rents are not final prices, and every property differs.</p>
         ) : null}
       </div>
     </details>

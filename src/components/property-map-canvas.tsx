@@ -36,7 +36,8 @@ function escapeHtml(value: string) {
 }
 
 function pinLabel(point: MapProperty) {
-  return (point.offerCount ?? 1) > 1 ? `From ${point.priceLabel}` : point.priceLabel
+  const price = point.priceLabel.replace(" / month", "/mo")
+  return (point.offerCount ?? 1) > 1 ? `From ${price}` : price
 }
 
 function WorldMarkers({ points }: { points: MapProperty[] }) {

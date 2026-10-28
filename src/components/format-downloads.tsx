@@ -34,14 +34,15 @@ export function FormatDownloads({
           <p className="text-zinc-700">
             {sellers ? (
               <>
-                Simple headings like <em>Asking price</em> and <em>Your name</em>. Only the{" "}
+                Simple headings like <em>Asking price</em> and <em>Your name</em>, for selling or renting out long-term. Only the{" "}
                 <strong>asking price</strong>, <strong>location</strong> and <strong>your name</strong> are needed.
                 Selling just one home? The <Link href="/sell" className="underline">one-page form</Link> is quicker and
                 takes photos from your phone.
               </>
             ) : (
               <>
-                One free spreadsheet for realtors anywhere in the world. One property per row, up to 200 per file. Only
+                One free spreadsheet for realtors anywhere in the world, for sales and long-term rentals. One property per row,
+                up to 200 per file. Only
                 the <strong>price</strong>, <strong>location</strong> (or a map pin) and <strong>your name</strong> are
                 required.
               </>

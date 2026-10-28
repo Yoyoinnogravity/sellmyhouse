@@ -1,3 +1,4 @@
+import { shortStayProblem } from "@/lib/rental";
 /**
  * APLS (Agent Property Listing Standard).
  * A listing needs only a whole-number price, a location (a map pin is
@@ -327,6 +328,12 @@ export function validateProperty(
   const solicitorId = readSolicitorId(record, errors);
   const metadata = readMetadata(record.metadata, errors);
 
+  if (record.saleType === "rent") {
+    const meta = asRecord(record.metadata);
+    const problem = shortStayProblem({ title, description, minLease: meta?.minLeaseMonths ?? record.minLease });
+    if (problem) errors.push({ field: "saleType", message: problem });
+  }
+
   if (errors.length > 0) {
     return { ok: false, errors: errors.map((error) => withIndex(index, error)) };
   }
@@ -334,7 +341,7 @@ export function validateProperty(
   return {
     ok: true,
     value: {
-      title: title || autoTitle(propertyType, bedrooms, location),
+      title: title || autoTitle(propertyType, bedrooms, location, record.saleType === "rent"),
       price: price as number,
       currency,
       location,
@@ -485,8 +492,9 @@ export function autoTitle(
   propertyType: string | null,
   bedrooms: number | null,
   location: string,
+  rent = false,
 ): string {
-  const kind = (propertyType || "property").toLowerCase();
+  const kind = `${(propertyType || "property").toLowerCase()}${rent ? " for rent" : ""}`;
   const rooms = bedrooms && bedrooms > 0 ? `${bedrooms}-bedroom ` : "";
   const first = location.split(",")[0]?.trim();
   const place = first && !first.startsWith("Near ") ? first : "";

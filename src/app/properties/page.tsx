@@ -10,6 +10,7 @@ import {
   listingTypeOptions,
   parseListingSearch,
   PRICE_BANDS,
+  RENT_BANDS,
   priceBandLabel,
   searchIsActive,
   type ListingSearch,
@@ -26,6 +27,7 @@ type PropertySearchParams = {
   max?: string | string[];
   type?: string | string[];
   all?: string | string[];
+  deal?: string | string[];
 };
 
 export default function PropertiesPage({
@@ -69,16 +71,32 @@ async function SaleBrowse({
     <>
       <div className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold tracking-tight">
-          {sale === "developer" ? developerHeading : `Private ${plural}`}
+          {sale === "developer"
+            ? developerHeading
+            : search.deal === "rent"
+              ? `${capitalize(plural)} for rent`
+              : search.deal === "sale"
+                ? `${capitalize(plural)} for sale`
+                : `Private ${plural}`}
         </h1>
         <p className="text-sm text-zinc-600">
           {sale === "developer"
             ? typeChoice
               ? `${capitalize(plural)} from licensed developments. Each price is the lowest published for that unit type.`
               : "Units, condos, bungalows, and land from licensed developments. Each price is the lowest published for that unit type."
-            : `${capitalize(plural)} offered by individual owners${allSites ? " across sellmyhouse, sellmycondo, sellmyland and sellmybungalow" : ""}. Listing your ${site.noun} for sale is free.`}
+            : search.deal === "rent"
+              ? `Long-term rentals (6 months or more) from owners and realtors. Listing your ${site.noun} for rent is free.`
+              : `${capitalize(plural)} offered by individual owners${allSites ? " across sellmyhouse, sellmycondo, sellmyland and sellmybungalow" : ""}. Listing your ${site.noun} for sale or rent is free.`}
         </p>
         <div className="flex flex-col gap-2 text-sm">
+          <ChoiceRow
+            label="Looking to"
+            options={[
+              { href: browseHref(sale, 1, { ...search, deal: "sale", minPrice: null, maxPrice: null }), text: "Buy", on: search.deal === "sale" },
+              { href: browseHref(sale, 1, { ...search, deal: "rent", minPrice: null, maxPrice: null }), text: "Rent", on: search.deal === "rent" },
+              { href: browseHref(sale, 1, { ...search, deal: "any", minPrice: null, maxPrice: null }), text: "Both", on: search.deal === "any" },
+            ]}
+          />
           <ChoiceRow
             label="Show"
             options={[
@@ -87,7 +105,7 @@ async function SaleBrowse({
             ]}
           />
           <ChoiceRow
-            label="Selling"
+            label="From"
             options={[
               { href: browseHref("private", 1, search), text: "Owners", on: sale === "private" },
               { href: browseHref("developer", 1, search), text: "Developers", on: sale === "developer" },
@@ -150,6 +168,7 @@ function ListingSearchForm({
     <form action="/properties" className="grid items-end gap-3 border p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-6">
       {sale === "developer" ? <input type="hidden" name="sale" value="developer" /> : null}
       {search.scope === "all" ? <input type="hidden" name="all" value="1" /> : null}
+      {search.deal !== "any" ? <input type="hidden" name="deal" value={search.deal} /> : null}
       <label className="sm:col-span-2">
         Town or country
         <input
@@ -169,10 +188,10 @@ function ListingSearchForm({
         </datalist>
       </label>
       <label>
-        Minimum price
+        {search.deal === "rent" ? "Minimum rent" : "Minimum price"}
         <select name="min" defaultValue={search.minPrice ?? ""} className="mt-1 block w-full border px-3 py-2">
           <option value="">No minimum</option>
-          {PRICE_BANDS.map((price) => (
+          {(search.deal === "rent" ? RENT_BANDS : PRICE_BANDS).map((price) => (
             <option key={price} value={price}>
               {priceBandLabel(price)}
             </option>
@@ -180,10 +199,10 @@ function ListingSearchForm({
         </select>
       </label>
       <label>
-        Maximum price
+        {search.deal === "rent" ? "Maximum rent" : "Maximum price"}
         <select name="max" defaultValue={search.maxPrice ?? ""} className="mt-1 block w-full border px-3 py-2">
           <option value="">No maximum</option>
-          {PRICE_BANDS.map((price) => (
+          {(search.deal === "rent" ? RENT_BANDS : PRICE_BANDS).map((price) => (
             <option key={price} value={price}>
               {priceBandLabel(price)}
             </option>
@@ -223,6 +242,7 @@ function browseHref(sale: SaleKind, page = 1, search: ListingSearch = emptyListi
   if (search.minPrice != null) params.set("min", String(search.minPrice));
   if (search.maxPrice != null) params.set("max", String(search.maxPrice));
   if (search.type) params.set("type", search.type);
+  if (search.deal !== "any") params.set("deal", search.deal);
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/properties?${query}` : "/properties";
@@ -247,7 +267,7 @@ function ChoiceRow({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="w-16 text-zinc-600">{label}</span>
+      <span className="w-20 text-zinc-600">{label}</span>
       {options.map((option) => (
         <Link
           key={option.text}

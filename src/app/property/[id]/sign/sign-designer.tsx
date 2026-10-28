@@ -31,6 +31,7 @@ export default function SignDesigner({
   details,
   phone,
   photo,
+  rental = false,
 }: {
   qrSvg: string;
   host: string;
@@ -42,6 +43,7 @@ export default function SignDesigner({
   details: string;
   phone: string | null;
   photo: string | null;
+  rental?: boolean;
 }) {
   const [size, setSize] = useState<Size>("A3");
   const [orientation, setOrientation] = useState<Orientation>("portrait");
@@ -187,7 +189,7 @@ export default function SignDesigner({
               className="flex items-center justify-center bg-orange-600 text-white"
             >
               <p style={{ fontSize: mm(landscape ? 13 : 15), lineHeight: 1, letterSpacing: "0.02em" }} className="font-black">
-                FOR SALE
+                {rental ? "FOR RENT" : "FOR SALE"}
               </p>
             </div>
 
@@ -197,7 +199,12 @@ export default function SignDesigner({
               className={`flex min-h-0 flex-1 ${landscape ? "flex-row" : "flex-col"}`}
             >
               <div style={{ gap: mm(3) }} className="flex min-h-0 min-w-0 flex-1 flex-col">
-                <p style={{ fontSize: mm(landscape ? 10 : 11), lineHeight: 1 }} className="font-black">{price}</p>
+                <p
+                  style={{ fontSize: mm(Math.min(landscape ? 10 : 11, 150 / Math.max(price.length, 1))), lineHeight: 1 }}
+                  className="font-black whitespace-nowrap"
+                >
+                  {price}
+                </p>
                 <div>
                   <p style={{ fontSize: mm(4.4), lineHeight: 1.15 }} className="line-clamp-2 font-bold">{title}</p>
                   {location || details ? (
@@ -232,7 +239,7 @@ export default function SignDesigner({
             >
               <p style={{ fontSize: mm(landscape ? 6.5 : 7.5), lineHeight: 1.05 }} className="font-black">{host}</p>
               <p style={{ fontSize: mm(2.8), marginTop: mm(0.8) }} className="text-zinc-200">
-                Buy or sell any property, anywhere. List yours free, no agent fees.
+                Buy, rent or sell any property, anywhere. List yours free, no agent fees.
               </p>
             </div>
           </div>

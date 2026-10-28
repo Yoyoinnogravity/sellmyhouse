@@ -7,6 +7,7 @@ import {
 import { createLeadForProperty } from "@/lib/leads";
 import { newManageKey, withManageHash } from "@/lib/manageKey";
 import { currencyForLocation } from "@/lib/currency";
+import { rentalMetadata, shortStayProblem } from "@/lib/rental";
 import { prisma } from "@/lib/prisma";
 import { formatFieldError, validateProperty } from "@/lib/propertyStandard";
 import { currentSite, defaultPropertyType } from "@/lib/site";
@@ -73,6 +74,12 @@ export async function POST(request: Request) {
     fields.location = `Near ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}`;
   }
 
+  if ((body as { saleType?: string }).saleType === "rent") {
+    const record = body as Record<string, unknown>;
+    const problem = shortStayProblem({ title: record.title, description: record.description, minLease: record.minLease });
+    if (problem) return NextResponse.json({ error: problem }, { status: 400 });
+  }
+
   const validated = validateProperty(body, {
     defaultSource: "manual",
     requireAgentId: true,
@@ -95,7 +102,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: named.error }, { status: 400 });
   }
   const manage = newManageKey();
-  const metadata = withManageHash(withPin(named.metadata, pin), manage.hash);
+  const rental = (body as { rental?: Record<string, string | number> | null }).rental ?? null;
+  const metadata = withManageHash(withPin(withRental(named.metadata, rental), pin), manage.hash);
 
   let images: string[] = [];
   try {
@@ -130,7 +138,7 @@ export async function POST(request: Request) {
 
     // The seller asked for local realtors. Their number is held back from
     // the public page and offered to agents in the same town.
-    if (specified.agentLeads && listing.contactType === "direct" && !specified.realtor) {
+    if (specified.agentLeads && listing.contactType === "direct" && !specified.realtor && !rental) {
       await createLeadForProperty({
         propertyId: property.id,
         location: listing.location,
@@ -184,6 +192,16 @@ async function readPublishRequest(request: Request) {
       agentId: contactChoice === "agent" ? form.get("agentId") : null,
       solicitorId: solicitorChoice === "now" ? form.get("solicitorId") : null,
       source: "manual",
+      saleType: form.get("saleType") === "rent" ? "rent" : "sale",
+      minLease: form.get("minLease"),
+      rental: form.get("saleType") === "rent"
+        ? rentalMetadata({
+            deposit: form.get("deposit"),
+            furnished: form.get("furnished"),
+            availableFrom: form.get("availableFrom"),
+            minLease: form.get("minLease"),
+          })
+        : null,
     },
     photos,
     pin: readPin(form.get("lat"), form.get("lng")),
@@ -309,6 +327,20 @@ function readPin(lat: FormDataEntryValue | null, lng: FormDataEntryValue | null)
     return null;
   }
   return { lat: Math.round(latitude * 1e6) / 1e6, lng: Math.round(longitude * 1e6) / 1e6 };
+}
+
+// Adds the rental details (saleType "rent", deposit, furnished…) to the metadata.
+function withRental(metadata: string | null, rental: Record<string, string | number> | null) {
+  if (!rental) return metadata;
+  let parsed: Record<string, unknown> = {};
+  if (metadata) {
+    try {
+      parsed = JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      parsed = {};
+    }
+  }
+  return JSON.stringify({ ...parsed, ...rental });
 }
 
 // Adds the pin to the listing's metadata, where the map reads lat and lng.

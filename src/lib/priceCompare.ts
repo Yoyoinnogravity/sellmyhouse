@@ -1,5 +1,6 @@
 import { geoIndex, pinMetadata } from "@/lib/listingGeo";
 import { picturePoint } from "@/lib/places";
+import { isRental } from "@/lib/rental";
 import { prisma } from "@/lib/prisma";
 import { cached } from "@/lib/queryCache";
 
@@ -72,14 +73,16 @@ async function nearbyListings(subject: Subject): Promise<CompareBlock | null> {
       ]);
       return rows.flatMap((row) => {
         const point = picturePoint(row.location, pinMetadata(geo.get(row.id)));
-        return point ? [{ ...row, lat: point.lat, lng: point.lng, precise: point.precise }] : [];
+        const rent = geo.get(row.id)?.rent ?? false;
+        return point ? [{ ...row, rent, lat: point.lat, lng: point.lng, precise: point.precise }] : [];
       });
     },
     15 * 60 * 1000,
   );
   const currency = subject.currency ?? "";
+  const rent = isRental(subject.metadata);
   const near = all
-    .filter((row) => row.id !== subject.id && (row.currency ?? "") === currency)
+    .filter((row) => row.id !== subject.id && (row.currency ?? "") === currency && row.rent === rent)
     .map((row) => ({ row, distance: km(here, row) }))
     .filter(({ distance }) => distance <= (here.precise ? 8 : 15))
     .sort((a, b) => a.distance - b.distance)
@@ -89,7 +92,7 @@ async function nearbyListings(subject: Subject): Promise<CompareBlock | null> {
   const sameBeds = subject.bedrooms ? near.filter(({ row }) => row.bedrooms === subject.bedrooms) : [];
   const pool = sameBeds.length >= 3 ? sameBeds : near;
   return {
-    title: "Asking prices nearby on this site",
+    title: rent ? "Rents nearby on this site" : "Asking prices nearby on this site",
     summary: `${pool.length} listing${pool.length === 1 ? "" : "s"} within ${here.precise ? 8 : 15} km${sameBeds.length >= 3 ? ` with ${subject.bedrooms} bedrooms` : ""}.`,
     currency: currency || "",
     median: median(pool.map(({ row }) => row.price)),
@@ -283,6 +286,11 @@ export async function comparePrices(id: number): Promise<CompareBlock[]> {
     select: { id: true, title: true, price: true, currency: true, location: true, propertyType: true, bedrooms: true, builtUp: true, metadata: true },
   });
   if (!subject) return [];
+  // Official records are sale prices, so rentals compare with other rentals only.
+  if (isRental(subject.metadata)) {
+    const nearby = await nearbyListings(subject).catch(() => null);
+    return nearby ? [nearby] : [];
+  }
   const settled = await Promise.allSettled([
     singaporeHdb(subject),
     franceDvf(subject),

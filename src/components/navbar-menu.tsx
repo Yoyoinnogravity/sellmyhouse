@@ -4,7 +4,8 @@ import Link from "next/link"
 import { useState } from "react"
 
 const publicLinks = [
-  { href: "/properties?all=1", label: "Find" },
+  { href: "/properties?all=1&deal=sale", label: "Buy" },
+  { href: "/properties?all=1&deal=rent", label: "Rent" },
   { href: "/sell", label: "Sell" },
   { href: "/listing-format", label: "Database format" },
   { href: "/agents", label: "Agents" },

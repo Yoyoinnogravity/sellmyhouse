@@ -10,6 +10,7 @@ type SellSearchParams = {
   price?: string | string[];
   location?: string | string[];
   as?: string | string[];
+  deal?: string | string[];
 };
 
 export default function SellPage({
@@ -22,7 +23,7 @@ export default function SellPage({
       <Suspense
         fallback={
           <>
-            <h1 className="text-3xl font-semibold tracking-tight">Sell your property, free</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">Sell or rent out your property, free</h1>
             <p className="mt-2 text-zinc-600">No account needed. It takes about two minutes.</p>
           </>
         }
@@ -59,7 +60,7 @@ async function SellHeading() {
   const site = await currentSite();
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">Sell your {site.noun}, free</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">Sell or rent out your {site.noun}, free</h1>
       <p className="mt-2 text-zinc-600">
         No account, no fees. Add photos, a price and how buyers can reach you. It takes about two minutes.
       </p>
@@ -73,6 +74,7 @@ async function SellForms({ searchParams }: { searchParams: Promise<SellSearchPar
     <QuickSellForm
       noun={site.noun}
       asRealtor={firstValue(params.as) === "realtor"}
+      forRent={firstValue(params.deal) === "rent"}
       defaults={{
         title: firstValue(params.title),
         price: firstValue(params.price),

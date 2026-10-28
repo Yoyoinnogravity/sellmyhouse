@@ -18,6 +18,8 @@ import { ListingLive, ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AdPlace } from "@/components/ad-place";
+import { RentalDetails } from "@/components/rental-details";
+import { isRental, perMonth } from "@/lib/rental";
 import { ComparePrices } from "@/components/compare-prices";
 import { WebsiteCard } from "@/components/website-card";
 import { AgentProfileCard } from "./agent-profile-card";
@@ -33,11 +35,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       currentSite(),
       prisma.property.findUnique({
         where: { id: propertyId },
-        select: { title: true, price: true, currency: true, location: true, description: true, image: true, images: true },
+        select: { title: true, price: true, currency: true, location: true, description: true, image: true, images: true, metadata: true },
       }),
     ]);
     if (!listing) return {};
-    const price = priceLabel(listing.currency, listing.price);
+    const price = perMonth(priceLabel(listing.currency, listing.price), isRental(listing.metadata));
     const photo = listingImages(listing.images, listing.image).find(
       (src) => src.startsWith("/uploads/") || src.startsWith("https://"),
     );
@@ -133,11 +135,12 @@ export default async function PropertyPage({
   const streetView = exact?.precise
     ? `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${exact.lat},${exact.lng}`
     : null;
+  const rental = isRental(property.metadata);
   const mapPoint = {
     id: property.id,
     title: property.title,
     location: property.location,
-    priceLabel: priceLabel(property.currency, property.price),
+    priceLabel: perMonth(priceLabel(property.currency, property.price), rental),
     lat: point.lat,
     lng: point.lng,
   };
@@ -162,19 +165,28 @@ export default async function PropertyPage({
         <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
         <p className="text-3xl font-bold tracking-tight">{mapPoint.priceLabel}</p>
         <p className="text-zinc-600">
-          {property.location} · {kind === "developer" ? "Developer unit" : "Private sale"}
+          {property.location} · {rental ? "For rent" : kind === "developer" ? "Developer unit" : "Private sale"}
           {property.developerVerified ? " · Verified developer" : ""}
         </p>
       </div>
-      {property.contactType === "direct" && !property.lead && extra?.contactRole !== "realtor" ? (
+      {property.contactType === "direct" && !property.lead ? (
         <SellerContact
+          heading={
+            extra?.contactRole === "realtor"
+              ? `Realtor${typeof extra?.realtorAgency === "string" ? ` · ${extra.realtorAgency}` : ""}`
+              : rental
+                ? "Contact the owner"
+                : "Contact the seller"
+          }
           name={property.contactName}
           phone={property.contactPhone}
           email={property.contactEmail}
           title={property.title}
           location={property.location}
+          rental={rental}
         />
       ) : null}
+      {rental ? <RentalDetails metadata={extra} /> : null}
       <ShareListing title={property.title} location={property.location} />
       <div className="grid gap-4 md:grid-cols-2">
         <ListingPhoto
@@ -287,7 +299,7 @@ export default async function PropertyPage({
       {extra ? (
         <ul>
           {Object.entries(extra)
-            .filter(([key]) => !["listingKey", "manageHash", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked", "contactRole", "realtorAgency", "solicitorName", "solicitorFirm", "solicitorPhone", "solicitorEmail", "listingUrl"].includes(key))
+            .filter(([key]) => !["listingKey", "manageHash", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked", "contactRole", "realtorAgency", "solicitorName", "solicitorFirm", "solicitorPhone", "solicitorEmail", "listingUrl", "saleType", "deposit", "furnished", "availableFrom", "minLeaseMonths", "mediaSource", "mediaOptOut"].includes(key))
             .map(([key, value]) => (
             <li key={key}>
               {metadataLabel(key)}: {String(value)}
@@ -311,14 +323,7 @@ export default async function PropertyPage({
           </p>
         </section>
       ) : property.contactType === "direct" && extra?.contactRole === "realtor" ? (
-        <SellerContact
-          heading={`Realtor${typeof extra?.realtorAgency === "string" ? ` · ${extra.realtorAgency}` : ""}`}
-          name={property.contactName}
-          phone={property.contactPhone}
-          email={property.contactEmail}
-          title={property.title}
-          location={property.location}
-        />
+null
       ) : agentIsAvailable && assignedAgent ? (
         <section>
           <h2>Realtor</h2>

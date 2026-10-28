@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import QRCode from "qrcode";
 import { isAerialPhoto, isPlaceholderPhoto, listingImages, priceLabel } from "@/lib/listingImage";
 import { prisma } from "@/lib/prisma";
+import { isRental, perMonth } from "@/lib/rental";
 import { currentSite } from "@/lib/site";
 import SignDesigner from "./sign-designer";
 
@@ -37,6 +38,7 @@ export default async function SignPage({ params }: { params: Promise<{ id: strin
         propertyType: true,
         contactType: true,
         contactPhone: true,
+        metadata: true,
         image: true,
         images: true,
         lead: { select: { id: true } },
@@ -60,7 +62,7 @@ export default async function SignPage({ params }: { params: Promise<{ id: strin
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6">
       <div className="flex flex-col gap-2 print:hidden">
-        <h1 className="text-3xl font-semibold tracking-tight">Print a For Sale sign</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Print a sign for your property</h1>
         <p className="text-zinc-700">
           Put it on your gate, fence or window. Anyone passing can scan the code to see your photos and details.{" "}
           <Link href={`/property/${property.id}`} className="underline">Back to the listing</Link>
@@ -71,7 +73,8 @@ export default async function SignPage({ params }: { params: Promise<{ id: strin
         host={site.host}
         listingPath={`${site.host}/property/${property.id}`}
         qrDownload={`/property/${property.id}/qr?download=1`}
-        price={priceLabel(property.currency, property.price)}
+        price={perMonth(priceLabel(property.currency, property.price), isRental(property.metadata)).replace(" / month", "/month")}
+        rental={isRental(property.metadata)}
         title={property.title}
         location={property.location.startsWith("Near ") ? "" : property.location}
         details={details}

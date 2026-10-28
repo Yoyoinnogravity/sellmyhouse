@@ -14,6 +14,8 @@ export type ListingSearch = {
   minPrice: number | null
   maxPrice: number | null
   type: ListingTypeId | null
+  // "sale", "rent", or "any" (both).
+  deal: "sale" | "rent" | "any"
   // "all": search every brand's stock (houses, condos, land, bungalows) from
   // whichever domain the visitor is on. "site": only this brand's type.
   scope: "site" | "all"
@@ -100,6 +102,9 @@ export const PRICE_BANDS = [
   5_000_000,
 ]
 
+// Monthly rents, for searches among rentals.
+export const RENT_BANDS = [500, 1_000, 1_500, 2_000, 3_000, 5_000, 8_000, 12_000, 20_000]
+
 export function priceBandLabel(value: number) {
   return value.toLocaleString("en-US")
 }
@@ -113,7 +118,7 @@ export function listingTypeWhere(id: ListingTypeId): Prisma.PropertyWhereInput {
 }
 
 export function emptyListingSearch(scope: ListingSearch["scope"] = "site"): ListingSearch {
-  return { place: "", minPrice: null, maxPrice: null, type: null, scope }
+  return { place: "", minPrice: null, maxPrice: null, type: null, deal: "any", scope }
 }
 
 export function parseListingSearch(params: {
@@ -122,6 +127,7 @@ export function parseListingSearch(params: {
   max?: string | string[]
   type?: string | string[]
   all?: string | string[]
+  deal?: string | string[]
 }): ListingSearch {
   const scope = firstValue(params.all) === "1" ? "all" : "site"
   const place = firstValue(params.place).trim().slice(0, 80)
@@ -134,11 +140,13 @@ export function parseListingSearch(params: {
   }
   const typeValue = firstValue(params.type)
   const type = listingTypes.some((type) => type.id === typeValue) ? (typeValue as ListingTypeId) : null
-  return { place, minPrice, maxPrice, type, scope }
+  const dealValue = firstValue(params.deal)
+  const deal = dealValue === "rent" || dealValue === "sale" ? dealValue : "any"
+  return { place, minPrice, maxPrice, type, deal, scope }
 }
 
 export function searchIsActive(search: ListingSearch) {
-  return search.place !== "" || search.minPrice != null || search.maxPrice != null || search.type != null
+  return search.place !== "" || search.minPrice != null || search.maxPrice != null || search.type != null || search.deal !== "any"
 }
 
 // Which stock a search covers: a chosen type wins, then "all sites", then this brand.

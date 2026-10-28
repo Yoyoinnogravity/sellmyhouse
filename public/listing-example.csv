@@ -1,4 +1,4 @@
-﻿price,currency,location,latitude,longitude,contact_name,contact_phone,contact_email,agency,title,property_type,bedrooms,bathrooms,built_up,land_size,area_unit,tenure,description,image_urls,reference,listing_url
-450000,MYR,"Ipoh, Perak, Malaysia",4.5975,101.0901,Aisha Rahman,+60 12 345 6789,aisha@example.com,,,Terrace,3,2,1650,,sq ft,Freehold,"Corner unit, renovated kitchen, near schools.",https://example.com/photo1.jpg | https://example.com/photo2.jpg,,
-1.2m,SGD,,1.3521,103.8198,Daniel Tan,+65 9123 4567,,Example Realty Pte Ltd,2-bedroom condo with pool view,Condominium,2,2,850,,sq ft,99-year leasehold,,,ER-1042,https://example.com/listings/1042
-"£325,000",,"Bath, Somerset, United Kingdom",,,Sarah Jones,,sarah@example.com,,,Cottage,2,1,,0.25,acres,Freehold,Stone cottage with garden.,,,
+﻿listing_type,price,currency,location,latitude,longitude,contact_name,contact_phone,contact_email,agency,title,property_type,bedrooms,bathrooms,built_up,land_size,area_unit,tenure,deposit,furnished,available_from,minimum_lease_months,description,image_urls,reference,listing_url
+,450000,MYR,"Ipoh, Perak, Malaysia",4.5975,101.0901,Aisha Rahman,+60 12 345 6789,aisha@example.com,,,Terrace,3,2,1650,,sq ft,Freehold,,,,,"Corner unit, renovated kitchen, near schools.",https://example.com/photo1.jpg | https://example.com/photo2.jpg,,
+rent,3800,SGD,,1.3521,103.8198,Daniel Tan,+65 9123 4567,,Example Realty Pte Ltd,2-bedroom condo with pool view,Condominium,2,2,850,,sq ft,,7600,Furnished,2026-12-01,12,,,ER-1042,https://example.com/listings/1042
+,"£325,000",,"Bath, Somerset, United Kingdom",,,Sarah Jones,,sarah@example.com,,,Cottage,2,1,,0.25,acres,Freehold,,,,,Stone cottage with garden.,,,

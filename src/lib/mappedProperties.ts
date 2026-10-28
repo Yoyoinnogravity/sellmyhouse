@@ -5,6 +5,7 @@ import { listingKind, type SaleKind } from "@/lib/listingKind"
 import { hasRealPhotos, listingPhoto, priceLabel } from "@/lib/listingImage"
 import { picturePoint, pointForListing, type MapProperty } from "@/lib/places"
 import { geoIndex, pinMetadata } from "@/lib/listingGeo"
+import { isRental, notRentWhere, perMonth, rentWhere } from "@/lib/rental"
 import { prisma } from "@/lib/prisma"
 import { cached } from "@/lib/queryCache"
 import { searchStockWhere, type ListingSearch } from "@/lib/listingSearch"
@@ -35,7 +36,7 @@ function toPoint(row: {
     id: row.id,
     title: row.title,
     location: row.location,
-    priceLabel: priceLabel(row.currency, row.price),
+    priceLabel: perMonth(priceLabel(row.currency, row.price), isRental(row.metadata)),
     lat: point.lat,
     lng: point.lng,
   }
@@ -64,6 +65,8 @@ async function listingWhere(sale?: SaleKind, search?: ListingSearch) {
   if (stock && (search?.type || sale !== "developer")) filters.push(stock)
   if (sale) filters.push(saleWhere(sale))
   if (search?.place) filters.push({ location: { contains: search.place, mode: "insensitive" } })
+  if (search?.deal === "rent") filters.push(rentWhere)
+  if (search?.deal === "sale") filters.push(notRentWhere)
   if (search && (search.minPrice != null || search.maxPrice != null)) {
     filters.push({
       price: {

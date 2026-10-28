@@ -139,7 +139,7 @@ export function ListingLive({ title }: { title: string }) {
           href={`${new URL(url).pathname.replace(/\/$/, "")}/sign`}
           className="inline-flex min-h-[48px] items-center justify-center bg-orange-600 px-5 font-semibold text-white hover:bg-orange-700 sm:self-start"
         >
-          Print a For Sale sign with your QR code (A1 to A4)
+          Print a sign with your QR code (A1 to A4)
         </a>
       ) : null}
       {manageUrl ? (

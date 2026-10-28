@@ -1,4 +1,5 @@
 import { currencyForLocation } from "@/lib/currency";
+import { readDeal, rentalMetadata } from "@/lib/rental";
 import { APLS } from "@/lib/propertyStandard";
 
 // Reads listing files from sellers and realtors anywhere in the world.
@@ -51,6 +52,12 @@ alias("contactEmail", "youremail", "email", "selleremail", "agentemail", "emaila
 alias("agency", "agencyname", "company", "brokerage", "agentcompany", "realestateagency");
 alias("listingUrl", "url", "link", "listinglink", "weblink");
 alias("reference", "ref", "referenceid", "listingid", "externalid", "mlsnumber", "mls", "propertyid");
+alias("deal", "listingtype", "forsaleorrent", "saleorrent", "sellorrent", "forsaleorforrent", "transactiontype", "offertype", "listingfor");
+alias("monthlyRent", "monthlyrent", "rentpermonth", "rentalprice", "rentmonthly", "rent");
+alias("deposit", "securitydeposit", "depositamount");
+alias("furnished", "furnishing", "furnishedornot");
+alias("availableFrom", "availablefrom", "available", "availabledate", "moveindate");
+alias("minLease", "minimumlease", "minimumleasemonths", "minleasemonths", "leaseterm", "minimumtenancy");
 alias("contactType", "contacttype");
 alias("source");
 alias("agentId", "agentid");
@@ -214,7 +221,9 @@ export function normalizeListing(raw: Record<string, unknown>): Record<string, u
   const text = (field: string) => (fields[field] == null ? "" : String(fields[field]).trim());
 
   // Price, and a currency read from the price when no currency column is given.
-  const priceText = text("price");
+  // A rent column, or "rent" in the sale-or-rent column, makes it a rental.
+  const rental = readDeal(fields.deal) === "rent" || (fields.monthlyRent != null && fields.price == null);
+  const priceText = text("price") || text("monthlyRent");
   const price = readPrice(priceText);
   listing.price = price ?? (priceText || undefined);
   listing.currency = text("currency") || currencyFromPrice(priceText) || undefined;
@@ -260,6 +269,19 @@ export function normalizeListing(raw: Record<string, unknown>): Record<string, u
   if (agency) {
     extras.contactRole = "realtor";
     extras.realtorAgency = agency.slice(0, 120);
+  }
+  if (rental) {
+    Object.assign(
+      extras,
+      rentalMetadata({
+        deposit: fields.deposit,
+        furnished: fields.furnished,
+        availableFrom: fields.availableFrom instanceof Date ? fields.availableFrom.toISOString() : fields.availableFrom,
+        minLease: fields.minLease,
+      }),
+    );
+    listing.saleType = "rent";
+    listing.minLease = fields.minLease;
   }
   if (text("listingUrl")) extras.listingUrl = text("listingUrl").slice(0, 200);
   if (text("reference")) extras.reference = text("reference").slice(0, 80);
@@ -432,13 +454,13 @@ export function rowsToRecords(rows: unknown[][]): Record<string, string>[] {
   const headers = cleaned[0].map((header) => header.trim());
   const keys = headers.map((header) => header.toLowerCase().replace(/[^a-z0-9]/g, ""));
   const fields = keys.map((key) => ALIASES[key]);
-  const hasPrice = fields.includes("price");
+  const hasPrice = fields.includes("price") || fields.includes("monthlyRent");
   const hasPlace = fields.some((field) =>
     ["location", "address", "city", "state", "country", "latitude"].includes(field ?? ""),
   );
   if (!hasPrice || !hasPlace) {
     throw new UploadParseError(
-      "The file needs a price column and a location column (or latitude and longitude). Download the template to see the columns.",
+      "The file needs a price (or monthly rent) column and a location column (or latitude and longitude). Download the template to see the columns.",
     );
   }
 
