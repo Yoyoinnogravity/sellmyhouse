@@ -31,8 +31,9 @@ export async function WorldMapSection({ sale, search }: { sale?: SaleKind; searc
   return (
     <div className="flex flex-col gap-2">
       <PropertyMap points={spreadPoints(listings)} variant="world" />
-      <p className="text-xs text-zinc-500">
-        Each pin shows the lowest price still on offer. Drag or pinch the map and select {article}. Imagery © Esri.
+      <p className="text-sm text-zinc-600">
+        Tap a price to see {article}. Drag to move around, pinch or use + and − to zoom. Where a development has
+        several units, the pin shows the cheapest.
       </p>
     </div>
   )
