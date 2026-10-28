@@ -7,7 +7,6 @@ import { runTeduhImport } from "@/lib/teduhImport";
 export const preferredRegion = "sin1"; // Singapore: close to the register's servers
 export const maxDuration = 60;
 
-let running = false;
 let lastRun = 0;
 
 export async function GET(request: Request) {
@@ -16,10 +15,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Not allowed." }, { status: 401 });
   }
   // One run at a time, and at most one a minute per server.
-  if (running || Date.now() - lastRun < 60_000) {
+  if (Date.now() - lastRun < 60_000) {
     return NextResponse.json({ skipped: "A run happened in the last minute." });
   }
-  running = true;
   lastRun = Date.now();
   try {
     const url = new URL(request.url);
@@ -32,7 +30,5 @@ export async function GET(request: Request) {
       { error: error instanceof Error ? error.message : "Import failed." },
       { status: 502, headers: { "Cache-Control": "no-store" } },
     );
-  } finally {
-    running = false;
   }
 }

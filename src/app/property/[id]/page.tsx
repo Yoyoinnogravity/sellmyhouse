@@ -128,6 +128,11 @@ export default async function PropertyPage({
     property.id,
   );
   const point = pointForListing(property.location, property.metadata);
+  // Street View only for an exact pin; a town-centre guess would show the wrong street.
+  const exact = picturePoint(property.location, property.metadata);
+  const streetView = exact?.precise
+    ? `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${exact.lat},${exact.lng}`
+    : null;
   const mapPoint = {
     id: property.id,
     title: property.title,
@@ -196,6 +201,16 @@ export default async function PropertyPage({
             </li>
           ))}
         </ul>
+      ) : null}
+      {streetView ? (
+        <a
+          href={streetView}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-[44px] items-center gap-2 self-start border-2 border-zinc-900 px-4 font-semibold hover:bg-zinc-50"
+        >
+          Open Street View of this spot ↗
+        </a>
       ) : null}
       {isPlaceholderPhoto(photos[0]) ? null : (
         <p className="text-sm text-zinc-600">
