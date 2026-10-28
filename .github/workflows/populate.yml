@@ -18,5 +18,7 @@ jobs:
         run: |
           AUTH=()
           if [ -n "$CRON_SECRET" ]; then AUTH=(-H "Authorization: Bearer $CRON_SECRET"); fi
-          curl -sS --max-time 90 "${AUTH[@]}" https://sellmyhouse.asia/api/cron/developments | head -c 4000
-          echo
+          OUT=$(curl -sS --max-time 90 "${AUTH[@]}" https://sellmyhouse.asia/api/cron/developments 2>&1 | head -c 3000)
+          echo "$OUT"
+          # Also as a notice, so the result shows on the run's summary page.
+          echo "::notice title=Import result::$(echo "$OUT" | tr '\n' ' ' | head -c 900)"
