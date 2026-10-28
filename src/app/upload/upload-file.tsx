@@ -58,7 +58,7 @@ export default function UploadFile() {
     const origin = window.location.origin;
     const quote = (value: string) => `"${value.replace(/"/g, '""')}"`;
     const lines = [
-      "id,title,public_link,private_check_or_edit_link,for_sale_sign",
+      "id,title,public_link,private_check_or_edit_link,for_sale_sign,qr_code",
       ...result.listings.map((listing) =>
         [
           listing.id,
@@ -66,6 +66,7 @@ export default function UploadFile() {
           `${origin}/property/${listing.id}`,
           `${origin}/edit/${listing.id}/${listing.manageKey}`,
           `${origin}/property/${listing.id}/sign`,
+          `${origin}/property/${listing.id}/qr?download=1`,
         ].join(","),
       ),
     ];
@@ -100,6 +101,9 @@ export default function UploadFile() {
             <li key={listing.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
               <a href={`/property/${listing.id}`} className="font-semibold underline">
                 {listing.title}
+              </a>
+              <a href={`/property/${listing.id}/qr?download=1`} className="text-sm underline">
+                QR code
               </a>
               <a href={`/property/${listing.id}/sign`} className="text-sm underline">
                 Print sign

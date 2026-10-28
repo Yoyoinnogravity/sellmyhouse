@@ -19,6 +19,7 @@ import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AdPlace } from "@/components/ad-place";
 import { AdminTools } from "@/components/admin-tools";
+import { ListingQr } from "@/components/listing-qr";
 import { isAdminEmail } from "@/lib/developerAccess";
 import { isRemoved } from "@/lib/listingRemoval";
 import { getUserFromCookie } from "@/lib/session";
@@ -168,6 +169,7 @@ export default async function PropertyPage({
       <AdPlace place={property.location} />
       {admin ? <AdminTools id={property.id} imported={kind === "developer"} /> : null}
       {(await searchParams).published ? <ListingLive title={property.title} /> : null}
+      {(await searchParams).published ? <ListingQr id={property.id} large /> : null}
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
         <p className="text-3xl font-bold tracking-tight">{mapPoint.priceLabel}</p>
@@ -195,6 +197,7 @@ export default async function PropertyPage({
       ) : null}
       {rental ? <RentalDetails metadata={extra} /> : null}
       <ShareListing title={property.title} location={property.location} />
+      <ListingQr id={property.id} />
       <div className="grid gap-4 md:grid-cols-2">
         <ListingPhoto
           src={photos[0]}

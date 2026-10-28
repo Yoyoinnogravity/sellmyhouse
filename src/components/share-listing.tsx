@@ -136,14 +136,14 @@ export function ListingLive({ title }: { title: string }) {
       </div>
       <a
         href="/sell"
-        className="inline-flex min-h-[48px] items-center justify-center border-2 border-green-700 bg-white px-5 font-semibold sm:self-start"
+        className="inline-flex min-h-[48px] items-center justify-center border-2 border-green-700 bg-white px-5 py-2 text-center font-semibold sm:self-start"
       >
         List another property (your details are remembered)
       </a>
       {url ? (
         <a
           href={`${new URL(url).pathname.replace(/\/$/, "")}/sign`}
-          className="inline-flex min-h-[48px] items-center justify-center bg-orange-600 px-5 font-semibold text-white hover:bg-orange-700 sm:self-start"
+          className="inline-flex min-h-[48px] items-center justify-center bg-orange-600 px-5 py-2 text-center font-semibold text-white hover:bg-orange-700 sm:self-start"
         >
           Print a sign with your QR code (A1 to A4)
         </a>
