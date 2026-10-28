@@ -33,7 +33,7 @@ async function AgentHome() {
       <p>{agent.email}</p>
       <p className="flex gap-4">
         <Link href={`/agents/${agent.id}`}>View profile</Link>
-        <Link href="/agents/upload">Upload listings</Link>
+        <Link href="/upload">Upload listings</Link>
       </p>
       <section className="flex flex-col gap-4">
         <h2>Sellers in {town} asking for a realtor</h2>

@@ -431,8 +431,16 @@ function metadataLabel(key: string) {
     units: "Units of this type",
     areaUnit: "Area unit",
     yearBuilt: "Year built",
+    address: "Address",
+    postcode: "Postcode",
+    country: "Country",
+    reference: "Reference",
+    listingUrl: "More details",
   }
-  return labels[key] ?? key
+  if (labels[key]) return labels[key]
+  // Extra columns from uploaded files: "swimmingPool" → "Swimming pool".
+  const words = key.replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase()
+  return words.charAt(0).toUpperCase() + words.slice(1)
 }
 
 function agentPhoto(name: string) {

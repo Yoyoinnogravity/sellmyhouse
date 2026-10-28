@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
+import readXlsxFile from "read-excel-file/node";
 import { ensureAgency, getAgentFromCookie } from "@/lib/agent";
+import { newManageKey, withManageHash } from "@/lib/manageKey";
 import { prisma } from "@/lib/prisma";
 import {
   formatFieldError,
   isPropertySource,
   validateAgent,
   validatePropertyBatch,
+  type AplsProperty,
   type PropertySource,
 } from "@/lib/propertyStandard";
-import { getUserFromCookie } from "@/lib/session";
+import { currentSite, defaultPropertyType } from "@/lib/site";
 import {
   isUploadMode,
   parseUploadBody,
@@ -16,14 +19,16 @@ import {
   type UploadMode,
 } from "@/lib/uploadParse";
 
+// Anyone can upload a file of listings: a seller with one home, or a
+// realtor with two hundred. No account is needed. Each listing gets its own
+// private edit link, returned once in the response. A signed-in agent's
+// listings are attached to their agent profile instead.
+
 const INSERT_CHUNK = 40;
+const MAX_FILE_BYTES = 4_000_000;
 
 export async function POST(request: Request) {
-  const user = await getUserFromCookie();
   const agentSession = await getAgentFromCookie();
-  if (!user && !agentSession) {
-    return NextResponse.json({ error: "You need to log in." }, { status: 401 });
-  }
 
   let mode: UploadMode;
   let source: PropertySource;
@@ -37,127 +42,130 @@ export async function POST(request: Request) {
     source = sourceForMode(parsed.mode, parsed.source);
     agentInput = parsed.agent;
     propertiesInput = parsed.properties;
-    if (!user && agentSession && !hasAgentIdentity(agentInput)) {
-      const self = await prisma.agent.findUnique({
-        where: { id: agentSession.id },
-        select: {
-          name: true,
-          agency: true,
-          phone: true,
-          email: true,
-          country: true,
-        },
-      });
-      if (!self) {
-        return NextResponse.json({ error: "You need to log in." }, { status: 401 });
-      }
-      agentInput = self;
-    }
   } catch (error) {
     const message =
-      error instanceof UploadParseError
-        ? error.message
-        : "The upload could not be read.";
+      error instanceof UploadParseError ? error.message : "The upload could not be read.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const agentResult = validateAgent(agentInput);
+  const site = await currentSite();
+  const asAgent = Boolean(agentSession);
   const batchResult = validatePropertyBatch(propertiesInput, {
     bulk: mode === "bulk",
-    defaultContactType: "agent",
+    defaultContactType: asAgent ? "agent" : "direct",
     defaultSource: source,
     requireAgentId: false,
   });
 
-  if (!agentResult.ok || !batchResult.ok) {
-    const errors = [
-      ...(agentResult.ok ? [] : agentResult.errors),
-      ...(batchResult.ok ? [] : batchResult.errors),
-    ];
-    return NextResponse.json(
-      {
-        error: errors.map(formatFieldError).join(" "),
-        errors: errors.map((error) => ({
-          ...error,
-          message: formatFieldError(error),
-        })),
-      },
-      { status: 400 },
-    );
-  }
+  if (!batchResult.ok) return errorResponse(batchResult.errors);
 
-  const agent = agentResult.value;
   const listings = batchResult.value;
 
-  if (!user && agentSession && agent.email !== agentSession.email) {
-    return NextResponse.json(
-      { error: "You can only upload listings for your own agent account." },
-      { status: 403 },
-    );
-  }
-
   try {
-    const saved = await prisma.$transaction(async (tx) => {
-      const existing = await tx.agent.findFirst({
-        where: { email: agent.email },
-        orderBy: { id: "asc" },
-      });
-      const record = existing
-        ? await tx.agent.update({
-            where: { id: existing.id },
-            data: {
-              name: agent.name,
-              agency: agent.agency,
-              phone: agent.phone,
-              country: agent.country,
-            },
-          })
-        : await tx.agent.create({ data: agent });
+    let agentId: number | null = null;
+    let agentName: string | null = null;
 
-      await ensureAgency(tx, {
+    if (agentSession) {
+      const self = await prisma.agent.findUnique({
+        where: { id: agentSession.id },
+        select: { name: true, agency: true, phone: true, email: true, country: true },
+      });
+      if (!self) return NextResponse.json({ error: "Please sign in again." }, { status: 401 });
+      const agentResult = validateAgent(hasAgentIdentity(agentInput) ? agentInput : self);
+      if (!agentResult.ok) return errorResponse(agentResult.errors);
+      if (agentResult.value.email !== agentSession.email) {
+        return NextResponse.json(
+          { error: "You can only upload listings for your own agent account." },
+          { status: 403 },
+        );
+      }
+      const record = await prisma.agent.update({
+        where: { id: agentSession.id },
+        data: {
+          name: agentResult.value.name,
+          agency: agentResult.value.agency,
+          phone: agentResult.value.phone,
+          country: agentResult.value.country,
+        },
+      });
+      await ensureAgency(prisma, {
         agentId: record.id,
-        name: agent.agency,
-        country: agent.country,
+        name: agentResult.value.agency,
+        country: agentResult.value.country,
       });
+      agentId = record.id;
+      agentName = record.name;
+    }
 
-      const ids: number[] = [];
-      for (let index = 0; index < listings.length; index += INSERT_CHUNK) {
-        const created = await tx.property.createManyAndReturn({
-          data: listings.slice(index, index + INSERT_CHUNK).map((listing) => ({
-            title: listing.title,
-            price: listing.price,
-            location: listing.location,
-            contactType: listing.contactType,
-            contactName: listing.contactName,
-            contactPhone: listing.contactPhone,
-            contactEmail: listing.contactEmail,
-            source: listing.source,
-            agentId: record.id,
-            solicitorId: null,
-          })),
+    const keys = listings.map(() => newManageKey());
+    const rows = listings.map((listing, index) => toRow(listing, keys[index].hash, agentId, defaultPropertyType(site)));
+
+    const ids = await prisma.$transaction(async (tx) => {
+      const created: number[] = [];
+      for (let index = 0; index < rows.length; index += INSERT_CHUNK) {
+        const saved = await tx.property.createManyAndReturn({
+          data: rows.slice(index, index + INSERT_CHUNK),
           select: { id: true },
         });
-        ids.push(...created.map((property) => property.id));
+        created.push(...saved.map((property) => property.id));
       }
-
-      return { agentId: record.id, agentName: record.name, ids };
+      return created;
     });
 
     return NextResponse.json(
       {
-        agentId: saved.agentId,
-        agentName: saved.agentName,
-        count: saved.ids.length,
-        ids: saved.ids,
+        agentId,
+        agentName: agentName ?? listings[0]?.contactName ?? "you",
+        count: ids.length,
+        ids,
+        listings: ids.map((id, index) => ({
+          id,
+          title: listings[index].title,
+          manageKey: keys[index].key,
+        })),
       },
       { status: 201 },
     );
   } catch {
-    return NextResponse.json(
-      { error: "The listings could not be saved." },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "The listings could not be saved." }, { status: 500 });
   }
+}
+
+function toRow(listing: AplsProperty, manageHash: string, agentId: number | null, fallbackType: string) {
+  const metadata = withManageHash(listing.metadata ? JSON.stringify(listing.metadata) : null, manageHash);
+  return {
+    title: listing.title,
+    price: listing.price,
+    currency: listing.currency,
+    location: listing.location,
+    propertyType: listing.propertyType ?? fallbackType,
+    bedrooms: listing.bedrooms,
+    bathrooms: listing.bathrooms,
+    builtUp: listing.builtUp,
+    landSize: listing.landSize,
+    tenure: listing.tenure,
+    description: listing.description,
+    image: listing.images[0] ?? null,
+    images: listing.images.length > 0 ? JSON.stringify(listing.images) : null,
+    metadata,
+    contactType: agentId ? listing.contactType : "direct",
+    contactName: listing.contactName,
+    contactPhone: listing.contactPhone,
+    contactEmail: listing.contactEmail,
+    source: listing.source,
+    agentId: agentId && listing.contactType === "agent" ? agentId : null,
+    solicitorId: null,
+  };
+}
+
+function errorResponse(errors: { field: string; message: string; index?: number }[]) {
+  return NextResponse.json(
+    {
+      error: errors.map(formatFieldError).join(" "),
+      errors: errors.map((error) => ({ ...error, message: formatFieldError(error) })),
+    },
+    { status: 400 },
+  );
 }
 
 async function readBody(request: Request): Promise<unknown> {
@@ -171,58 +179,67 @@ async function readBody(request: Request): Promise<unknown> {
     }
   }
 
-  if (contentType.includes("text/csv")) {
+  if (contentType.includes("text/csv") || contentType.includes("text/plain")) {
     return { mode: "csv", payload: await request.text() };
   }
 
-  if (
-    contentType.includes("multipart/form-data") ||
-    contentType.includes("application/x-www-form-urlencoded")
-  ) {
+  if (contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded")) {
     const formData = await request.formData();
+    // Left empty by people; spam bots usually fill it in.
+    if (formString(formData.get("website"))) throw new UploadParseError("The upload could not be read.");
+
+    const formMode = formString(formData.get("mode"));
+    const base = {
+      source: formString(formData.get("source")),
+      agent: agentFromForm(formData),
+    };
     const file = formData.get("file");
-    let payload = formString(formData.get("payload"));
     if (file instanceof File && file.size > 0) {
-      if (file.size > 1_000_000) {
-        throw new UploadParseError("That file is too large.");
+      if (file.size > MAX_FILE_BYTES) throw new UploadParseError("That file is too large. Please split it into smaller files.");
+      const name = file.name.toLowerCase();
+      if (name.endsWith(".xlsx")) {
+        let sheets: { sheet: string; data: unknown[][] }[];
+        try {
+          sheets = (await readXlsxFile(Buffer.from(await file.arrayBuffer()))) as unknown as {
+            sheet: string;
+            data: unknown[][];
+          }[];
+        } catch {
+          throw new UploadParseError("That Excel file could not be read. Save it as .xlsx or CSV and try again.");
+        }
+        // Our template has Listings, Guide and Example sheets: only Listings is read,
+        // so the example rows are never published. Other workbooks: the first sheet.
+        const chosen = sheets.find((sheet) => sheet.sheet.trim().toLowerCase() === "listings") ?? sheets[0];
+        if (!chosen) throw new UploadParseError("That Excel file has no sheets.");
+        return { ...base, mode: "csv", rows: chosen.data };
       }
-      const fileText = (await file.text()).trim();
-      const fileMode = modeFromFile(file.name, fileText);
-      payload = fileText;
-      const formMode = formString(formData.get("mode"));
+      if (name.endsWith(".xls") || name.endsWith(".numbers") || name.endsWith(".ods")) {
+        throw new UploadParseError("Please save the file as .xlsx or CSV, then upload it again.");
+      }
+      const text = (await file.text()).trim();
+      const fileMode: UploadMode = name.endsWith(".json") || text.startsWith("{") || text.startsWith("[") ? "json" : "csv";
       return {
-        mode: isUploadMode(formMode) ? formMode : fileMode,
-        source: formString(formData.get("source")),
-        agent: agentFromForm(formData),
-        properties: formString(formData.get("properties")),
-        payload,
-        title: formString(formData.get("title")),
-        price: formString(formData.get("price")),
-        location: formString(formData.get("location")),
+        ...base,
+        mode: isUploadMode(formMode) && formMode !== "manual" ? formMode : fileMode,
+        payload: text,
       };
     }
 
     return {
-      mode: formString(formData.get("mode")),
-      source: formString(formData.get("source")),
-      agent: agentFromForm(formData),
+      ...base,
+      mode: formMode,
       properties: formString(formData.get("properties")),
-      payload,
-      title: formString(formData.get("title")),
-      price: formString(formData.get("price")),
-      location: formString(formData.get("location")),
+      payload: formString(formData.get("payload")),
     };
   }
 
-  throw new UploadParseError("Send JSON, CSV, or form data.");
+  throw new UploadParseError("Send a CSV, Excel or JSON file.");
 }
 
 function sourceForMode(mode: UploadMode, explicit: unknown): PropertySource {
   if (typeof explicit === "string" && explicit.trim()) {
     const source = explicit.trim();
-    if (!isPropertySource(source)) {
-      throw new UploadParseError("Source must be manual, imported, or agency.");
-    }
+    if (!isPropertySource(source)) throw new UploadParseError("Source must be manual, imported, or agency.");
     return source;
   }
   return mode === "manual" ? "manual" : "imported";
@@ -238,18 +255,9 @@ function agentFromForm(formData: FormData) {
   };
 }
 
-function modeFromFile(name: string, text: string): UploadMode {
-  const lower = name.toLowerCase();
-  if (lower.endsWith(".csv")) return "csv";
-  if (lower.endsWith(".json")) return "json";
-  const trimmed = text.trimStart();
-  if (trimmed.startsWith("{") || trimmed.startsWith("[")) return "json";
-  return "csv";
-}
-
 function hasAgentIdentity(agent: unknown) {
   if (!agent || typeof agent !== "object") return false;
-  return ["name", "agency", "phone", "email", "country"].some((field) => {
+  return ["name", "agency", "phone", "email", "country"].every((field) => {
     const value = (agent as Record<string, unknown>)[field];
     return typeof value === "string" && value.trim() !== "";
   });

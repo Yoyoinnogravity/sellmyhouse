@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
+import { FormatDownloads } from "@/components/format-downloads";
 import { WorldMapSection } from "@/components/world-map-section";
 import { emptyListingSearch, listingTypeOptions, PRICE_BANDS, priceBandLabel } from "@/lib/listingSearch";
 import { listCountryCounts, listPlaceOptions } from "@/lib/mappedProperties";
@@ -229,6 +230,7 @@ function SellersSection() {
           List your property free
         </Link>
       </div>
+      <FormatDownloads />
     </section>
   );
 }

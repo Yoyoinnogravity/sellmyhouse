@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { FormatDownloads } from "@/components/format-downloads";
 import { listAgents } from "@/lib/agent";
 
 export default function AgentsPage() {
@@ -11,8 +12,8 @@ export default function AgentsPage() {
       <p className="flex flex-wrap gap-x-4 gap-y-2">
         <Link href="/agents/register">Add your details and region</Link>
         <Link href="/agents/login">Log in</Link>
-        <Link href="/agents/upload">Upload many listings at once</Link>
       </p>
+      <FormatDownloads />
       <Suspense fallback={<p>Loading…</p>}>
         <AgentDirectory />
       </Suspense>

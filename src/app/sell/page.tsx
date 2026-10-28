@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { FormatDownloads } from "@/components/format-downloads";
 import { currentSite } from "@/lib/site";
 import QuickSellForm from "./quick-sell-form";
 import SellForm from "./sell-form";
@@ -30,6 +31,9 @@ export default function SellPage({
       <Suspense fallback={<p className="mt-8">Loading…</p>}>
         <SellForms searchParams={searchParams} />
       </Suspense>
+      <div className="mt-10">
+        <FormatDownloads compact />
+      </div>
       <details className="mt-10 border-t pt-6">
         <summary className="cursor-pointer font-semibold">
           Want a realtor or conveyancer to handle it? More options

@@ -36,6 +36,10 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
     event.preventDefault();
     setError(null);
     const formData = new FormData(event.currentTarget);
+    if (!String(formData.get("location") ?? "").trim() && !formData.get("lat")) {
+      setError("Please type the town or tap your property on the map.");
+      return;
+    }
     const price = Number(String(formData.get("price") ?? "").replace(/[^0-9]/g, ""));
     if (!Number.isInteger(price) || price <= 0) {
       setError("Please enter the asking price as a number, for example 450000.");
@@ -110,12 +114,12 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">2. Tell buyers about it</h2>
+        <p className="text-sm text-zinc-600">Only the price and where it is are needed. Everything else is up to you.</p>
         <label htmlFor="title">
-          What are you selling?
+          What are you selling? <span className="text-zinc-500">(optional)</span>
           <input
             id="title"
             name="title"
-            required
             maxLength={120}
             defaultValue={defaults.title}
             placeholder={examples[noun] ?? `3-bedroom ${noun} with garden`}
@@ -135,11 +139,10 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
           />
         </label>
         <label htmlFor="location">
-          Where is it?
+          Where is it? <span className="text-zinc-500">(type the town, or just drop a pin below)</span>
           <input
             id="location"
             name="location"
-            required
             value={location}
             onChange={(event) => setLocation(event.target.value)}
             placeholder="Town, country"
@@ -150,7 +153,10 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
           <span>
             Pin it on the map <span className="text-zinc-500">(helps buyers find it)</span>
           </span>
-          <LocationPicker location={location} />
+          <LocationPicker
+            location={location}
+            onPlace={(place) => setLocation((current) => (current.trim() ? current : place))}
+          />
         </div>
         <label htmlFor="description">
           A few words about it <span className="text-zinc-500">(optional)</span>
@@ -167,16 +173,16 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">3. How can buyers reach you?</h2>
         <label htmlFor="contactName">
-          Your name
+          Your name <span className="text-zinc-500">(seller or realtor)</span>
           <input id="contactName" name="contactName" required autoComplete="name" className={input} />
         </label>
         <label htmlFor="contactPhone">
-          Phone or WhatsApp
-          <input id="contactPhone" name="contactPhone" type="tel" required autoComplete="tel" className={input} />
+          Phone or WhatsApp <span className="text-zinc-500">(optional, but buyers call most)</span>
+          <input id="contactPhone" name="contactPhone" type="tel" autoComplete="tel" className={input} />
         </label>
         <label htmlFor="contactEmail">
-          Email
-          <input id="contactEmail" name="contactEmail" type="email" required autoComplete="email" className={input} />
+          Email <span className="text-zinc-500">(optional)</span>
+          <input id="contactEmail" name="contactEmail" type="email" autoComplete="email" className={input} />
         </label>
         <label className="flex items-start gap-3 border p-3">
           <input type="checkbox" name="agentLeads" value="1" className="mt-1 h-5 w-5" />

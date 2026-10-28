@@ -36,7 +36,8 @@
     "prisma": "^8.0.0-rc.22",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "read-excel-file": "9.3.12"
   },
   "devDependencies": {
     "@prisma/prisma7": "^7.10.0",

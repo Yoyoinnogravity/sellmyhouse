@@ -6,6 +6,7 @@ import { useState } from "react"
 const publicLinks = [
   { href: "/properties?all=1", label: "Find" },
   { href: "/sell", label: "Sell" },
+  { href: "/listing-format", label: "Upload format" },
   { href: "/agents", label: "Agents" },
   { href: "/solicitors", label: "Conveyancers" },
   { href: "/advertise", label: "Advertise" },

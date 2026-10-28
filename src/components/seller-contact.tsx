@@ -62,7 +62,9 @@ export function SellerContact({
         ) : null}
       </div>
       <p className="text-sm text-zinc-600">
-        {[phone, email].filter(Boolean).join(" · ")}. No account needed, and no fees for buyers.
+        {phone || email
+          ? `${[phone, email].filter(Boolean).join(" · ")}. No account needed, and no fees for buyers.`
+          : "The seller hasn't added a phone number or email yet. Check back soon."}
       </p>
     </section>
   )

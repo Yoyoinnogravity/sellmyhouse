@@ -12,7 +12,16 @@ const Canvas = dynamic(() => import("./location-picker-canvas"), {
 
 // Lets a seller tap the exact spot of their property. The pin is sent with
 // the listing as lat and lng, so it lands in the right place on the world map.
-export function LocationPicker({ location }: { location: string }) {
+// When the seller drops a pin without typing a place, onPlace receives the
+// town and country for that spot (from OpenStreetMap), so the pin alone is
+// enough to list.
+export function LocationPicker({
+  location,
+  onPlace,
+}: {
+  location: string
+  onPlace?: (place: string) => void
+}) {
   const [pin, setPin] = useState<Pin | null>(null)
   const [centre, setCentre] = useState<Pin | null>(null)
   const [zoom, setZoom] = useState(2)
@@ -41,6 +50,7 @@ export function LocationPicker({ location }: { location: string }) {
       (position) => {
         const here = { lat: position.coords.latitude, lng: position.coords.longitude }
         setPin(here)
+        describe(here)
         setCentre(here)
         setZoom(17)
         setNote(null)
@@ -53,6 +63,26 @@ export function LocationPicker({ location }: { location: string }) {
   function pick(next: Pin) {
     setPin(next)
     setNote(null)
+    describe(next)
+  }
+
+  async function describe(spot: Pin) {
+    if (!onPlace || location.trim()) return
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&lat=${spot.lat}&lon=${spot.lng}`,
+        { headers: { Accept: "application/json" } },
+      )
+      const data = (await response.json()) as {
+        address?: Record<string, string>
+      }
+      const a = data.address ?? {}
+      const town = a.suburb ?? a.town ?? a.city ?? a.village ?? a.county ?? a.city_district
+      const place = [town, a.state, a.country].filter(Boolean).join(", ")
+      if (place) onPlace(place.slice(0, 120))
+    } catch {
+      // The pin still saves; the server describes it by its coordinates.
+    }
   }
 
   return (

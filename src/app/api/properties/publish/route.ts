@@ -52,6 +52,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
+  // A pin alone is enough: describe the place by its coordinates.
+  const fields = body as Record<string, unknown>;
+  if (pin && fields && typeof fields === "object" && !String(fields.location ?? "").trim()) {
+    fields.location = `Near ${pin.lat.toFixed(4)}, ${pin.lng.toFixed(4)}`;
+  }
+
   const validated = validateProperty(body, {
     defaultSource: "manual",
     requireAgentId: true,

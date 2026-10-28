@@ -1,7 +1,9 @@
 /**
  * APLS (Agent Property Listing Standard).
- * A listing needs a title, a whole-number price, and a location.
- * Contact is either direct (name, phone, and email) or an estate agent.
+ * A listing needs only a whole-number price, a location (a map pin is
+ * enough; see uploadParse) and a contact name. Everything else may be left
+ * blank: a missing title is written from the details. Contact is direct
+ * (name, plus phone and email if given) or an estate agent.
  * source is "manual", "imported", or "agency".
  * Optional details are currency, propertyType, bedrooms, bathrooms, builtUp,
  * landSize, tenure, images, description, solicitorId, and metadata.
@@ -44,7 +46,7 @@ export type AplsAgent = {
   country: string;
 };
 
-export type AplsTenure = "Freehold" | "Leasehold";
+export type AplsTenure = "Freehold" | "Leasehold" | (string & {});
 
 export type AplsMetadata = Record<string, string | number | boolean | null>;
 
@@ -83,7 +85,7 @@ export type ValidatePropertyOptions = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phonePattern = /^[0-9+().\-\s]+$/;
-const namePattern = /^[\p{L}\p{M}][\p{L}\p{M}\s.'-]{0,79}$/u;
+const namePattern = /^[\p{L}\p{M}\p{N}][\p{L}\p{M}\p{N}\s.'&,()/-]{0,79}$/u;
 const agencyPattern = /^[\p{L}\p{M}0-9][\p{L}\p{M}0-9\s&.'-]{0,119}$/u;
 const countryPattern = /^[\p{L}\p{M}][\p{L}\p{M}\s.'-]{1,79}$/u;
 
@@ -200,9 +202,9 @@ export function validateProperty(
         ? null
         : (options.defaultContactType ?? null);
 
-  if (!title) {
-    errors.push({ field: "title", message: "Enter a title." });
-  } else if (title.length > APLS.titleMax) {
+  // Only the price and location are required. A blank title is written
+  // from the details given, for example "3-bedroom house in Ipoh".
+  if (title.length > APLS.titleMax) {
     errors.push({
       field: "title",
       message: `Enter a title up to ${APLS.titleMax} characters.`,
@@ -251,19 +253,22 @@ export function validateProperty(
   let agentId: number | null = null;
 
   if (contactType === "direct") {
-    if (!contactName || !namePattern.test(contactName)) {
+    // The contact name is required; phone and email are optional but
+    // checked when given.
+    if (!contactName) {
+      errors.push({ field: "contactName", message: "Enter the seller's or realtor's name." });
+    } else if (!namePattern.test(contactName)) {
       errors.push({ field: "contactName", message: "Enter a contact name." });
     }
-    if (!isPhone(contactPhone)) {
+    if (contactPhone && !isPhone(contactPhone)) {
       errors.push({
         field: "contactPhone",
         message: "Enter a contact phone number.",
       });
     }
     if (
-      !contactEmail ||
-      contactEmail.length > APLS.emailMax ||
-      !emailPattern.test(contactEmail)
+      contactEmail &&
+      (contactEmail.length > APLS.emailMax || !emailPattern.test(contactEmail))
     ) {
       errors.push({
         field: "contactEmail",
@@ -329,7 +334,7 @@ export function validateProperty(
   return {
     ok: true,
     value: {
-      title,
+      title: title || autoTitle(propertyType, bedrooms, location),
       price: price as number,
       currency,
       location,
@@ -342,11 +347,9 @@ export function validateProperty(
       images: images ?? [],
       description,
       contactType: contactType as ContactType,
-      contactName: contactType === "direct" ? contactName : contactName || null,
-      contactPhone:
-        contactType === "direct" ? contactPhone : contactPhone || null,
-      contactEmail:
-        contactType === "direct" ? contactEmail : contactEmail || null,
+      contactName: contactName || null,
+      contactPhone: contactPhone || null,
+      contactEmail: contactEmail || null,
       source,
       solicitorId,
       agentId,
@@ -462,16 +465,34 @@ function readMeasure(
   return parsed;
 }
 
+// Freehold and Leasehold are written the same way everywhere; other local
+// terms (Strata, Malay Reserve, 99-year lease…) are kept as given.
 function readTenure(value: unknown, errors: FieldError[]): AplsTenure | null {
   if (isBlank(value)) return null;
-  const tenure = readString(value).toLowerCase();
-  if (tenure === "freehold") return "Freehold";
-  if (tenure === "leasehold") return "Leasehold";
+  const tenure = readString(value);
+  const lower = tenure.toLowerCase();
+  if (lower === "freehold") return "Freehold";
+  if (lower === "leasehold") return "Leasehold";
+  if (tenure.length <= 40 && /^[\p{L}\p{N}][\p{L}\p{N}\s.'()\/-]*$/u.test(tenure)) return tenure;
   errors.push({
     field: "tenure",
-    message: "Tenure must be freehold or leasehold.",
+    message: "Enter the tenure in up to 40 characters, for example Freehold.",
   });
   return null;
+}
+
+export function autoTitle(
+  propertyType: string | null,
+  bedrooms: number | null,
+  location: string,
+): string {
+  const kind = (propertyType || "property").toLowerCase();
+  const rooms = bedrooms && bedrooms > 0 ? `${bedrooms}-bedroom ` : "";
+  const first = location.split(",")[0]?.trim();
+  const place = first && !first.startsWith("Near ") ? first : "";
+  const text = `${rooms}${kind}${place ? ` in ${place}` : ""}`;
+  const title = text.charAt(0).toUpperCase() + text.slice(1);
+  return title.slice(0, APLS.titleMax);
 }
 
 function readImages(value: unknown, errors: FieldError[]): string[] | null {
