@@ -57,6 +57,8 @@ export async function fillDevelopmentMedia(options: { deadlineMs?: number; maxPr
       AND metadata::jsonb->>'mediaOptOut' IS NULL
       AND coalesce(metadata::jsonb->>'website', '') <> ''
     GROUP BY 1
+    -- Condos and apartments first: their developers' sites have the views.
+    ORDER BY bool_or("propertyType" ~* 'kondo|condo|apartment|pangsapuri|servis|suite|soho|residen') DESC
     LIMIT ${options.maxProjects ?? 3}`;
 
   const log: string[] = [];
@@ -75,9 +77,32 @@ export async function fillDevelopmentMedia(options: { deadlineMs?: number; maxPr
       await save(row.code, website, media.images as string[], media.videos as string[]);
       log.push(`${row.code} ${developmentName(title, row.code, row.propertyType)}: ${media.images.length} photos, ${media.videos.length} videos`);
     } catch (error) {
-      await save(row.code, website, [], []);
-      log.push(`${row.code}: ${error instanceof Error ? error.message : "failed"}`);
+      // A site that's down gets one more try on a later run before it's skipped.
+      const tries = await prisma.$queryRaw<{ tries: number }[]>`
+        UPDATE "Property"
+        SET metadata = (metadata::jsonb || jsonb_build_object(
+          'mediaTries', coalesce((metadata::jsonb->>'mediaTries')::int, 0) + 1))::text
+        WHERE metadata::jsonb->>'projectCode' = ${row.code} AND metadata::jsonb->>'register' = 'TEDUH'
+        RETURNING (metadata::jsonb->>'mediaTries')::int AS tries`;
+      if ((tries[0]?.tries ?? 2) >= 2) await save(row.code, website, [], []);
+      log.push(`${row.code}: ${error instanceof Error ? error.message : "failed"} (try ${tries[0]?.tries ?? "?"})`);
     }
   }
-  return { checked: rows.length, log };
+  const [stats] = await prisma.$queryRaw<{ projects: bigint; withWebsite: bigint; checked: bigint; withPhotos: bigint }[]>`
+    SELECT count(DISTINCT metadata::jsonb->>'projectCode') AS projects,
+           count(DISTINCT metadata::jsonb->>'projectCode') FILTER (WHERE coalesce(metadata::jsonb->>'website', '') <> '') AS "withWebsite",
+           count(DISTINCT metadata::jsonb->>'projectCode') FILTER (WHERE metadata::jsonb->>'mediaChecked' IS NOT NULL) AS checked,
+           count(DISTINCT metadata::jsonb->>'projectCode') FILTER (WHERE images IS NOT NULL AND images NOT LIKE '%placehold.co%') AS "withPhotos"
+    FROM "Property"
+    WHERE metadata IS NOT NULL AND metadata::jsonb->>'register' = 'TEDUH'`;
+  return {
+    checked: rows.length,
+    log,
+    developments: {
+      total: Number(stats?.projects ?? 0),
+      withWebsite: Number(stats?.withWebsite ?? 0),
+      websitesRead: Number(stats?.checked ?? 0),
+      withPhotos: Number(stats?.withPhotos ?? 0),
+    },
+  };
 }
