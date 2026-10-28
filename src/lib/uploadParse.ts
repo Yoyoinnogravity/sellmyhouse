@@ -1,3 +1,4 @@
+import { currencyForLocation } from "@/lib/currency";
 import { APLS } from "@/lib/propertyStandard";
 
 // Reads listing files from sellers and realtors anywhere in the world.
@@ -226,6 +227,7 @@ export function normalizeListing(raw: Record<string, unknown>): Record<string, u
   if (!location) location = buildLocation([text("city"), text("state"), text("country")]) || text("address").slice(0, APLS.locationMax);
   if (!location && pinned) location = `Near ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
   listing.location = location;
+  listing.currency ??= currencyForLocation(location) ?? undefined;
   if (pinned) {
     extras.lat = lat;
     extras.lng = lng;

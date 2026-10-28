@@ -114,6 +114,8 @@ export default function ManageListing({ id }: { id: number }) {
     <div className="flex flex-col gap-8">
       <p className="text-zinc-600">
         {listing?.location}. <Link href={`/property/${id}`} className="underline">View your listing</Link>
+        {" · "}
+        <Link href={`/property/${id}/sign`} className="underline">Print a For Sale sign</Link>
       </p>
       <form onSubmit={save} className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Change the details</h2>

@@ -6,6 +6,7 @@ import {
 } from "@/lib/listingPhotos";
 import { createLeadForProperty } from "@/lib/leads";
 import { newManageKey, withManageHash } from "@/lib/manageKey";
+import { currencyForLocation } from "@/lib/currency";
 import { prisma } from "@/lib/prisma";
 import { formatFieldError, validateProperty } from "@/lib/propertyStandard";
 import { currentSite, defaultPropertyType } from "@/lib/site";
@@ -56,6 +57,15 @@ export async function POST(request: Request) {
   const site = await currentSite();
   // A pin alone is enough: describe the place by its coordinates.
   const fields = body as Record<string, unknown>;
+  if (fields && typeof fields === "object" && !fields.currency) {
+    let currency = currencyForLocation(String(fields.location ?? ""));
+    // Pin only, no place name: Singapore or Malaysia from the coordinates.
+    if (!currency && pin) {
+      if (pin.lat > 1.15 && pin.lat < 1.48 && pin.lng > 103.6 && pin.lng < 104.1) currency = "SGD";
+      else if (pin.lat > 0.8 && pin.lat < 7.6 && pin.lng > 99.5 && pin.lng < 119.5) currency = "MYR";
+    }
+    if (currency) fields.currency = currency;
+  }
   if (fields && typeof fields === "object" && !fields.propertyType) {
     fields.propertyType = defaultPropertyType(site);
   }
@@ -100,6 +110,7 @@ export async function POST(request: Request) {
       data: {
         title: listing.title,
         price: listing.price,
+        currency: listing.currency,
         location: listing.location,
         description: listing.description,
         propertyType: listing.propertyType ?? defaultPropertyType(site),
@@ -131,7 +142,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ id: property.id, manageKey: manage.key }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("publish failed", error);
     await removeListingPhotos(images);
     return NextResponse.json({ error: "Could not publish this listing." }, { status: 500 });
   }

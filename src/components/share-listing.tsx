@@ -134,6 +134,14 @@ export function ListingLive({ title }: { title: string }) {
           Send by email
         </a>
       </div>
+      {url ? (
+        <a
+          href={`${new URL(url).pathname.replace(/\/$/, "")}/sign`}
+          className="inline-flex min-h-[48px] items-center justify-center bg-orange-600 px-5 font-semibold text-white hover:bg-orange-700 sm:self-start"
+        >
+          Print a For Sale sign with your QR code (A1 to A4)
+        </a>
+      ) : null}
       {manageUrl ? (
         <div className="mt-2 flex flex-col gap-2 border-t border-green-700/30 pt-3">
           <p className="text-lg font-semibold text-green-900">Your link to check or edit your listing</p>
