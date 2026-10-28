@@ -3,7 +3,29 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   async redirects() {
+    // One brand: sellmycondo.asia, sellmyland.asia and sellmybungalow.asia now
+    // send visitors to sellmyhouse.asia, which shows every property type
+    // together. Any page keeps its path. Permanent, so search rankings move too.
+    const brandRedirects = [
+      { host: "sellmycondo" },
+      { host: "sellmyland" },
+      { host: "sellmybungalow" },
+    ].flatMap(({ host }) => [
+      {
+        source: "/",
+        has: [{ type: "host" as const, value: `(?:www\\.)?${host}\\.asia` }],
+        destination: "https://sellmyhouse.asia/",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host" as const, value: `(?:www\\.)?${host}\\.asia` }],
+        destination: "https://sellmyhouse.asia/:path*",
+        permanent: true,
+      },
+    ]);
     return [
+      ...brandRedirects,
       {
         source: "/properties/:id(\\d+)",
         destination: "/property/:id",

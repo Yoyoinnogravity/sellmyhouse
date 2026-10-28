@@ -117,7 +117,7 @@ export function listingTypeWhere(id: ListingTypeId): Prisma.PropertyWhereInput {
   return listingTypeChoice(id)?.where ?? {}
 }
 
-export function emptyListingSearch(scope: ListingSearch["scope"] = "site"): ListingSearch {
+export function emptyListingSearch(scope: ListingSearch["scope"] = "all"): ListingSearch {
   return { place: "", minPrice: null, maxPrice: null, type: null, deal: "any", scope }
 }
 
@@ -129,7 +129,9 @@ export function parseListingSearch(params: {
   all?: string | string[]
   deal?: string | string[]
 }): ListingSearch {
-  const scope = firstValue(params.all) === "1" ? "all" : "site"
+  // Every property type by default, until there is enough stock to split
+  // by type; all=0 narrows to this site's own type.
+  const scope = firstValue(params.all) === "0" ? "site" : "all"
   const place = firstValue(params.place).trim().slice(0, 80)
   let minPrice = priceValue(params.min)
   let maxPrice = priceValue(params.max)

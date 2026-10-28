@@ -167,7 +167,7 @@ function ListingSearchForm({
   return (
     <form action="/properties" className="grid items-end gap-3 border p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-6">
       {sale === "developer" ? <input type="hidden" name="sale" value="developer" /> : null}
-      {search.scope === "all" ? <input type="hidden" name="all" value="1" /> : null}
+      {search.scope === "site" ? <input type="hidden" name="all" value="0" /> : null}
       {search.deal !== "any" ? <input type="hidden" name="deal" value={search.deal} /> : null}
       <label className="sm:col-span-2">
         Town or country
@@ -237,7 +237,7 @@ function ListingSearchForm({
 function browseHref(sale: SaleKind, page = 1, search: ListingSearch = emptyListingSearch()) {
   const params = new URLSearchParams();
   if (sale === "developer") params.set("sale", "developer");
-  if (search.scope === "all") params.set("all", "1");
+  if (search.scope === "site") params.set("all", "0");
   if (search.place) params.set("place", search.place);
   if (search.minPrice != null) params.set("min", String(search.minPrice));
   if (search.maxPrice != null) params.set("max", String(search.maxPrice));
