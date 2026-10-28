@@ -25,7 +25,10 @@ export function NavbarMenu({ siteName, admin = false }: { siteName: string; admi
       <Link href="/" className="shrink-0 font-semibold tracking-tight whitespace-nowrap">
         {siteName}
       </Link>
-      <div className="ml-auto sm:hidden">
+      <div className="ml-auto flex items-center gap-2 sm:hidden">
+        <Link href="/sell" className="inline-flex min-h-[40px] items-center whitespace-nowrap bg-zinc-900 px-3 font-semibold text-white hover:bg-zinc-700 dark:bg-white dark:text-black">
+          List free
+        </Link>
         <button
           type="button"
           aria-expanded={open}
@@ -43,6 +46,10 @@ export function NavbarMenu({ siteName, admin = false }: { siteName: string; admi
           </Link>
         ))}
         <div className="ml-auto flex shrink-0 items-center gap-6">
+          <Link href="/sell" className="inline-flex min-h-[40px] items-center whitespace-nowrap bg-zinc-900 px-3 font-semibold text-white hover:bg-zinc-700 dark:bg-white dark:text-black">
+            <span className="hidden lg:inline">List your property free</span>
+            <span className="lg:hidden">List free</span>
+          </Link>
           <Link href="/login" className="whitespace-nowrap">
             Log in
           </Link>

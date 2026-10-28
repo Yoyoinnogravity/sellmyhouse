@@ -11,6 +11,7 @@ import { publishedContact, telHref, whatsappHref } from "@/lib/developerContact"
 import { picturePoint, pointForListing } from "@/lib/places";
 import { prisma } from "@/lib/prisma";
 import { conveyancerRegisterPath, propertyRegion, realtorRegisterPath, regionPath } from "@/lib/region";
+import { ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AgentProfileCard } from "./agent-profile-card";
@@ -106,6 +107,7 @@ export default async function PropertyPage({
       <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
       <p>{kind === "developer" ? "Developer unit" : "Private sale"}{property.developerVerified ? " · Verified developer" : ""}</p>
       <p>Buying? No account needed. Contact the seller, realtor, or a conveyancer below.</p>
+      <ShareListing title={property.title} location={property.location} />
       <div className="grid gap-4 md:grid-cols-2">
         <ListingPhoto
           src={photos[0]}
