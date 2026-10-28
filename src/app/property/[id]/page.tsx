@@ -18,6 +18,8 @@ import { ListingLive, ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AdPlace } from "@/components/ad-place";
+import { ComparePrices } from "@/components/compare-prices";
+import { WebsiteCard } from "@/components/website-card";
 import { AgentProfileCard } from "./agent-profile-card";
 
 export const instant = false;
@@ -238,13 +240,25 @@ export default async function PropertyPage({
             </p>
           ) : null}
           {contact.website ? (
-            <p>
-              <a href={contact.website} target="_blank" rel="noreferrer">
-                {contact.website.replace(/^https?:\/\//, "")}
-              </a>
-            </p>
+            <WebsiteCard id={property.id} website={contact.website} label="The developer's website" />
+          ) : contact.developer ? (
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(`${contact.developer} official website`)}`}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="underline"
+            >
+              Find {contact.developer}&apos;s website
+            </a>
           ) : null}
         </section>
+      ) : null}
+      {!contact.website && typeof extra?.listingUrl === "string" && /^https?:\/\//.test(extra.listingUrl) ? (
+        <WebsiteCard
+          id={property.id}
+          website={extra.listingUrl}
+          label={typeof extra?.realtorAgency === "string" ? `${extra.realtorAgency}'s website` : "More on the agent's website"}
+        />
       ) : null}
       {property.description ? <p>{property.description}</p> : null}
       {details.length > 0 ? (
@@ -254,10 +268,11 @@ export default async function PropertyPage({
           ))}
         </ul>
       ) : null}
+      <ComparePrices id={property.id} />
       {extra ? (
         <ul>
           {Object.entries(extra)
-            .filter(([key]) => !["listingKey", "manageHash", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked", "contactRole", "realtorAgency", "solicitorName", "solicitorFirm", "solicitorPhone", "solicitorEmail"].includes(key))
+            .filter(([key]) => !["listingKey", "manageHash", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked", "contactRole", "realtorAgency", "solicitorName", "solicitorFirm", "solicitorPhone", "solicitorEmail", "listingUrl"].includes(key))
             .map(([key, value]) => (
             <li key={key}>
               {metadataLabel(key)}: {String(value)}

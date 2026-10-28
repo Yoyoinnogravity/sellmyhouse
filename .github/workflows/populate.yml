@@ -10,7 +10,7 @@ on:
 jobs:
   populate:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - name: Import a batch
         env:
@@ -22,3 +22,6 @@ jobs:
           echo "$OUT"
           # Also as a notice, so the result shows on the run's summary page.
           echo "::notice title=Import result::$(echo "$OUT" | tr '\n' ' ' | head -c 900)"
+          MEDIA=$(curl -sS --max-time 90 "${AUTH[@]}" https://sellmyhouse.asia/api/cron/media 2>&1 | head -c 3000)
+          echo "$MEDIA"
+          echo "::notice title=Photos result::$(echo "$MEDIA" | tr '\n' ' ' | head -c 900)"
