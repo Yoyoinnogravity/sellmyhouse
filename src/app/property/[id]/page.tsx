@@ -1,15 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { ListingPhoto } from "@/components/listing-photo";
 import { PropertyMap } from "@/components/property-map";
 import { listAvailableAgentsInRegion } from "@/lib/agent";
-import { isAerialPhoto, isPlaceholderPhoto, isSellerPhoto, listingGallery, priceLabel } from "@/lib/listingImage";
+import { isAerialPhoto, isPlaceholderPhoto, isSellerPhoto, listingGallery, listingImages, priceLabel } from "@/lib/listingImage";
 import { listingKind } from "@/lib/listingKind";
 import { listingVideos } from "@/lib/listingMedia";
 import { publishedContact, telHref, whatsappHref } from "@/lib/developerContact";
 import { picturePoint, pointForListing } from "@/lib/places";
 import { prisma } from "@/lib/prisma";
+import { currentSite } from "@/lib/site";
 import { conveyancerRegisterPath, propertyRegion, realtorRegisterPath, regionPath } from "@/lib/region";
 import { ListingLive, ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
@@ -17,6 +19,45 @@ import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AgentProfileCard } from "./agent-profile-card";
 
 export const instant = false;
+
+// Shared links on WhatsApp and Facebook show the listing's photo, price and place.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const propertyId = Number((await params).id);
+  if (!Number.isInteger(propertyId)) return {};
+  try {
+    const [site, listing] = await Promise.all([
+      currentSite(),
+      prisma.property.findUnique({
+        where: { id: propertyId },
+        select: { title: true, price: true, currency: true, location: true, description: true, image: true, images: true },
+      }),
+    ]);
+    if (!listing) return {};
+    const price = priceLabel(listing.currency, listing.price);
+    const photo = listingImages(listing.images, listing.image).find(
+      (src) => src.startsWith("/uploads/") || src.startsWith("https://"),
+    );
+    const description = [`${price} · ${listing.location}.`, listing.description ?? ""].join(" ").trim().slice(0, 200);
+    const title = `${listing.title} · ${price}`;
+    return {
+      metadataBase: new URL(`https://${site.host}`),
+      title: `${title} | ${site.name}`,
+      description,
+      alternates: { canonical: `/property/${propertyId}` },
+      openGraph: {
+        type: "website",
+        siteName: site.name,
+        title,
+        description,
+        url: `/property/${propertyId}`,
+        images: photo ? [{ url: photo }] : undefined,
+      },
+    };
+  } catch (error) {
+    unstable_rethrow(error);
+    return {};
+  }
+}
 
 export default async function PropertyPage({
   params,
