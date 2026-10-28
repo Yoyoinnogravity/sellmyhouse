@@ -164,8 +164,41 @@ export default async function PropertyPage({
       ? []
       : await listAvailableAgentsInRegion(region.country, region.city, 6);
 
+  const site = await currentSite();
+  const pageUrl = `https://${site.host}/property/${property.id}`;
+  const realPhotos = photos.filter((src) => !isPlaceholderPhoto(src) && !isAerialPhoto(src));
+  // Structured data so search engines read this as a property listing.
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: property.title,
+    url: pageUrl,
+    datePosted: property.createdAt.toISOString().slice(0, 10),
+    description: (property.description ?? `${property.title} in ${property.location}`).slice(0, 500),
+    ...(realPhotos.length > 0
+      ? { image: realPhotos.slice(0, 5).map((src) => (src.startsWith("/") ? `https://${site.host}${src}` : src)) }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      price: property.price,
+      priceCurrency: property.currency ?? undefined,
+      availability: "https://schema.org/InStock",
+      businessFunction: rental ? "https://purl.org/goodrelations/v1#LeaseOut" : "https://purl.org/goodrelations/v1#Sell",
+    },
+    contentLocation: {
+      "@type": "Place",
+      name: property.location,
+      ...(exact?.precise ? { geo: { "@type": "GeoCoordinates", latitude: exact.lat, longitude: exact.lng } } : {}),
+    },
+  };
+
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-10 sm:py-16">
+      <script
+        type="application/ld+json"
+        // Built from our own fields; "<" is escaped so text can't end the tag.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }}
+      />
       <AdPlace place={property.location} />
       {admin ? <AdminTools id={property.id} imported={kind === "developer"} /> : null}
       {(await searchParams).published ? <ListingLive title={property.title} /> : null}

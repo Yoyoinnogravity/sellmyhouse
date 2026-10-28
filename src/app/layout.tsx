@@ -34,8 +34,14 @@ export const instant = false;
 export async function generateMetadata(): Promise<Metadata> {
   const site = await currentSite();
   return {
-    title: site.name,
-    description: `Listing your ${site.noun} for sale is free.`,
+    metadataBase: new URL(`https://${site.host}`),
+    title: `${site.name}: buy, rent or sell property anywhere`,
+    description:
+      "Houses, condos, land and new developments for sale or long-term rent, worldwide. Contact owners and realtors directly. Listing is free, no account needed.",
+    // Google Search Console: set GOOGLE_SITE_VERIFICATION in Vercel to the code Google gives.
+    verification: process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : undefined,
     manifest: "/manifest.webmanifest",
     appleWebApp: {
       capable: true,

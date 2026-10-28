@@ -3,6 +3,7 @@ import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
 import { FormatDownloads } from "@/components/format-downloads";
 import { RealtorStrip } from "@/components/realtor-strip";
+import { areaSlug, KL_AREAS } from "@/lib/areas";
 import { WorldMapSection } from "@/components/world-map-section";
 import { emptyListingSearch, listingTypeOptions } from "@/lib/listingSearch";
 import { listCountryCounts, listPlaceOptions } from "@/lib/mappedProperties";
@@ -53,6 +54,18 @@ export default async function HomePage() {
           <SearchWithPlaces />
         </Suspense>
         <RealtorStrip />
+        <nav aria-label="Popular areas in Kuala Lumpur" className="flex flex-col gap-2">
+          <p className="text-sm text-zinc-600">Popular in Greater Kuala Lumpur</p>
+          <ul className="flex flex-wrap gap-2">
+            {KL_AREAS.map((area) => (
+              <li key={area}>
+                <Link href={`/in/${areaSlug(area)}`} className="inline-flex min-h-[36px] items-center border px-3 py-1 text-sm hover:border-zinc-900">
+                  {area}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
         <Suspense fallback={null}>
           <CountryChips />
         </Suspense>

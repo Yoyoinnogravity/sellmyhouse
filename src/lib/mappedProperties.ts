@@ -220,3 +220,25 @@ export async function listListingsPage(page: number, sale: SaleKind, search?: Li
     }),
   }
 }
+
+// The places with the most listings (towns, districts, states, countries),
+// for area pages and the sitemap.
+export async function listTopPlaces(limit = 300): Promise<{ label: string; count: number }[]> {
+  const rows = await cached(
+    "top-places",
+    () => prisma.property.findMany({ where: notRemovedWhere, select: { location: true } }),
+    60 * 60 * 1000,
+  )
+  const counts = new Map<string, { label: string; count: number }>()
+  for (const row of rows) {
+    for (const part of row.location.split(",")) {
+      const label = part.trim()
+      if (label.length < 2 || label.startsWith("Near ")) continue
+      const key = label.toLocaleLowerCase()
+      const seen = counts.get(key)
+      if (seen) seen.count += 1
+      else counts.set(key, { label, count: 1 })
+    }
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count).slice(0, limit)
+}

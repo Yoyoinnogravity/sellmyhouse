@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { unstable_rethrow } from "next/navigation";
+import { areaSlug, KL_AREAS } from "@/lib/areas";
 import { notRemovedWhere } from "@/lib/listingRemoval";
+import { listTopPlaces } from "@/lib/mappedProperties";
 import { prisma } from "@/lib/prisma";
 import { cached } from "@/lib/queryCache";
 import { currentSite, siteListingWhere } from "@/lib/site";
@@ -42,6 +44,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly",
         priority: 0.7,
       });
+    }
+    // Area pages (/in/kuala-lumpur) for every place with a few listings.
+    for (const place of await listTopPlaces(500)) {
+      if (place.count < 2) continue;
+      pages.push({ url: `${base}/in/${areaSlug(place.label)}`, changeFrequency: "daily", priority: 0.8 });
+    }
+    for (const area of KL_AREAS) {
+      const url = `${base}/in/${areaSlug(area)}`;
+      if (!pages.some((page) => page.url === url)) pages.push({ url, changeFrequency: "daily", priority: 0.8 });
     }
   } catch (error) {
     unstable_rethrow(error);
