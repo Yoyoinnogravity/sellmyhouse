@@ -134,6 +134,12 @@ export function ListingLive({ title }: { title: string }) {
           Send by email
         </a>
       </div>
+      <a
+        href="/sell"
+        className="inline-flex min-h-[48px] items-center justify-center border-2 border-green-700 bg-white px-5 font-semibold sm:self-start"
+      >
+        List another property (your details are remembered)
+      </a>
       {url ? (
         <a
           href={`${new URL(url).pathname.replace(/\/$/, "")}/sign`}

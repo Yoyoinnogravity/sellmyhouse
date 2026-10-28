@@ -103,7 +103,12 @@ export async function POST(request: Request) {
   }
   const manage = newManageKey();
   const rental = (body as { rental?: Record<string, string | number> | null }).rental ?? null;
-  const metadata = withManageHash(withPin(withRental(named.metadata, rental), pin), manage.hash);
+  const areaUnit = String((body as { areaUnit?: unknown }).areaUnit ?? "");
+  const extra = {
+    ...(rental ?? {}),
+    ...(["sq ft", "sq m", "acres", "hectares"].includes(areaUnit) && (listing.builtUp || listing.landSize) ? { areaUnit } : {}),
+  };
+  const metadata = withManageHash(withPin(withRental(named.metadata, Object.keys(extra).length ? extra : null), pin), manage.hash);
 
   let images: string[] = [];
   try {
@@ -122,6 +127,11 @@ export async function POST(request: Request) {
         location: listing.location,
         description: listing.description,
         propertyType: listing.propertyType ?? defaultPropertyType(site),
+        bedrooms: listing.bedrooms,
+        bathrooms: listing.bathrooms,
+        builtUp: listing.builtUp,
+        landSize: listing.landSize,
+        tenure: listing.tenure,
         image: images[0] ?? null,
         images: images.length > 0 ? JSON.stringify(images) : null,
         metadata,
@@ -185,6 +195,13 @@ async function readPublishRequest(request: Request) {
       price: form.get("price"),
       location: form.get("location"),
       description: form.get("description"),
+      propertyType: text(form.get("propertyType")) || undefined,
+      bedrooms: text(form.get("bedrooms")) || undefined,
+      bathrooms: text(form.get("bathrooms")) || undefined,
+      builtUp: text(form.get("builtUp")).replace(/[^0-9]/g, "") || undefined,
+      landSize: text(form.get("landSize")).replace(/[^0-9]/g, "") || undefined,
+      tenure: text(form.get("tenure")) || undefined,
+      areaUnit: text(form.get("areaUnit")),
       contactType: contactChoice === "agent" ? "agent" : "direct",
       contactName: specifiedRealtor ? form.get("realtorName") : form.get("contactName"),
       contactPhone: specifiedRealtor ? form.get("realtorPhone") : form.get("contactPhone"),

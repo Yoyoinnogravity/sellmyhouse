@@ -10,22 +10,22 @@ export function RealtorStrip() {
       <div>
         <p className="text-lg font-bold">Realtors: upload your whole stock free</p>
         <p className="text-sm text-orange-50">
-          Sales and long-term rentals, up to 200 per file, anywhere in the world. No account, no fees.
+          Add listings one by one with our step-by-step guide, or upload a spreadsheet of up to 200. Sales and
+          long-term rentals, anywhere. No account, no fees.
         </p>
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:shrink-0">
-        <a
-          href="/listing-template.xlsx"
-          download="Global-Database-Format-for-Realtors.xlsx"
+        <Link
+          href="/sell?as=realtor"
           className="inline-flex min-h-[48px] items-center justify-center bg-white px-4 text-center font-semibold text-orange-800 hover:bg-orange-50"
         >
-          Download the Global Database Format
-        </a>
+          Add a listing, step by step
+        </Link>
         <Link
-          href="/upload"
+          href="/listing-format"
           className="inline-flex min-h-[48px] items-center justify-center border-2 border-white px-4 font-semibold hover:bg-orange-700"
         >
-          Upload your file
+          Upload a spreadsheet
         </Link>
       </div>
     </section>

@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { FormatDownloads } from "@/components/format-downloads";
 import { currentSite } from "@/lib/site";
-import QuickSellForm from "./quick-sell-form";
+import ListingWizard from "./wizard-loader";
 import SellForm from "./sell-form";
 
 type SellSearchParams = {
@@ -33,9 +32,6 @@ export default function SellPage({
       <Suspense fallback={<p className="mt-8">Loading…</p>}>
         <SellForms searchParams={searchParams} />
       </Suspense>
-      <div className="mt-10">
-        <FormatDownloads audience="sellers" compact />
-      </div>
       <details className="mt-10 border-t pt-6">
         <summary className="cursor-pointer font-semibold">
           Want a realtor or conveyancer to handle it? More options
@@ -62,7 +58,7 @@ async function SellHeading() {
     <>
       <h1 className="text-3xl font-semibold tracking-tight">Sell or rent out your {site.noun}, free</h1>
       <p className="mt-2 text-zinc-600">
-        No account, no fees. Add photos, a price and how buyers can reach you. It takes about two minutes.
+        No account, no fees. We&apos;ll guide you one step at a time. It takes about two minutes.
       </p>
     </>
   );
@@ -71,7 +67,7 @@ async function SellHeading() {
 async function SellForms({ searchParams }: { searchParams: Promise<SellSearchParams> }) {
   const [params, site] = await Promise.all([searchParams, currentSite()]);
   return (
-    <QuickSellForm
+    <ListingWizard
       noun={site.noun}
       asRealtor={firstValue(params.as) === "realtor"}
       forRent={firstValue(params.deal) === "rent"}
