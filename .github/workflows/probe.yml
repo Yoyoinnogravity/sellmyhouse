@@ -1,0 +1,14 @@
+name: Probe public data APIs
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: |
+          note() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | head -c 950)"; }
+          note HDB "$(curl -s -m 30 'https://data.gov.sg/api/action/datastore_search?resource_id=d_8b84c4ee58e3cfc0ece0d773c8ca6abc&limit=2&sort=month%20desc')"
+          note HDBfilter "$(curl -s -m 30 -G 'https://data.gov.sg/api/action/datastore_search' --data-urlencode 'resource_id=d_8b84c4ee58e3cfc0ece0d773c8ca6abc' --data-urlencode 'filters={"town":"TAMPINES","flat_type":"4 ROOM"}' --data-urlencode 'limit=1' --data-urlencode 'sort=month desc')"
+          note LR "$(curl -s -m 30 'https://landregistry.data.gov.uk/data/ppi/transaction-record.json?propertyAddress.postcode=BA1%201LZ&_pageSize=1')"
+          note LRtown "$(curl -s -m 30 'https://landregistry.data.gov.uk/data/ppi/transaction-record.json?propertyAddress.town=BATH&_pageSize=1&_sort=-transactionDate&min-transactionDate=2025-01-01' | head -c 1500)"
+          note VIC "$(curl -s -m 30 'https://data.gov.au/data/api/3/action/package_show?id=a0eab9e7-4143-47ee-99a6-27341dc52651' | python3 -c 'import json,sys; d=json.load(sys.stdin)["result"]; print(d.get("license_id"), [(r["name"], r["url"], r.get("format")) for r in d["resources"]][-3:])')"
