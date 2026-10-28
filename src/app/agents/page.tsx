@@ -8,9 +8,10 @@ export default function AgentsPage() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
       <h1 className="text-3xl font-semibold tracking-tight">Agents</h1>
       <p>Realtors can add their contact details and the region they cover.</p>
-      <p className="flex gap-4">
+      <p className="flex flex-wrap gap-x-4 gap-y-2">
         <Link href="/agents/register">Add your details and region</Link>
         <Link href="/agents/login">Log in</Link>
+        <Link href="/agents/upload">Upload many listings at once</Link>
       </p>
       <Suspense fallback={<p>Loading…</p>}>
         <AgentDirectory />

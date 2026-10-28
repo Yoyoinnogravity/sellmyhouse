@@ -8,10 +8,8 @@ const publicLinks = [
   { href: "/sell", label: "Sell" },
   { href: "/agents", label: "Agents" },
   { href: "/solicitors", label: "Conveyancers" },
-  { href: "/agents/upload", label: "Upload" },
   { href: "/advertise", label: "Advertise" },
   { href: "/developers", label: "Developers" },
-  { href: "/dashboard", label: "Dashboard" },
 ]
 
 const adminLinks = [{ href: "/leads", label: "Leads" }]

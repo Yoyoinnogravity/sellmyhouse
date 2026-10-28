@@ -29,6 +29,6 @@ export function loginPrompt(nextPath: string) {
 
   return {
     title: "Log in",
-    body: "Sign in with your seller account. Buying? No account needed.",
+    body: "Accounts are for developers and anyone managing several listings. Selling one home, or buying? You don't need an account.",
   };
 }

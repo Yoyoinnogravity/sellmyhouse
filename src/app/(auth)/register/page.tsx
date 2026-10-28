@@ -61,7 +61,7 @@ function RegisterForm() {
       <p className="mt-3">
         {listing
           ? "After this, you’ll go back to your listing."
-          : "Use this seller account to list a house."}
+          : "Accounts are for developers and anyone managing several listings. Selling one home? You don't need one: press List free at the top."}
       </p>
       <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-4">
         <label htmlFor="email">
