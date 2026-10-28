@@ -41,7 +41,7 @@ export default async function HomePage() {
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 pt-10 sm:px-6 sm:pt-16">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Find {site.withArticle}, anywhere in the world
+            Buy or sell your {site.noun} anywhere in the world
           </h1>
           <p className="text-zinc-600">
             Houses, condos, land, bungalows and new developments from every Sell My site, on one
