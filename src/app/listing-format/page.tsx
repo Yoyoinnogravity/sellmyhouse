@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FormatDownloads } from "@/components/format-downloads";
-import { LISTING_COLUMNS } from "@/lib/listingFormat";
+import { LISTING_COLUMNS, SELLER_COLUMNS, type FormatColumn } from "@/lib/listingFormat";
 
 export const metadata: Metadata = {
-  title: "Global Database Format for Realtors",
+  title: "Upload formats: Global Database Format for Realtors and Seller's Format",
   description:
     "Free spreadsheet template for uploading properties worldwide. Only price, location and a contact name are required.",
 };
@@ -20,37 +20,30 @@ export default function ListingFormatPage() {
         </p>
       </div>
 
+      <p className="text-zinc-700">
+        Two versions, same upload page: the <a href="#realtors" className="underline">Global Database Format for Realtors</a>{" "}
+        and the simpler <a href="#sellers" className="underline">Seller&apos;s Format for Individual Sellers</a>.
+      </p>
+
       <FormatDownloads />
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-2xl font-semibold tracking-tight">The columns</h2>
+      <section id="realtors" className="flex scroll-mt-24 flex-col gap-3">
+        <h2 className="text-2xl font-semibold tracking-tight">Columns in the Global Database Format for Realtors</h2>
         <p className="text-zinc-700">
           Put one property on each row. Leave any optional cell blank. Columns can be in any order, and close
           names work too: <em>Asking Price</em>, <em>Beds</em>, <em>Address</em> or <em>Lat</em> are all understood.
           Columns we don&apos;t recognise are kept and shown as extra details on the listing.
         </p>
-        <div className="overflow-x-auto border">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-100">
-              <tr>
-                <th scope="col" className="px-3 py-2">Column</th>
-                <th scope="col" className="px-3 py-2">Needed?</th>
-                <th scope="col" className="px-3 py-2">What to put in it</th>
-              </tr>
-            </thead>
-            <tbody>
-              {LISTING_COLUMNS.map((column) => (
-                <tr key={column.name} className="border-t align-top">
-                  <td className="px-3 py-2 font-mono font-semibold whitespace-nowrap">{column.name}</td>
-                  <td className="px-3 py-2 whitespace-nowrap">
-                    {column.required ? <strong className="text-orange-700">Required</strong> : "Optional"}
-                  </td>
-                  <td className="px-3 py-2">{column.help}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ColumnTable columns={LISTING_COLUMNS} />
+      </section>
+
+      <section id="sellers" className="flex scroll-mt-24 flex-col gap-3">
+        <h2 className="text-2xl font-semibold tracking-tight">Seller&apos;s Format for Individual Sellers</h2>
+        <p className="text-zinc-700">
+          The same idea with plain headings, for owners with one or a few properties. Only the green columns are needed.
+        </p>
+        <FormatDownloads audience="sellers" compact />
+        <ColumnTable columns={SELLER_COLUMNS} />
       </section>
 
       <section className="flex flex-col gap-3">
@@ -91,5 +84,32 @@ export default function ListingFormatPage() {
 ]`}</pre>
       </section>
     </main>
+  );
+}
+
+function ColumnTable({ columns }: { columns: FormatColumn[] }) {
+  return (
+    <div className="overflow-x-auto border">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-zinc-100">
+          <tr>
+            <th scope="col" className="px-3 py-2">Column</th>
+            <th scope="col" className="px-3 py-2">Needed?</th>
+            <th scope="col" className="px-3 py-2">What to put in it</th>
+          </tr>
+        </thead>
+        <tbody>
+          {columns.map((column) => (
+            <tr key={column.name} className="border-t align-top">
+              <td className="px-3 py-2 font-mono font-semibold whitespace-nowrap">{column.name}</td>
+              <td className="px-3 py-2 whitespace-nowrap">
+                {column.required ? <strong className="text-orange-700">Required</strong> : "Optional"}
+              </td>
+              <td className="px-3 py-2">{column.help}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

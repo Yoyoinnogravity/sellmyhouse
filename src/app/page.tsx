@@ -230,7 +230,10 @@ function SellersSection() {
           List your property free
         </Link>
       </div>
-      <FormatDownloads />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <FormatDownloads audience="sellers" />
+        <FormatDownloads />
+      </div>
     </section>
   );
 }

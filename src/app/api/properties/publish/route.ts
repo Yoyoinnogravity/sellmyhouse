@@ -224,8 +224,8 @@ function namedContacts(
   const metadata: Record<string, string> = {};
 
   if (specified.realtor) {
-    if (!personName(listing.contactName) || !phone(listing.contactPhone) || !email(listing.contactEmail)) {
-      return { ok: false, error: "Enter the realtor's name, phone, and email." };
+    if (!personName(listing.contactName) || (!phone(listing.contactPhone) && !email(listing.contactEmail))) {
+      return { ok: false, error: "Enter the realtor's name, and a phone number or email." };
     }
     metadata.contactRole = "realtor";
     if (specified.realtorAgency) {

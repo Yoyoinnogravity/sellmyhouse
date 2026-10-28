@@ -14,12 +14,22 @@ export default function UploadPage() {
       <div className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold tracking-tight">Upload your listings</h1>
         <p className="text-lg text-zinc-700">
-          Fill in the template, then upload it here. Free, no account, and your listings go on the world map
-          straight away. Selling just one home? The <Link href="/sell" className="underline">one-page form</Link> is
-          quicker and takes photos from your phone.
+          Realtors and individual sellers both upload here. Use either format below, fill it in, and upload it.
+          Free, no account, and your listings go on the world map straight away.
         </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <a href="/sell" className="flex flex-col border-2 border-zinc-300 p-3 hover:border-zinc-900">
+            <span className="font-semibold">Just one property?</span>
+            <span className="text-sm text-zinc-600">Use the one-page form. It takes photos from your phone.</span>
+          </a>
+          <a href="/sell?as=realtor" className="flex flex-col border-2 border-zinc-300 p-3 hover:border-zinc-900">
+            <span className="font-semibold">Realtor with one listing?</span>
+            <span className="text-sm text-zinc-600">The same form, with your agency shown to buyers.</span>
+          </a>
+        </div>
       </div>
       <UploadFile />
+      <FormatDownloads audience="sellers" compact />
       <FormatDownloads compact />
     </main>
   );

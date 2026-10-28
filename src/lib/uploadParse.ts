@@ -25,10 +25,10 @@ const ALIASES: Record<string, string> = {};
 function alias(field: string, ...names: string[]) {
   for (const name of [field, ...names]) ALIASES[name.toLowerCase().replace(/[^a-z0-9]/g, "")] = field;
 }
-alias("title", "headline", "listingtitle", "propertytitle", "propertyname", "listingname");
+alias("title", "headlineoptional", "headline", "listingtitle", "propertytitle", "propertyname", "listingname");
 alias("price", "askingprice", "saleprice", "listprice", "listingprice", "sellingprice");
 alias("currency", "currencycode", "ccy");
-alias("location", "fulladdress", "locationtext");
+alias("location", "whereisit", "locationtowncountry", "towncountry", "fulladdress", "locationtext");
 alias("address", "streetaddress", "street", "address1", "addressline1");
 alias("city", "town", "suburb", "area", "district", "neighbourhood", "neighborhood");
 alias("state", "region", "province", "county", "prefecture");
@@ -44,10 +44,10 @@ alias("landSize", "landarea", "lotsize", "plotsize", "lotarea", "plotarea", "lan
 alias("areaUnit", "unit", "sizeunit", "areaunits");
 alias("tenure", "ownership", "titletype", "freeholdleasehold");
 alias("description", "details", "remarks", "summary", "notes", "about");
-alias("images", "imageurls", "photos", "photourls", "pictures", "image", "photo", "imageurl", "photourl", "pictureurls");
-alias("contactName", "sellername", "ownername", "name", "agentname", "contact");
-alias("contactPhone", "phone", "mobile", "whatsapp", "sellerphone", "agentphone", "tel", "telephone", "phonenumber");
-alias("contactEmail", "email", "selleremail", "agentemail", "emailaddress");
+alias("images", "photolinks", "photolink", "imageurls", "photos", "photourls", "pictures", "image", "photo", "imageurl", "photourl", "pictureurls");
+alias("contactName", "yourname", "sellersname", "sellername", "ownername", "name", "agentname", "contact");
+alias("contactPhone", "phoneorwhatsapp", "yourphone", "phone", "mobile", "whatsapp", "sellerphone", "agentphone", "tel", "telephone", "phonenumber");
+alias("contactEmail", "youremail", "email", "selleremail", "agentemail", "emailaddress");
 alias("agency", "agencyname", "company", "brokerage", "agentcompany", "realestateagency");
 alias("listingUrl", "url", "link", "listinglink", "weblink");
 alias("reference", "ref", "referenceid", "listingid", "externalid", "mlsnumber", "mls", "propertyid");

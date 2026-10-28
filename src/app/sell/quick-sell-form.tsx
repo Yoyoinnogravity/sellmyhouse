@@ -14,7 +14,16 @@ const examples: Record<string, string> = {
 
 // The one-page way to list: photos first, a few details, publish.
 // No account. Realtor and conveyancer choices live on the longer form.
-export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; noun: string }) {
+export default function QuickSellForm({
+  defaults,
+  noun,
+  asRealtor = false,
+}: {
+  defaults: Defaults;
+  noun: string;
+  asRealtor?: boolean;
+}) {
+  const [realtor, setRealtor] = useState(asRealtor);
   const [previews, setPreviews] = useState<string[]>([]);
   const [location, setLocation] = useState(defaults.location);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +55,16 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
       return;
     }
     formData.set("price", String(price));
-    formData.set("contactType", "direct");
+    if (realtor) {
+      // A realtor listing for a client: buyers contact the realtor.
+      formData.set("contactType", "specified");
+      formData.set("realtorName", String(formData.get("contactName") ?? ""));
+      formData.set("realtorPhone", String(formData.get("contactPhone") ?? ""));
+      formData.set("realtorEmail", String(formData.get("contactEmail") ?? ""));
+      formData.delete("agentLeads");
+    } else {
+      formData.set("contactType", "direct");
+    }
     formData.set("solicitorChoice", "none");
 
     setPending(true);
@@ -79,6 +97,32 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
         aria-hidden="true"
         style={{ position: "absolute", left: "-10000px", width: 1, height: 1 }}
       />
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-2 text-lg font-semibold">Who&apos;s listing?</legend>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { value: false, label: "I'm the owner", hint: "Selling my own property" },
+            { value: true, label: "I'm a realtor", hint: "Listing for a client" },
+          ].map((option) => (
+            <button
+              key={option.label}
+              type="button"
+              aria-pressed={realtor === option.value}
+              onClick={() => setRealtor(option.value)}
+              className={`flex min-h-[64px] flex-col items-start justify-center border-2 px-3 py-2 text-left ${
+                realtor === option.value ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-300 bg-white"
+              }`}
+            >
+              <span className="font-semibold">{option.label}</span>
+              <span className={`text-sm ${realtor === option.value ? "text-zinc-200" : "text-zinc-600"}`}>{option.hint}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-zinc-600">
+          Several properties? <a href="/upload" className="underline">Upload a spreadsheet instead</a>.
+        </p>
+      </fieldset>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">1. Add your photos</h2>
@@ -172,8 +216,9 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">3. How can buyers reach you?</h2>
+        <p className="text-sm text-zinc-600">Your name is needed. Add a phone number or email so buyers can reach you.</p>
         <label htmlFor="contactName">
-          Your name <span className="text-zinc-500">(seller or realtor)</span>
+          {realtor ? "Your name (realtor)" : "Your name"}
           <input id="contactName" name="contactName" required autoComplete="name" className={input} />
         </label>
         <label htmlFor="contactPhone">
@@ -184,8 +229,14 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
           Email <span className="text-zinc-500">(optional)</span>
           <input id="contactEmail" name="contactEmail" type="email" autoComplete="email" className={input} />
         </label>
-        <label className="flex items-start gap-3 border p-3">
-          <input type="checkbox" name="agentLeads" value="1" className="mt-1 h-5 w-5" />
+        {realtor ? (
+          <label htmlFor="realtorAgency">
+            Agency <span className="text-zinc-500">(optional)</span>
+            <input id="realtorAgency" name="realtorAgency" maxLength={120} autoComplete="organization" className={input} />
+          </label>
+        ) : null}
+        <label className={`flex items-start gap-3 border p-3 ${realtor ? "hidden" : ""}`}>
+          <input type="checkbox" name="agentLeads" value="1" className="mt-1 h-5 w-5" disabled={realtor} />
           <span>
             Also let realtors in {town} offer to help me sell.
             <span className="block text-sm text-zinc-600">

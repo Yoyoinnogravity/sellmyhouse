@@ -12,6 +12,7 @@ export default function AgentsPage() {
       <p className="flex flex-wrap gap-x-4 gap-y-2">
         <Link href="/agents/register">Add your details and region</Link>
         <Link href="/agents/login">Log in</Link>
+        <Link href="/sell?as=realtor">List one property for a client</Link>
       </p>
       <p className="text-sm text-zinc-700">
         In Malaysia, check any agent or agency on the official{" "}

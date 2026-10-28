@@ -26,3 +26,25 @@ export const LISTING_COLUMNS: FormatColumn[] = [
   { name: "reference", required: false, help: "Your own listing ID, so you can match listings back to your system." },
   { name: "listing_url", required: false, help: "Link to the listing on your own website." },
 ];
+
+// The simpler Seller's Format (public/seller-template.xlsx and .csv).
+export const SELLER_COLUMNS: FormatColumn[] = [
+  { name: "Asking price", required: true, help: "Just the number, e.g. 450000. RM 450,000 also works." },
+  { name: "Location", required: true, help: "Town and country, e.g. Ipoh, Perak, Malaysia. Or leave blank and fill Latitude and Longitude." },
+  { name: "Your name", required: true, help: "Shown to buyers so they know who they're talking to." },
+  { name: "Phone or WhatsApp", required: false, help: "With country code if you can, e.g. +60 12 345 6789. Buyers call or WhatsApp you." },
+  { name: "Email", required: false, help: "Buyers can email you." },
+  { name: "Currency", required: false, help: "MYR, SGD, AUD, GBP… Worked out from the location if left blank." },
+  { name: "Property type", required: false, help: "House, Condominium, Apartment, Terrace, Bungalow, Land…" },
+  { name: "Bedrooms", required: false, help: "A number. Studio = 0." },
+  { name: "Bathrooms", required: false, help: "A number." },
+  { name: "Floor area", required: false, help: "A number, e.g. 1200. Put the unit in Area unit." },
+  { name: "Land size", required: false, help: "A number, for houses and land." },
+  { name: "Area unit", required: false, help: "sq ft, sq m, acres or hectares." },
+  { name: "Tenure", required: false, help: "Freehold, Leasehold, or your local term." },
+  { name: "Headline", required: false, help: "A short title. Leave blank and we write one, e.g. 3-bedroom house in Ipoh." },
+  { name: "Description", required: false, help: "Anything buyers should know." },
+  { name: "Photo links", required: false, help: "Links to photos already online (https://…), separated by spaces. Or add photos from your phone with the one-page form instead." },
+  { name: "Latitude", required: false, help: "Map pin, e.g. 4.5975. Tip: in Google Maps, press and hold on your home and copy the numbers." },
+  { name: "Longitude", required: false, help: "Map pin, e.g. 101.0901." },
+];

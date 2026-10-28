@@ -9,6 +9,7 @@ type SellSearchParams = {
   title?: string | string[];
   price?: string | string[];
   location?: string | string[];
+  as?: string | string[];
 };
 
 export default function SellPage({
@@ -32,7 +33,7 @@ export default function SellPage({
         <SellForms searchParams={searchParams} />
       </Suspense>
       <div className="mt-10">
-        <FormatDownloads compact />
+        <FormatDownloads audience="sellers" compact />
       </div>
       <details className="mt-10 border-t pt-6">
         <summary className="cursor-pointer font-semibold">
@@ -71,6 +72,7 @@ async function SellForms({ searchParams }: { searchParams: Promise<SellSearchPar
   return (
     <QuickSellForm
       noun={site.noun}
+      asRealtor={firstValue(params.as) === "realtor"}
       defaults={{
         title: firstValue(params.title),
         price: firstValue(params.price),
