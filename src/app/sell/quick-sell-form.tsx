@@ -1,0 +1,202 @@
+"use client";
+
+import { ChangeEvent, FormEvent, useState } from "react";
+
+type Defaults = { title: string; price: string; location: string };
+
+const examples: Record<string, string> = {
+  house: "3-bedroom house with garden",
+  condo: "2-bedroom condo with pool view",
+  bungalow: "Single-storey bungalow with garden",
+  land: "Half-acre plot with road access",
+};
+
+// The one-page way to list: photos first, a few details, publish.
+// No account. Realtor and conveyancer choices live on the longer form.
+export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; noun: string }) {
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [location, setLocation] = useState(defaults.location);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  function onPhotos(event: ChangeEvent<HTMLInputElement>) {
+    const files = [...(event.target.files ?? [])];
+    if (files.length > 8) {
+      setError("Please choose up to 8 photos.");
+      event.target.value = "";
+      setPreviews([]);
+      return;
+    }
+    setError(null);
+    setPreviews(files.map((file) => URL.createObjectURL(file)));
+  }
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    const formData = new FormData(event.currentTarget);
+    const price = Number(String(formData.get("price") ?? "").replace(/[^0-9]/g, ""));
+    if (!Number.isInteger(price) || price <= 0) {
+      setError("Please enter the asking price as a number, for example 450000.");
+      return;
+    }
+    formData.set("price", String(price));
+    formData.set("contactType", "direct");
+    formData.set("solicitorChoice", "none");
+
+    setPending(true);
+    try {
+      const response = await fetch("/api/properties/publish", { method: "POST", body: formData });
+      const data = (await response.json().catch(() => null)) as { id?: number; error?: string } | null;
+      if (!response.ok || !data?.id) {
+        setError(data?.error ?? "Your listing couldn't be published just now. Please try again in a minute.");
+        return;
+      }
+      window.location.assign(`/property/${data.id}?published=1`);
+    } catch {
+      setError("Your listing couldn't be published just now. Please try again in a minute.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  const input = "mt-1 block w-full border px-3 py-3 text-base";
+  const town = location.split(",")[0]?.trim() || "your area";
+
+  return (
+    <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-6">
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-10000px", width: 1, height: 1 }}
+      />
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold">1. Add your photos</h2>
+        <label
+          htmlFor="photos"
+          className="flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-1 border-2 border-dashed border-zinc-300 p-6 text-center hover:border-zinc-500"
+        >
+          <span className="font-semibold">Tap to choose photos</span>
+          <span className="text-sm text-zinc-600">Up to 8 pictures from your phone or computer. JPG, PNG or WebP.</span>
+          <input
+            id="photos"
+            name="photos"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={onPhotos}
+            className="sr-only"
+          />
+        </label>
+        {previews.length > 0 ? (
+          <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {previews.map((src, index) => (
+              <li key={src}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt={`Photo ${index + 1}`} className="aspect-square w-full border object-cover" />
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-zinc-600">No photos to hand? You can still publish without them.</p>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold">2. Tell buyers about it</h2>
+        <label htmlFor="title">
+          What are you selling?
+          <input
+            id="title"
+            name="title"
+            required
+            maxLength={120}
+            defaultValue={defaults.title}
+            placeholder={examples[noun] ?? `3-bedroom ${noun} with garden`}
+            className={input}
+          />
+        </label>
+        <label htmlFor="price">
+          Asking price
+          <input
+            id="price"
+            name="price"
+            inputMode="numeric"
+            required
+            defaultValue={defaults.price}
+            placeholder="450000"
+            className={input}
+          />
+        </label>
+        <label htmlFor="location">
+          Where is it?
+          <input
+            id="location"
+            name="location"
+            required
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+            placeholder="Town, country"
+            className={input}
+          />
+        </label>
+        <label htmlFor="description">
+          A few words about it <span className="text-zinc-500">(optional)</span>
+          <textarea
+            id="description"
+            name="description"
+            rows={4}
+            placeholder="Quiet street, near schools, recently renovated kitchen…"
+            className={input}
+          />
+        </label>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="text-lg font-semibold">3. How can buyers reach you?</h2>
+        <label htmlFor="contactName">
+          Your name
+          <input id="contactName" name="contactName" required autoComplete="name" className={input} />
+        </label>
+        <label htmlFor="contactPhone">
+          Phone or WhatsApp
+          <input id="contactPhone" name="contactPhone" type="tel" required autoComplete="tel" className={input} />
+        </label>
+        <label htmlFor="contactEmail">
+          Email
+          <input id="contactEmail" name="contactEmail" type="email" required autoComplete="email" className={input} />
+        </label>
+        <label className="flex items-start gap-3 border p-3">
+          <input type="checkbox" name="agentLeads" value="1" className="mt-1 h-5 w-5" />
+          <span>
+            Also let realtors in {town} offer to help me sell.
+            <span className="block text-sm text-zinc-600">
+              Optional and free. Your number isn&apos;t shown publicly for this; up to three local realtors can ask us for it.
+            </span>
+          </span>
+        </label>
+      </section>
+
+      {error ? (
+        <p role="alert" className="border border-red-300 bg-red-50 p-3 text-red-800">
+          {error}
+        </p>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={pending}
+        className="min-h-[52px] bg-zinc-900 px-6 text-lg font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
+      >
+        {pending ? "Publishing…" : "Publish my listing free"}
+      </button>
+      <p className="text-sm text-zinc-600">
+        No account and no fees. Your listing goes on the world map within a few minutes.
+      </p>
+    </form>
+  );
+}

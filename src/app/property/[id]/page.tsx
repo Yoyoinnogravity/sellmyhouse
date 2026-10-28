@@ -11,7 +11,7 @@ import { publishedContact, telHref, whatsappHref } from "@/lib/developerContact"
 import { picturePoint, pointForListing } from "@/lib/places";
 import { prisma } from "@/lib/prisma";
 import { conveyancerRegisterPath, propertyRegion, realtorRegisterPath, regionPath } from "@/lib/region";
-import { ShareListing } from "@/components/share-listing";
+import { ListingLive, ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AgentProfileCard } from "./agent-profile-card";
@@ -20,8 +20,10 @@ export const instant = false;
 
 export default async function PropertyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ published?: string | string[] }>;
 }) {
   await connection();
   const { id } = await params;
@@ -104,6 +106,7 @@ export default async function PropertyPage({
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
+      {(await searchParams).published ? <ListingLive title={property.title} /> : null}
       <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
       <p>{kind === "developer" ? "Developer unit" : "Private sale"}{property.developerVerified ? " · Verified developer" : ""}</p>
       <p>Buying? No account needed. Contact the seller, realtor, or a conveyancer below.</p>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { currentSite } from "@/lib/site";
+import QuickSellForm from "./quick-sell-form";
 import SellForm from "./sell-form";
 
 type SellSearchParams = {
@@ -15,48 +16,57 @@ export default function SellPage({
   searchParams: Promise<SellSearchParams>;
 }) {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-6 py-16">
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-10 sm:px-6 sm:py-16">
       <Suspense
         fallback={
           <>
-            <h1 className="text-3xl font-semibold tracking-tight">Sell your house</h1>
-            <p className="mt-2">Listing your property for sale is free.</p>
+            <h1 className="text-3xl font-semibold tracking-tight">Sell your property, free</h1>
+            <p className="mt-2 text-zinc-600">No account needed. It takes about two minutes.</p>
           </>
         }
       >
         <SellHeading />
       </Suspense>
-      <p className="mt-4">
-        Add photos and a description, then choose or specify a realtor or a solicitor.
-      </p>
-      <ul className="mt-3 flex flex-col gap-2">
-        <li>List it yourself, on this page.</li>
-        <li>
-          <Link href="/solicitors">Choose a solicitor</Link>
-        </li>
-        <li>
-          <Link href="/agents">Choose a realtor</Link>
-        </li>
-        <li>
-          <Link href="/agents/register">I'm a realtor. Add your details and region.</Link>
-        </li>
-      </ul>
-      <Suspense fallback={<p>Loading…</p>}>
-        <AuthorizedSellForm searchParams={searchParams} />
+      <Suspense fallback={<p className="mt-8">Loading…</p>}>
+        <SellForms searchParams={searchParams} />
       </Suspense>
+      <details className="mt-10 border-t pt-6">
+        <summary className="cursor-pointer font-semibold">
+          Want a realtor or conveyancer to handle it? More options
+        </summary>
+        <div className="mt-4 flex flex-col gap-3 text-sm">
+          <p>
+            Choose a realtor or conveyancer while you list, or browse them first:{" "}
+            <Link href="/agents" className="underline">find a realtor</Link> ·{" "}
+            <Link href="/solicitors" className="underline">find a conveyancer</Link> ·{" "}
+            <Link href="/agents/register" className="underline">I&apos;m a realtor</Link>
+          </p>
+        </div>
+        <Suspense fallback={null}>
+          <AdvancedForm searchParams={searchParams} />
+        </Suspense>
+      </details>
     </main>
   );
 }
 
-async function AuthorizedSellForm({
-  searchParams,
-}: {
-  searchParams: Promise<SellSearchParams>;
-}) {
-  const params = await searchParams;
-
+async function SellHeading() {
+  const site = await currentSite();
   return (
-    <SellForm
+    <>
+      <h1 className="text-3xl font-semibold tracking-tight">Sell your {site.noun}, free</h1>
+      <p className="mt-2 text-zinc-600">
+        No account, no fees. Add photos, a price and how buyers can reach you. It takes about two minutes.
+      </p>
+    </>
+  );
+}
+
+async function SellForms({ searchParams }: { searchParams: Promise<SellSearchParams> }) {
+  const [params, site] = await Promise.all([searchParams, currentSite()]);
+  return (
+    <QuickSellForm
+      noun={site.noun}
       defaults={{
         title: firstValue(params.title),
         price: firstValue(params.price),
@@ -66,13 +76,16 @@ async function AuthorizedSellForm({
   );
 }
 
-async function SellHeading() {
-  const site = await currentSite();
+async function AdvancedForm({ searchParams }: { searchParams: Promise<SellSearchParams> }) {
+  const params = await searchParams;
   return (
-    <>
-      <h1 className="text-3xl font-semibold tracking-tight">Sell your {site.noun}</h1>
-      <p className="mt-2">Listing your {site.noun} for sale is free.</p>
-    </>
+    <SellForm
+      defaults={{
+        title: firstValue(params.title),
+        price: firstValue(params.price),
+        location: firstValue(params.location),
+      }}
+    />
   );
 }
 

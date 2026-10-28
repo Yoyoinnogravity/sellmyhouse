@@ -68,7 +68,7 @@ export default function SellForm({ defaults }: { defaults: ListingDefaults }) {
         />
       </label>
       {error ? <p role="alert">{error}</p> : null}
-      <button type="submit">Continue</button>
+      <button type="submit" className="border px-4 py-2 font-semibold">Continue to realtor and conveyancer options</button>
     </form>
   );
 }
