@@ -49,7 +49,7 @@ function WorldMarkers({ points }: { points: MapProperty[] }) {
       const marker = L.marker([point.lat, point.lng], {
         icon: L.divIcon({
           className: "price-pin",
-          html: `<span style="position:absolute;left:0;top:0;transform:translate(-50%,-130%);background:#f97316;color:#fff7ed;border:2px solid #fff7ed;border-radius:999px;padding:2px 8px;font:600 12px/1.3 Arial,Helvetica,sans-serif;white-space:nowrap;box-shadow:0 1px 2px rgb(0 0 0 / 35%)">${escapeHtml(label)}</span>`,
+          html: `<span style="position:absolute;left:0;top:0;transform:translate(-50%,-130%);cursor:pointer;background:#f97316;color:#fff7ed;border:2px solid #fff7ed;border-radius:999px;padding:2px 8px;font:600 12px/1.3 Arial,Helvetica,sans-serif;white-space:nowrap;box-shadow:0 1px 2px rgb(0 0 0 / 35%)">${escapeHtml(label)}</span>`,
           iconSize: [0, 0],
           iconAnchor: [0, 0],
         }),
@@ -58,9 +58,17 @@ function WorldMarkers({ points }: { points: MapProperty[] }) {
       })
       const offers = point.offerCount ?? 1
       const count = offers > 1 ? `<br>Lowest of ${offers} unit types` : ""
-      marker.bindPopup(
-        `<a href="/property/${point.id}">${escapeHtml(point.title)}</a><br>${escapeHtml(label)}${count}<br>${escapeHtml(point.location)}`,
+      // A tap or click on the price goes straight to the property's own page.
+      marker.bindTooltip(
+        `<strong>${escapeHtml(point.title)}</strong><br>${escapeHtml(label)}${count}<br>${escapeHtml(point.location)}`,
+        { direction: "top", offset: [0, -28] },
       )
+      marker.on("click", () => {
+        window.location.assign(`/property/${point.id}`)
+      })
+      marker.on("keypress", (event: L.LeafletKeyboardEvent) => {
+        if (event.originalEvent.key === "Enter") window.location.assign(`/property/${point.id}`)
+      })
       marker.addTo(layer)
     }
     layer.addTo(map)
