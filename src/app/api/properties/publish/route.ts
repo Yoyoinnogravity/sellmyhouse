@@ -29,6 +29,7 @@ export async function POST(request: Request) {
   // field is left empty by people and usually filled in by spam bots.
   let body: unknown;
   let photos: Blob[] = [];
+  let pin: { lat: number; lng: number } | null = null;
   let specified: SpecifiedContacts = {
     realtor: false,
     solicitor: false,
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
     const parsed = await readPublishRequest(request);
     body = parsed.body;
     photos = parsed.photos;
+    pin = parsed.pin;
     specified = parsed.specified;
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
@@ -72,6 +74,7 @@ export async function POST(request: Request) {
   if (!named.ok) {
     return NextResponse.json({ error: named.error }, { status: 400 });
   }
+  const metadata = withPin(named.metadata, pin);
 
   let images: string[] = [];
   try {
@@ -91,7 +94,7 @@ export async function POST(request: Request) {
         propertyType: listing.propertyType ?? defaultPropertyType(site),
         image: images[0] ?? null,
         images: images.length > 0 ? JSON.stringify(images) : null,
-        metadata: named.metadata,
+        metadata,
         contactType: listing.contactType,
         contactName: listing.contactName,
         contactPhone: listing.contactPhone,
@@ -130,6 +133,7 @@ async function readPublishRequest(request: Request) {
       body: await request.json(),
       photos: [] as Blob[],
       specified: emptySpecified(),
+      pin: null,
     };
   }
 
@@ -159,6 +163,7 @@ async function readPublishRequest(request: Request) {
       source: "manual",
     },
     photos,
+    pin: readPin(form.get("lat"), form.get("lng")),
     specified: {
       realtor: specifiedRealtor,
       solicitor: solicitorChoice === "specify",
@@ -267,4 +272,32 @@ async function resolveSolicitorId(
   }
 
   return { ok: true, solicitorId: selectedSolicitor.id };
+}
+
+// The seller's map pin, if they dropped one.
+function readPin(lat: FormDataEntryValue | null, lng: FormDataEntryValue | null) {
+  const latitude = Number(typeof lat === "string" ? lat : "");
+  const longitude = Number(typeof lng === "string" ? lng : "");
+  if (
+    typeof lat !== "string" || typeof lng !== "string" || lat === "" || lng === "" ||
+    !Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+    Math.abs(latitude) > 90 || Math.abs(longitude) > 180
+  ) {
+    return null;
+  }
+  return { lat: Math.round(latitude * 1e6) / 1e6, lng: Math.round(longitude * 1e6) / 1e6 };
+}
+
+// Adds the pin to the listing's metadata, where the map reads lat and lng.
+function withPin(metadata: string | null, pin: { lat: number; lng: number } | null) {
+  if (!pin) return metadata;
+  let parsed: Record<string, unknown> = {};
+  if (metadata) {
+    try {
+      parsed = JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      parsed = {};
+    }
+  }
+  return JSON.stringify({ ...parsed, lat: pin.lat, lng: pin.lng });
 }

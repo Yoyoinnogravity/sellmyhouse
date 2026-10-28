@@ -23,8 +23,8 @@ export function PropertyMap({
     <div
       className={
         variant === "world"
-          ? "h-72 w-full overflow-hidden border sm:h-96"
-          : "h-64 w-full overflow-hidden border sm:h-full sm:min-h-72"
+          ? "isolate h-72 w-full overflow-hidden border sm:h-96"
+          : "isolate h-64 w-full overflow-hidden border sm:h-full sm:min-h-72"
       }
     >
       <Canvas points={points} variant={variant} />

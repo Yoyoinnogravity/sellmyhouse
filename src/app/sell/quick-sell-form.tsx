@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useState } from "react";
+import { LocationPicker } from "@/components/location-picker";
 
 type Defaults = { title: string; price: string; location: string };
 
@@ -144,6 +145,12 @@ export default function QuickSellForm({ defaults, noun }: { defaults: Defaults; 
             className={input}
           />
         </label>
+        <div className="flex flex-col gap-1">
+          <span>
+            Pin it on the map <span className="text-zinc-500">(helps buyers find it)</span>
+          </span>
+          <LocationPicker location={location} />
+        </div>
         <label htmlFor="description">
           A few words about it <span className="text-zinc-500">(optional)</span>
           <textarea
