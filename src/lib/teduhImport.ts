@@ -176,7 +176,13 @@ export async function runTeduhImport(options: { maxProjects?: number; deadlineMs
   // Priority states most of the time; any state now and then.
   let state = options.state;
   if (!state) {
-    if (Math.random() < 0.8) {
+    // Focus on Kuala Lumpur first, then Selangor (Greater KL), then the rest.
+    const roll = Math.random();
+    if (roll < 0.6) {
+      state = "14"; // WP Kuala Lumpur
+    } else if (roll < 0.85) {
+      state = "10"; // Selangor
+    } else if (roll < 0.95) {
       state = PRIORITY_STATES[Math.floor(Math.random() * PRIORITY_STATES.length)];
     } else {
       const states = await getJson<{ id: string }[]>("/api/negeri");
