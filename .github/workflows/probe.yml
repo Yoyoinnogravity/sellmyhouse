@@ -1,0 +1,13 @@
+name: Probe register
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: |
+          note() { echo "::notice title=$1::$(echo "$2" | tr '\n' ' ' | tr -s ' ' | head -c 950)"; }
+          for u in https://lppeh.gov.my/search-listing https://lpeph.gov.my/search-listing https://lppeh.gov.my/; do
+            H=$(curl -sL -m 30 -A 'Mozilla/5.0' -o /tmp/p.html -w '%{http_code} %{url_effective}' "$u")
+            note "$u" "$H $(sed 's/<script[^>]*>.*<\/script>//g' /tmp/p.html | grep -io '<form[^>]*>\|<input[^>]*>\|<select[^>]*>\|<option[^>]*>[^<]*\|action=\"[^\"]*\"\|/api/[a-z/_-]*\|search[a-z_-]*\.php' | head -40 | tr '\n' ' ')"
+          done
