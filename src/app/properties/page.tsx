@@ -77,23 +77,22 @@ async function SaleBrowse({
               : "Units, condos, bungalows, and land from licensed developments. Each price is the lowest published for that unit type."
             : `${capitalize(plural)} offered by individual owners${allSites ? " across sellmyhouse, sellmycondo, sellmyland and sellmybungalow" : ""}. Listing your ${site.noun} for sale is free.`}
         </p>
-        <p className="flex gap-4 text-sm">
-          <Link href={browseHref(sale, 1, { ...search, scope: "site" })} aria-current={search.scope === "site" ? "page" : undefined} className={search.scope === "site" ? "font-semibold" : undefined}>
-            {site.name} only
-          </Link>
-          <Link href={browseHref(sale, 1, { ...search, scope: "all" })} aria-current={search.scope === "all" ? "page" : undefined} className={search.scope === "all" ? "font-semibold" : undefined}>
-            All four sites
-          </Link>
-        </p>
-        <p className="flex gap-4 text-sm">
-          <Link href={browseHref("private", 1, search)} aria-current={sale === "private" ? "page" : undefined} className={sale === "private" ? "font-semibold" : undefined}>
-            Private sales
-          </Link>
-          <Link href={browseHref("developer", 1, search)} aria-current={sale === "developer" ? "page" : undefined} className={sale === "developer" ? "font-semibold" : undefined}>
-            Developer units
-          </Link>
-          {sale === "private" ? <Link href="/sell">List a property</Link> : null}
-        </p>
+        <div className="flex flex-col gap-2 text-sm">
+          <ChoiceRow
+            label="Show"
+            options={[
+              { href: browseHref(sale, 1, { ...search, scope: "site" }), text: `${capitalize(site.plural)} only`, on: search.scope === "site" },
+              { href: browseHref(sale, 1, { ...search, scope: "all" }), text: "All property types", on: search.scope === "all" },
+            ]}
+          />
+          <ChoiceRow
+            label="Selling"
+            options={[
+              { href: browseHref("private", 1, search), text: "Owners", on: sale === "private" },
+              { href: browseHref("developer", 1, search), text: "Developers", on: sale === "developer" },
+            ]}
+          />
+        </div>
         <ListingSearchForm sale={sale} search={search} places={places} />
       </div>
       <WorldMapSection sale={sale} search={search} />
@@ -234,4 +233,33 @@ function firstValue(value: string | string[] | undefined) {
 
 function capitalize(value: string) {
   return `${value[0].toUpperCase()}${value.slice(1)}`;
+}
+
+// A labelled pair of choices that look like buttons, with the current one filled in.
+function ChoiceRow({
+  label,
+  options,
+}: {
+  label: string;
+  options: { href: string; text: string; on: boolean }[];
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="w-16 text-zinc-600">{label}</span>
+      {options.map((option) => (
+        <Link
+          key={option.text}
+          href={option.href}
+          aria-current={option.on ? "page" : undefined}
+          className={
+            option.on
+              ? "inline-flex min-h-[36px] items-center border border-zinc-900 bg-zinc-900 px-3 font-semibold text-white"
+              : "inline-flex min-h-[36px] items-center border px-3 hover:border-zinc-900"
+          }
+        >
+          {option.text}
+        </Link>
+      ))}
+    </div>
+  );
 }
