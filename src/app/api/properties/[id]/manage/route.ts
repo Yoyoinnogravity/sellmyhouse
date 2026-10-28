@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { removeListingPhotos } from "@/lib/listingPhotos";
-import { listingImages } from "@/lib/listingImage";
 import { manageKeyMatches } from "@/lib/manageKey";
+import { deleteListing } from "@/lib/listingRemoval";
 import { prisma } from "@/lib/prisma";
 import { APLS } from "@/lib/propertyStandard";
 
@@ -61,17 +60,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   if (body.action === "remove") {
-    const photos = listingImages(property.images, property.image);
-    await prisma.$transaction(async (tx) => {
-      const lead = await tx.lead.findUnique({ where: { propertyId: id }, select: { id: true } });
-      if (lead) {
-        await tx.leadUnlock.deleteMany({ where: { leadId: lead.id } });
-        await tx.lead.delete({ where: { id: lead.id } });
-      }
-      await tx.representationRequest.deleteMany({ where: { propertyId: id } });
-      await tx.property.delete({ where: { id } });
-    });
-    await removeListingPhotos(photos.filter((src) => src.startsWith("/uploads/")));
+    await deleteListing(id);
     return NextResponse.json({ ok: true });
   }
 

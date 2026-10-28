@@ -18,6 +18,10 @@ import { ListingLive, ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
 import { AdPlace } from "@/components/ad-place";
+import { AdminTools } from "@/components/admin-tools";
+import { isAdminEmail } from "@/lib/developerAccess";
+import { isRemoved } from "@/lib/listingRemoval";
+import { getUserFromCookie } from "@/lib/session";
 import { RentalDetails } from "@/components/rental-details";
 import { isRental, perMonth } from "@/lib/rental";
 import { ComparePrices } from "@/components/compare-prices";
@@ -38,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         select: { title: true, price: true, currency: true, location: true, description: true, image: true, images: true, metadata: true },
       }),
     ]);
-    if (!listing) return {};
+    if (!listing || isRemoved(listing.metadata)) return { robots: { index: false } };
     const price = perMonth(priceLabel(listing.currency, listing.price), isRental(listing.metadata));
     const photo = listingImages(listing.images, listing.image).find(
       (src) => src.startsWith("/uploads/") || src.startsWith("https://"),
@@ -98,9 +102,11 @@ export default async function PropertyPage({
     },
   });
 
-  if (!property) {
+  if (!property || isRemoved(property.metadata)) {
     notFound();
   }
+  const viewer = await getUserFromCookie();
+  const admin = isAdminEmail(viewer?.email);
 
   const solicitor =
     property.solicitorId == null
@@ -160,6 +166,7 @@ export default async function PropertyPage({
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-10 sm:py-16">
       <AdPlace place={property.location} />
+      {admin ? <AdminTools id={property.id} imported={kind === "developer"} /> : null}
       {(await searchParams).published ? <ListingLive title={property.title} /> : null}
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>

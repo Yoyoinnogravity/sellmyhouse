@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { unstable_rethrow } from "next/navigation";
+import { notRemovedWhere } from "@/lib/listingRemoval";
 import { prisma } from "@/lib/prisma";
 import { cached } from "@/lib/queryCache";
 import { currentSite, siteListingWhere } from "@/lib/site";
@@ -23,7 +24,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const where = siteListingWhere(site);
+    // One brand: every listing, except hidden ones.
+    void siteListingWhere(site);
+    const where = notRemovedWhere;
     const listings = await cached(`sitemap:${site.id}`, () =>
       prisma.property.findMany({
         where,

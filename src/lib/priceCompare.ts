@@ -1,4 +1,5 @@
 import { geoIndex, pinMetadata } from "@/lib/listingGeo";
+import { notRemovedWhere } from "@/lib/listingRemoval";
 import { picturePoint } from "@/lib/places";
 import { isRental } from "@/lib/rental";
 import { prisma } from "@/lib/prisma";
@@ -67,6 +68,7 @@ async function nearbyListings(subject: Subject): Promise<CompareBlock | null> {
     async () => {
       const [rows, geo] = await Promise.all([
         prisma.property.findMany({
+          where: notRemovedWhere,
           select: { id: true, title: true, price: true, currency: true, location: true, propertyType: true, bedrooms: true },
         }),
         geoIndex(),

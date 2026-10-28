@@ -55,6 +55,7 @@ export async function fillDevelopmentMedia(options: { deadlineMs?: number; maxPr
       AND metadata::jsonb->>'register' = 'TEDUH'
       AND metadata::jsonb->>'mediaChecked' IS NULL
       AND metadata::jsonb->>'mediaOptOut' IS NULL
+      AND metadata::jsonb->>'removed' IS NULL
       AND coalesce(metadata::jsonb->>'website', '') <> ''
     GROUP BY 1
     -- Condos and apartments first: their developers' sites have the views.

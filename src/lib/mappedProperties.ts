@@ -5,6 +5,7 @@ import { listingKind, type SaleKind } from "@/lib/listingKind"
 import { hasRealPhotos, listingPhoto, priceLabel } from "@/lib/listingImage"
 import { picturePoint, pointForListing, type MapProperty } from "@/lib/places"
 import { geoIndex, pinMetadata } from "@/lib/listingGeo"
+import { notRemovedWhere } from "@/lib/listingRemoval"
 import { isRental, notRentWhere, perMonth, rentWhere } from "@/lib/rental"
 import { prisma } from "@/lib/prisma"
 import { cached } from "@/lib/queryCache"
@@ -60,7 +61,7 @@ function saleWhere(sale: SaleKind): Prisma.PropertyWhereInput {
 
 async function listingWhere(sale?: SaleKind, search?: ListingSearch) {
   const site = await currentSite()
-  const filters: Prisma.PropertyWhereInput[] = []
+  const filters: Prisma.PropertyWhereInput[] = [notRemovedWhere]
   const stock = searchStockWhere(search, siteListingWhere(site))
   if (stock && (search?.type || sale !== "developer")) filters.push(stock)
   if (sale) filters.push(saleWhere(sale))
@@ -81,7 +82,7 @@ async function listingWhere(sale?: SaleKind, search?: ListingSearch) {
 export async function listPlaceOptions(sale: SaleKind, search: ListingSearch): Promise<string[]> {
   await connection()
   const site = await currentSite()
-  const filters: Prisma.PropertyWhereInput[] = []
+  const filters: Prisma.PropertyWhereInput[] = [notRemovedWhere]
   const stock = searchStockWhere(search, siteListingWhere(site))
   if (stock && (search.type || sale !== "developer")) filters.push(stock)
   filters.push(saleWhere(sale))
@@ -98,7 +99,7 @@ export async function listPlaceOptions(sale: SaleKind, search: ListingSearch): P
 export async function listCountryCounts(sale: SaleKind, search: ListingSearch): Promise<{ label: string; count: number }[]> {
   await connection()
   const site = await currentSite()
-  const filters: Prisma.PropertyWhereInput[] = []
+  const filters: Prisma.PropertyWhereInput[] = [notRemovedWhere]
   const stock = searchStockWhere(search, siteListingWhere(site))
   if (stock && (search.type || sale !== "developer")) filters.push(stock)
   filters.push(saleWhere(sale))

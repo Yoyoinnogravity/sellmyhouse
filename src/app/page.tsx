@@ -45,8 +45,7 @@ export default async function HomePage() {
             Buy, rent or sell your {site.noun} anywhere in the world
           </h1>
           <p className="text-zinc-600">
-            Houses, condos, land, bungalows and new developments from every Sell My site, on one
-            map. Type a town or a country. No account needed.
+            Sell. Buy. Rent. Type a town or a country. No account needed.
           </p>
         </div>
         <Suspense fallback={<SearchForm places={[]} />}>
