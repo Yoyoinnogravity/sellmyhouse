@@ -4,7 +4,7 @@ import { FormatDownloads } from "@/components/format-downloads";
 import { LISTING_COLUMNS } from "@/lib/listingFormat";
 
 export const metadata: Metadata = {
-  title: "Listing file format for realtors and sellers",
+  title: "Global Database Format for Realtors",
   description:
     "Free spreadsheet template for uploading properties worldwide. Only price, location and a contact name are required.",
 };
@@ -13,7 +13,7 @@ export default function ListingFormatPage() {
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6">
       <div className="flex flex-col gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight">The listing file format</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Global Database Format for Realtors</h1>
         <p className="text-lg text-zinc-700">
           One simple spreadsheet for listing any property, anywhere in the world: a house, a condo, a plot of land.
           Realtors can upload their whole stock at once; a seller can upload a single home.

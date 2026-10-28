@@ -3,7 +3,7 @@ import Link from "next/link";
 // The one place sellers and realtors get the listing file format.
 // Shown on the home page, the sell page, the realtors page and /listing-format.
 export function FormatDownloads({ compact = false }: { compact?: boolean }) {
-  const big = "inline-flex min-h-[52px] items-center justify-center gap-2 px-5 text-base font-semibold";
+  const big = "inline-flex min-h-[52px] items-center justify-center gap-2 px-5 py-2 text-center text-base font-semibold";
   return (
     <section
       aria-labelledby="format-downloads-heading"
@@ -11,8 +11,9 @@ export function FormatDownloads({ compact = false }: { compact?: boolean }) {
     >
       <div className="flex flex-col gap-1">
         <h2 id="format-downloads-heading" className="text-xl font-semibold tracking-tight">
-          Have several properties? Download the listing format
+          Global Database Format for Realtors
         </h2>
+        <p className="font-semibold text-zinc-800">Have several properties? Download the format and upload them all at once.</p>
         {compact ? null : (
           <p className="text-zinc-700">
             One free spreadsheet for realtors and sellers anywhere in the world. One property per row, up to 200
@@ -22,11 +23,11 @@ export function FormatDownloads({ compact = false }: { compact?: boolean }) {
         )}
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <a href="/listing-template.xlsx" download className={`${big} bg-orange-600 text-white hover:bg-orange-700`}>
-          Download Excel template
+        <a href="/listing-template.xlsx" download="Global-Database-Format-for-Realtors.xlsx" className={`${big} bg-orange-600 text-white hover:bg-orange-700`}>
+          Download the Global Database Format (Excel)
         </a>
-        <a href="/listing-template.csv" download className={`${big} border-2 border-orange-600 bg-white hover:bg-orange-100`}>
-          Download CSV template
+        <a href="/listing-template.csv" download="Global-Database-Format-for-Realtors.csv" className={`${big} border-2 border-orange-600 bg-white hover:bg-orange-100`}>
+          Download as CSV
         </a>
         <Link href="/upload" className={`${big} bg-zinc-900 text-white hover:bg-zinc-700`}>
           Upload your file
