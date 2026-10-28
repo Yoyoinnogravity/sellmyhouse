@@ -21,7 +21,7 @@ const sellerExamples = [
 
 const sellerSteps = [
   { title: "Add photos and a price", text: "Snap a few pictures on your phone. No account, no fees." },
-  { title: "Choose who buyers contact", text: "Yourself, a realtor of your choice, or let local realtors get in touch." },
+  { title: "Buyers contact you", text: "They call, WhatsApp or email you directly. A realtor is optional." },
   { title: "Share it", text: "Your listing goes on the world map. Send it round on WhatsApp and Facebook." },
 ];
 
