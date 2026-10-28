@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" role="img" aria-label="Illustration of a two-storey family house">
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe3f5"/><stop offset="1" stop-color="#eaf6fb"/></linearGradient></defs>
+<rect width="400" height="260" fill="url(#s)"/><circle cx="330" cy="55" r="24" fill="#ffd36b"/>
+<rect y="205" width="400" height="55" fill="#8cc084"/><rect y="205" width="400" height="6" fill="#74ad6c"/>
+<polygon points="95,110 200,45 305,110" fill="#b5523b"/><rect x="110" y="108" width="180" height="100" fill="#f3e3c7"/>
+<rect x="250" y="55" width="20" height="40" fill="#8a3f2e"/>
+<rect x="128" y="125" width="38" height="30" fill="#7fb6d9" stroke="#fff" stroke-width="4"/><rect x="234" y="125" width="38" height="30" fill="#7fb6d9" stroke="#fff" stroke-width="4"/>
+<rect x="182" y="150" width="36" height="58" fill="#6b4a3a"/><circle cx="210" cy="180" r="3" fill="#ffd36b"/>
+<rect x="128" y="170" width="38" height="26" fill="#7fb6d9" stroke="#fff" stroke-width="4"/><rect x="234" y="170" width="38" height="26" fill="#7fb6d9" stroke="#fff" stroke-width="4"/>
+<circle cx="55" cy="175" r="30" fill="#5f9e57"/><rect x="51" y="190" width="8" height="22" fill="#6b4a3a"/>
+<rect x="196" y="208" width="8" height="52" fill="#d9c9a8"/>
+</svg>

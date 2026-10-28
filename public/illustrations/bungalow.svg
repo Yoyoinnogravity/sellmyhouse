@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" role="img" aria-label="Illustration of a single-storey bungalow with palm trees">
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd8e6"/><stop offset="1" stop-color="#f6f1df"/></linearGradient></defs>
+<rect width="400" height="260" fill="url(#s)"/>
+<rect y="200" width="400" height="60" fill="#a7c97a"/>
+<polygon points="70,140 200,95 330,140" fill="#5c6f7d"/><rect x="85" y="138" width="230" height="66" fill="#fbf7ee"/>
+<rect x="105" y="155" width="44" height="30" fill="#8ec5df" stroke="#fff" stroke-width="4"/><rect x="250" y="155" width="44" height="30" fill="#8ec5df" stroke="#fff" stroke-width="4"/>
+<rect x="182" y="150" width="36" height="54" fill="#9a6b45"/>
+<rect x="85" y="198" width="230" height="8" fill="#d9cfb8"/>
+<path d="M352 210 Q356 150 346 120" stroke="#7a5a3a" stroke-width="7" fill="none"/>
+<g fill="#4f9a50"><ellipse cx="330" cy="118" rx="28" ry="8" transform="rotate(-25 330 118)"/><ellipse cx="366" cy="116" rx="28" ry="8" transform="rotate(25 366 116)"/><ellipse cx="346" cy="108" rx="8" ry="24"/></g>
+<path d="M40 210 Q44 160 36 135" stroke="#7a5a3a" stroke-width="6" fill="none"/>
+<g fill="#4f9a50"><ellipse cx="22" cy="134" rx="24" ry="7" transform="rotate(-25 22 134)"/><ellipse cx="52" cy="132" rx="24" ry="7" transform="rotate(25 52 132)"/></g>
+</svg>

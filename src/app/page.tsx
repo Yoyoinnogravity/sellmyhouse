@@ -12,6 +12,19 @@ import { currentSite } from "@/lib/site";
 // listing can be found and sold from any of the domains; the brand only
 // sets the headline wording.
 
+const sellerExamples = [
+  { src: "/illustrations/house.svg", label: "Houses", alt: "Illustration of a family house" },
+  { src: "/illustrations/condo.svg", label: "Condos and flats", alt: "Illustration of condominium towers" },
+  { src: "/illustrations/bungalow.svg", label: "Bungalows", alt: "Illustration of a bungalow with palm trees" },
+  { src: "/illustrations/land.svg", label: "Land", alt: "Illustration of a plot of land with a for-sale sign" },
+];
+
+const sellerSteps = [
+  { title: "Add photos and a price", text: "Snap a few pictures on your phone. No account, no fees." },
+  { title: "Choose who buyers contact", text: "Yourself, a realtor of your choice, or let local realtors get in touch." },
+  { title: "Share it", text: "Your listing goes on the world map. Send it round on WhatsApp and Facebook." },
+];
+
 const moreChoices = [
   { href: "/properties?all=1", label: "Private sales" },
   { href: "/properties?sale=developer&all=1", label: "Developer units" },
@@ -42,6 +55,7 @@ export default async function HomePage() {
           <CountryChips />
         </Suspense>
       </section>
+      <SellersSection />
       <section className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-8 sm:px-6 sm:py-10">
         <h2 className="text-2xl font-semibold tracking-tight">Property around the world</h2>
         <Suspense fallback={<p>Loading the map…</p>}>
@@ -165,5 +179,56 @@ function SearchForm({ places }: { places: string[] }) {
         Search
       </button>
     </form>
+  );
+}
+
+// Shown whether or not the database is available: it needs no data.
+function SellersSection() {
+  return (
+    <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 border-t px-4 py-10 sm:px-6">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-2xl font-semibold tracking-tight">Selling? List it free in three steps</h2>
+        <p className="text-zinc-600">Any kind of property, anywhere in the world.</p>
+      </div>
+      <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {sellerExamples.map((example) => (
+          <li key={example.src}>
+            <Link href="/sell" className="group flex flex-col gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={example.src}
+                alt={example.alt}
+                width={400}
+                height={260}
+                loading="lazy"
+                className="aspect-[400/260] w-full border object-cover transition group-hover:opacity-90"
+              />
+              <span className="text-sm font-semibold">{example.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <ol className="grid gap-4 sm:grid-cols-3">
+        {sellerSteps.map((step, index) => (
+          <li key={step.title} className="flex gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-zinc-900 font-semibold text-white">
+              {index + 1}
+            </span>
+            <span className="flex flex-col gap-1">
+              <span className="font-semibold">{step.title}</span>
+              <span className="text-sm text-zinc-600">{step.text}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+      <div>
+        <Link
+          href="/sell"
+          className="inline-flex min-h-[48px] items-center bg-zinc-900 px-6 text-base font-semibold text-white hover:bg-zinc-700"
+        >
+          List your property free
+        </Link>
+      </div>
+    </section>
   );
 }

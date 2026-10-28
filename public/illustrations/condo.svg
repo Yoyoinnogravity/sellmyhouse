@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" role="img" aria-label="Illustration of condominium towers">
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f4d7a"/><stop offset="1" stop-color="#f2a65a"/></linearGradient></defs>
+<rect width="400" height="260" fill="url(#s)"/>
+<rect x="70" y="60" width="90" height="190" fill="#e8ecf2"/><rect x="185" y="30" width="100" height="220" fill="#d5dce6"/><rect x="305" y="95" width="70" height="155" fill="#e8ecf2"/>
+<g fill="#ffd98a">
+<rect x="82" y="75" width="14" height="10"/><rect x="108" y="75" width="14" height="10"/><rect x="134" y="75" width="14" height="10"/>
+<rect x="82" y="100" width="14" height="10"/><rect x="134" y="100" width="14" height="10"/><rect x="108" y="125" width="14" height="10"/>
+<rect x="82" y="150" width="14" height="10"/><rect x="134" y="175" width="14" height="10"/><rect x="108" y="200" width="14" height="10"/>
+<rect x="198" y="45" width="16" height="11"/><rect x="226" y="45" width="16" height="11"/><rect x="256" y="45" width="16" height="11"/>
+<rect x="198" y="72" width="16" height="11"/><rect x="256" y="72" width="16" height="11"/><rect x="226" y="99" width="16" height="11"/>
+<rect x="198" y="126" width="16" height="11"/><rect x="256" y="126" width="16" height="11"/><rect x="226" y="153" width="16" height="11"/>
+<rect x="198" y="180" width="16" height="11"/><rect x="256" y="207" width="16" height="11"/>
+<rect x="316" y="110" width="12" height="9"/><rect x="350" y="110" width="12" height="9"/><rect x="316" y="160" width="12" height="9"/><rect x="350" y="185" width="12" height="9"/>
+</g>
+<rect y="238" width="400" height="22" fill="#3b4a5e"/>
+</svg>
