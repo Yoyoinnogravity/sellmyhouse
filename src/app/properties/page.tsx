@@ -69,6 +69,19 @@ async function SaleBrowse({
 
   return (
     <>
+      {search.place ? (
+        <div className="flex flex-wrap items-center gap-3 border-2 border-zinc-900 bg-zinc-50 p-3">
+          <span>
+            Showing <strong>{search.place}</strong>
+          </span>
+          <Link
+            href={browseHref(sale, 1, { ...search, place: "" })}
+            className="inline-flex min-h-[44px] items-center gap-2 bg-zinc-900 px-4 font-semibold text-white hover:bg-zinc-700"
+          >
+            ← Back to the whole world
+          </Link>
+        </div>
+      ) : null}
       <div className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold tracking-tight">
           {sale === "developer"
@@ -77,7 +90,7 @@ async function SaleBrowse({
               ? `${capitalize(plural)} for rent`
               : search.deal === "sale"
                 ? `${capitalize(plural)} for sale`
-                : `Private ${plural}`}
+                : capitalize(plural)}
         </h1>
         <p className="text-sm text-zinc-600">
           {sale === "developer"
@@ -86,7 +99,7 @@ async function SaleBrowse({
               : "Units, condos, bungalows, and land from licensed developments. Each price is the lowest published for that unit type."
             : search.deal === "rent"
               ? `Long-term rentals (6 months or more) from owners and realtors. Listing your ${site.noun} for rent is free.`
-              : `${capitalize(plural)} offered by individual owners${allSites ? " across sellmyhouse, sellmycondo, sellmyland and sellmybungalow" : ""}. Listing your ${site.noun} for sale or rent is free.`}
+              : `${capitalize(plural)} for sale and long-term rent, from owners and realtors${allSites ? ", anywhere in the world" : ""}. Listing yours is free.`}
         </p>
         <div className="flex flex-col gap-2 text-sm">
           <ChoiceRow

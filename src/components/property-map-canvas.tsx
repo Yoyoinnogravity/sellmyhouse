@@ -25,6 +25,32 @@ function Frame({ points, variant }: { points: MapProperty[]; variant: "world" | 
   return null
 }
 
+// A "World" button on the map: zooms right out to the whole globe.
+function WorldButton() {
+  const map = useMap()
+  useEffect(() => {
+    const Control = L.Control.extend({
+      onAdd() {
+        const button = L.DomUtil.create("button", "")
+        button.type = "button"
+        button.textContent = "World"
+        button.title = "Zoom out to the whole world"
+        button.style.cssText =
+          "background:#fff;border:2px solid rgba(0,0,0,0.3);border-radius:4px;padding:6px 10px;font:600 13px Arial,Helvetica,sans-serif;cursor:pointer"
+        L.DomEvent.disableClickPropagation(button)
+        L.DomEvent.on(button, "click", () => map.setView([20, 0], 2))
+        return button
+      },
+    })
+    const control = new Control({ position: "topright" })
+    control.addTo(map)
+    return () => {
+      control.remove()
+    }
+  }, [map])
+  return null
+}
+
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => {
     if (char === "&") return "&amp;"
@@ -112,6 +138,7 @@ export default function PropertyMapCanvas({
       <TileLayer attribution={MAP_ATTRIBUTION} maxZoom={19} url={MAP_TILES} />
       <TileLayer attribution="" maxZoom={19} url={MAP_LABELS} />
       <Frame points={points} variant={variant} />
+      {variant === "world" ? <WorldButton /> : null}
       {variant === "world" ? (
         <WorldMarkers points={points} />
       ) : (
