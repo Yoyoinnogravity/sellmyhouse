@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { Suspense } from "react";
 import { WorldMapSection } from "@/components/world-map-section";
 import { emptyListingSearch, listingTypeOptions, PRICE_BANDS, priceBandLabel } from "@/lib/listingSearch";
@@ -67,12 +68,24 @@ export default async function HomePage() {
 }
 
 async function SearchWithPlaces() {
-  const places = await listPlaceOptions("private", emptyListingSearch("all"));
+  // If the database is unavailable, the search box still works without suggestions.
+  let places: string[] = [];
+  try {
+    places = await listPlaceOptions("private", emptyListingSearch("all"));
+  } catch (error) {
+    unstable_rethrow(error);
+  }
   return <SearchForm places={places} />;
 }
 
 async function CountryChips() {
-  const countries = await listCountryCounts("private", emptyListingSearch("all"));
+  let countries: Awaited<ReturnType<typeof listCountryCounts>> = [];
+  try {
+    countries = await listCountryCounts("private", emptyListingSearch("all"));
+  } catch (error) {
+    unstable_rethrow(error);
+    return null;
+  }
   if (countries.length === 0) return null;
   return (
     <div className="flex flex-col gap-2">
