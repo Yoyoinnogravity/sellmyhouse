@@ -20,6 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: "#ffffff",
+  colorScheme: "light",
 };
 
 // The whole app renders per request: four brands selected from the request

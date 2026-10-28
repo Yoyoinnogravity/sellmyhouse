@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* The site is designed light. "dark:" classes only apply if a .dark class is
+   ever added, never just because the visitor's browser is in dark mode. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -12,11 +16,9 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Keep form controls (dropdowns, inputs) light even when the browser is dark. */
+:root {
+  color-scheme: light;
 }
 
 html {
