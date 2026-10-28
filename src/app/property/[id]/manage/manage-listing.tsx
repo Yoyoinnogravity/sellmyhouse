@@ -104,7 +104,7 @@ export default function ManageListing({ id }: { id: number }) {
     return (
       <div className="flex flex-col gap-3">
         <p className="text-lg font-semibold">Your listing has been removed.</p>
-        <p>It has been taken off the site. The map catches up within a few minutes. Thank you for using Sell My.</p>
+        <p>It has been taken off the site. The map catches up within a few minutes. Thank you, and good luck with the sale.</p>
         <Link href="/" className="underline">Go to the home page</Link>
       </div>
     );

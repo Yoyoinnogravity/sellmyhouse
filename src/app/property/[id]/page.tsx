@@ -13,6 +13,7 @@ import { picturePoint, pointForListing } from "@/lib/places";
 import { prisma } from "@/lib/prisma";
 import { currentSite } from "@/lib/site";
 import { conveyancerRegisterPath, propertyRegion, realtorRegisterPath, regionPath } from "@/lib/region";
+import { SellerContact } from "@/components/seller-contact";
 import { ListingLive, ShareListing } from "@/components/share-listing";
 import { SolicitorContacts } from "@/components/solicitor-contacts";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
@@ -146,11 +147,25 @@ export default async function PropertyPage({
       : await listAvailableAgentsInRegion(region.country, region.city, 6);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-16">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-6 py-10 sm:py-16">
       {(await searchParams).published ? <ListingLive title={property.title} /> : null}
-      <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
-      <p>{kind === "developer" ? "Developer unit" : "Private sale"}{property.developerVerified ? " · Verified developer" : ""}</p>
-      <p>Buying? No account needed. Contact the seller, realtor, or a conveyancer below.</p>
+      <div className="flex flex-col gap-1">
+        <h1 className="text-3xl font-semibold tracking-tight">{property.title}</h1>
+        <p className="text-3xl font-bold tracking-tight">{mapPoint.priceLabel}</p>
+        <p className="text-zinc-600">
+          {property.location} · {kind === "developer" ? "Developer unit" : "Private sale"}
+          {property.developerVerified ? " · Verified developer" : ""}
+        </p>
+      </div>
+      {property.contactType === "direct" && !property.lead && extra?.contactRole !== "realtor" ? (
+        <SellerContact
+          name={property.contactName}
+          phone={property.contactPhone}
+          email={property.contactEmail}
+          title={property.title}
+          location={property.location}
+        />
+      ) : null}
       <ShareListing title={property.title} location={property.location} />
       <div className="grid gap-4 md:grid-cols-2">
         <ListingPhoto
@@ -206,8 +221,6 @@ export default async function PropertyPage({
           )}
         </section>
       ) : null}
-      <p>{property.location}</p>
-      <p>{mapPoint.priceLabel}</p>
       {contact.developer || contact.phones.length > 0 || contact.website ? (
         <section className="flex flex-col gap-1">
           <h2>Developer</h2>
@@ -242,7 +255,7 @@ export default async function PropertyPage({
       {extra ? (
         <ul>
           {Object.entries(extra)
-            .filter(([key]) => !["listingKey", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked", "contactRole", "realtorAgency", "solicitorName", "solicitorFirm", "solicitorPhone", "solicitorEmail"].includes(key))
+            .filter(([key]) => !["listingKey", "manageHash", "lat", "lng", "register", "priceMin", "priceMax", "phone", "phone2", "website", "contactChecked", "developer", "videos", "mediaChecked", "geoChecked", "contactRole", "realtorAgency", "solicitorName", "solicitorFirm", "solicitorPhone", "solicitorEmail"].includes(key))
             .map(([key, value]) => (
             <li key={key}>
               {metadataLabel(key)}: {String(value)}
@@ -265,14 +278,15 @@ export default async function PropertyPage({
             <Link href="/agents/dashboard">Get this seller&apos;s number</Link>
           </p>
         </section>
-      ) : property.contactType === "direct" ? (
-        <section>
-          <h2>{extra?.contactRole === "realtor" ? "Realtor" : "Contact the seller"}</h2>
-          <p>{property.contactName}</p>
-          {typeof extra?.realtorAgency === "string" ? <p>{extra.realtorAgency}</p> : null}
-          <p>{property.contactPhone}</p>
-          <p>{property.contactEmail}</p>
-        </section>
+      ) : property.contactType === "direct" && extra?.contactRole === "realtor" ? (
+        <SellerContact
+          heading={`Realtor${typeof extra?.realtorAgency === "string" ? ` · ${extra.realtorAgency}` : ""}`}
+          name={property.contactName}
+          phone={property.contactPhone}
+          email={property.contactEmail}
+          title={property.title}
+          location={property.location}
+        />
       ) : agentIsAvailable && assignedAgent ? (
         <section>
           <h2>Realtor</h2>
@@ -293,7 +307,6 @@ export default async function PropertyPage({
               : "This property does not have an agent yet."}
           </p>
           <h2>Available Agents in This Region</h2>
-          <p>Selling this property? Sign in to choose an agent.</p>
           {regionalAgents.length === 0 ? (
             <p>
               No realtors registered for this region.{" "}
