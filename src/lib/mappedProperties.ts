@@ -4,6 +4,7 @@ import { publishedContact } from "@/lib/developerContact"
 import { listingKind, type SaleKind } from "@/lib/listingKind"
 import { hasRealPhotos, listingPhoto, priceLabel } from "@/lib/listingImage"
 import { picturePoint, pointForListing, type MapProperty } from "@/lib/places"
+import { geoIndex, pinMetadata } from "@/lib/listingGeo"
 import { prisma } from "@/lib/prisma"
 import { cached } from "@/lib/queryCache"
 import { searchStockWhere, type ListingSearch } from "@/lib/listingSearch"
@@ -38,19 +39,6 @@ function toPoint(row: {
     lat: point.lat,
     lng: point.lng,
   }
-}
-
-function offerKey(id: number, metadata: string | null) {
-  if (!metadata) return `listing:${id}`
-  try {
-    const parsed = JSON.parse(metadata) as { register?: unknown; projectCode?: unknown }
-    if (parsed.register === "TEDUH" && typeof parsed.projectCode === "string" && parsed.projectCode) {
-      return `teduh:${parsed.projectCode}`
-    }
-  } catch {
-    // Ungrouped listings keep their own pin.
-  }
-  return `listing:${id}`
 }
 
 function cheapestOffer<T extends { id: number; price: number }>(offers: T[]) {
@@ -159,13 +147,17 @@ export async function listMapPoints(sale?: SaleKind, search?: ListingSearch): Pr
       price: true,
       currency: true,
       location: true,
-      metadata: true,
     },
   } satisfies Prisma.PropertyFindManyArgs
-  const rows = await cached(`property:${JSON.stringify(query3)}`, () => prisma.property.findMany(query3))
+  const [slim, geo] = await Promise.all([
+    cached(`property:${JSON.stringify(query3)}`, () => prisma.property.findMany(query3), 15 * 60 * 1000),
+    geoIndex(),
+  ])
+  const rows = slim.map((row) => ({ ...row, metadata: pinMetadata(geo.get(row.id)) }))
   const groups = new Map<string, typeof rows>()
   for (const row of rows) {
-    const key = offerKey(row.id, row.metadata)
+    const code = geo.get(row.id)?.code
+    const key = code ? `teduh:${code}` : `listing:${row.id}`
     const group = groups.get(key)
     if (group) group.push(row)
     else groups.set(key, [row])

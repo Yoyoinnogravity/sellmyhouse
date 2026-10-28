@@ -1,3 +1,4 @@
+import { geoIndex, pinMetadata } from "@/lib/listingGeo";
 import { picturePoint } from "@/lib/places";
 import { prisma } from "@/lib/prisma";
 import { cached } from "@/lib/queryCache";
@@ -60,18 +61,22 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 async function nearbyListings(subject: Subject): Promise<CompareBlock | null> {
   const here = picturePoint(subject.location, subject.metadata);
   if (!here) return null;
-  const all = await cached("compare:all-listings", async () => {
-    const rows = await prisma.property.findMany({
-      select: { id: true, title: true, price: true, currency: true, location: true, propertyType: true, bedrooms: true, metadata: true },
-    });
-    return rows.flatMap((row) => {
-      const point = picturePoint(row.location, row.metadata);
-      if (!point) return [];
-      const { metadata: _drop, ...rest } = row;
-      void _drop;
-      return [{ ...rest, lat: point.lat, lng: point.lng, precise: point.precise }];
-    });
-  });
+  const all = await cached(
+    "compare:all-listings",
+    async () => {
+      const [rows, geo] = await Promise.all([
+        prisma.property.findMany({
+          select: { id: true, title: true, price: true, currency: true, location: true, propertyType: true, bedrooms: true },
+        }),
+        geoIndex(),
+      ]);
+      return rows.flatMap((row) => {
+        const point = picturePoint(row.location, pinMetadata(geo.get(row.id)));
+        return point ? [{ ...row, lat: point.lat, lng: point.lng, precise: point.precise }] : [];
+      });
+    },
+    15 * 60 * 1000,
+  );
   const currency = subject.currency ?? "";
   const near = all
     .filter((row) => row.id !== subject.id && (row.currency ?? "") === currency)
