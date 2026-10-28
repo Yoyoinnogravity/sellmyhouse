@@ -43,31 +43,8 @@ async function save(code: string, website: string, images: string[], videos: str
       AND metadata::jsonb->>'register' = 'TEDUH'`;
 }
 
-// Many projects have no website on the register while another project by the
-// same developer does. Lend that website to the rest, so their photos can be
-// found too. Marked websiteFrom = "developer" so it's clear where it came from.
-async function shareDeveloperWebsites() {
-  return prisma.$executeRaw`
-    UPDATE "Property" p
-    SET metadata = (p.metadata::jsonb || jsonb_build_object('website', w.website, 'websiteFrom', 'developer'))::text
-    FROM (
-      SELECT lower(trim(metadata::jsonb->>'developer')) AS developer, min(metadata::jsonb->>'website') AS website
-      FROM "Property"
-      WHERE metadata IS NOT NULL
-        AND metadata::jsonb->>'register' = 'TEDUH'
-        AND coalesce(metadata::jsonb->>'website', '') <> ''
-        AND coalesce(metadata::jsonb->>'developer', '') <> ''
-      GROUP BY 1
-    ) w
-    WHERE p.metadata IS NOT NULL
-      AND p.metadata::jsonb->>'register' = 'TEDUH'
-      AND coalesce(p.metadata::jsonb->>'website', '') = ''
-      AND lower(trim(p.metadata::jsonb->>'developer')) = w.developer`;
-}
-
 export async function fillDevelopmentMedia(options: { deadlineMs?: number; maxProjects?: number } = {}) {
   const deadline = Date.now() + (options.deadlineMs ?? 45_000);
-  const shared = await shareDeveloperWebsites();
   const rows = await prisma.$queryRaw<Row[]>`
     SELECT metadata::jsonb->>'projectCode' AS code,
            min(metadata::jsonb->>'website') AS website,
@@ -120,7 +97,6 @@ export async function fillDevelopmentMedia(options: { deadlineMs?: number; maxPr
     WHERE metadata IS NOT NULL AND metadata::jsonb->>'register' = 'TEDUH'`;
   return {
     checked: rows.length,
-    sharedWebsites: shared,
     log,
     developments: {
       total: Number(stats?.projects ?? 0),
