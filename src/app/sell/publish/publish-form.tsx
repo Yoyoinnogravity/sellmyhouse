@@ -121,6 +121,14 @@ export default function PublishForm({
 
   return (
     <form onSubmit={publish} className="mt-8 flex flex-col gap-4">
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-10000px", width: 1, height: 1 }}
+      />
       <p>
         {draft.title} in {draft.location}
       </p>

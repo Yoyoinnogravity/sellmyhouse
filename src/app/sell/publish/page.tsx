@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { listAvailableAgentsInRegion, listAgents } from "@/lib/agent";
 import { conveyancerRegisterPath, propertyRegion, realtorRegisterPath } from "@/lib/region";
 import { conveyancerPlace, listSolicitors } from "@/lib/solicitor";
-import { requireUser } from "@/lib/session";
 import PublishForm from "./publish-form";
 
 type PublishSearchParams = {
@@ -43,8 +42,7 @@ async function AuthorizedPublish({
     redirect("/sell");
   }
 
-  const returnQuery = new URLSearchParams({ title, price, location });
-  await requireUser(`/sell/publish?${returnQuery.toString()}`);
+  // Anyone can list a property: no account or login needed.
 
   const region = propertyRegion(location);
   const [solicitors, agents] = await Promise.all([

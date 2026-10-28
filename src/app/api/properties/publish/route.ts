@@ -7,7 +7,6 @@ import {
 import { createLeadForProperty } from "@/lib/leads";
 import { prisma } from "@/lib/prisma";
 import { formatFieldError, validateProperty } from "@/lib/propertyStandard";
-import { getUserFromCookie } from "@/lib/session";
 import { currentSite, defaultPropertyType } from "@/lib/site";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,11 +25,8 @@ type SpecifiedContacts = {
 };
 
 export async function POST(request: Request) {
-  const user = await getUserFromCookie();
-  if (!user) {
-    return NextResponse.json({ error: "You need to log in." }, { status: 401 });
-  }
-
+  // Anyone can list a property without an account. A hidden "website"
+  // field is left empty by people and usually filled in by spam bots.
   let body: unknown;
   let photos: Blob[] = [];
   let specified: SpecifiedContacts = {
@@ -138,6 +134,9 @@ async function readPublishRequest(request: Request) {
   }
 
   const form = await request.formData();
+  if (String(form.get("website") ?? "").trim() !== "") {
+    throw new Error("Spam");
+  }
   const contactChoice = String(form.get("contactType") ?? "");
   const solicitorChoice = String(form.get("solicitorChoice") ?? "");
   const specifiedRealtor = contactChoice === "specified";
