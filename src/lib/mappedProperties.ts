@@ -5,6 +5,7 @@ import { listingKind, type SaleKind } from "@/lib/listingKind"
 import { hasRealPhotos, listingPhoto, priceLabel } from "@/lib/listingImage"
 import { picturePoint, pointForListing, type MapProperty } from "@/lib/places"
 import { prisma } from "@/lib/prisma"
+import { cached } from "@/lib/queryCache"
 import { searchStockWhere, type ListingSearch } from "@/lib/listingSearch"
 import { currentSite, siteListingWhere } from "@/lib/site"
 
@@ -93,10 +94,11 @@ export async function listPlaceOptions(sale: SaleKind, search: ListingSearch): P
   const stock = searchStockWhere(search, siteListingWhere(site))
   if (stock && (search.type || sale !== "developer")) filters.push(stock)
   filters.push(saleWhere(sale))
-  const rows = await prisma.property.findMany({
+  const query1 = {
     where: filters.length === 1 ? filters[0] : { AND: filters },
     select: { location: true },
-  })
+  } satisfies Prisma.PropertyFindManyArgs
+  const rows = await cached(`property:${JSON.stringify(query1)}`, () => prisma.property.findMany(query1))
   return placeSegments(rows.map((row) => row.location))
 }
 
@@ -109,10 +111,11 @@ export async function listCountryCounts(sale: SaleKind, search: ListingSearch): 
   const stock = searchStockWhere(search, siteListingWhere(site))
   if (stock && (search.type || sale !== "developer")) filters.push(stock)
   filters.push(saleWhere(sale))
-  const rows = await prisma.property.findMany({
+  const query2 = {
     where: filters.length === 1 ? filters[0] : { AND: filters },
     select: { location: true },
-  })
+  } satisfies Prisma.PropertyFindManyArgs
+  const rows = await cached(`property:${JSON.stringify(query2)}`, () => prisma.property.findMany(query2))
   const counts = new Map<string, { label: string; count: number }>()
   for (const row of rows) {
     const parts = row.location.split(",").map((part) => part.trim()).filter(Boolean)
@@ -147,7 +150,7 @@ function placeSegments(locations: string[]) {
 export async function listMapPoints(sale?: SaleKind, search?: ListingSearch): Promise<MapProperty[]> {
   await connection()
   const where = await listingWhere(sale, search)
-  const rows = await prisma.property.findMany({
+  const query3 = {
     where,
     orderBy: { id: "asc" },
     select: {
@@ -158,7 +161,8 @@ export async function listMapPoints(sale?: SaleKind, search?: ListingSearch): Pr
       location: true,
       metadata: true,
     },
-  })
+  } satisfies Prisma.PropertyFindManyArgs
+  const rows = await cached(`property:${JSON.stringify(query3)}`, () => prisma.property.findMany(query3))
   const groups = new Map<string, typeof rows>()
   for (const row of rows) {
     const key = offerKey(row.id, row.metadata)

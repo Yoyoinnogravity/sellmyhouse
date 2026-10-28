@@ -29,7 +29,7 @@ export async function GET(
     return new Response(photo.bytes, {
       headers: {
         "Content-Type": photo.contentType ?? contentTypeFor(name),
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
       },
     })
   }
@@ -39,7 +39,7 @@ export async function GET(
     return new Response(new Uint8Array(bytes), {
       headers: {
         "Content-Type": contentTypeFor(name),
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
       },
     })
   } catch {
