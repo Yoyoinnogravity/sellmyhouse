@@ -13,6 +13,13 @@ export default function AgentsPage() {
         <Link href="/agents/register">Add your details and region</Link>
         <Link href="/agents/login">Log in</Link>
       </p>
+      <p className="text-sm text-zinc-700">
+        In Malaysia, check any agent or agency on the official{" "}
+        <a href="https://lpeph.gov.my/search-listing" target="_blank" rel="noopener noreferrer" className="underline">
+          Board of Valuers (LPPEH) register
+        </a>{" "}
+        before you deal with them.
+      </p>
       <FormatDownloads />
       <Suspense fallback={<p>Loading…</p>}>
         <AgentDirectory />
